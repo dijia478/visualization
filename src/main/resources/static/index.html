@@ -3,46 +3,79 @@
 <head>
     <meta charset="utf-8">
     <title>公众号：万户楼台</title>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <style>
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-    </style>
-    <script src="https://unpkg.com/@antv/g2@next/dist/g2.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@antv/g2plot@latest/dist/g2plot.min.js"></script>
+    <script>
+        const {Line} = G2Plot;
+    </script>
+    <link rel="stylesheet" type="text/css" href="input.css">
 </head>
 <body>
 
-<div id="container"></div>
+<div>
+    <form class="form">
+
+        <label>
+            <input required="" placeholder="" type="text" class="input">
+            <span>Firstname</span>
+        </label>
+        <label>
+            <input required="" placeholder="" type="email" class="input">
+            <span>Email</span>
+        </label>
+
+        <label>
+            <input required="" placeholder="" type="password" class="input">
+            <span>Password</span>
+        </label>
+        <label>
+            <input required="" placeholder="" type="password" class="input">
+            <span>Confirm password</span>
+        </label>
+        <button class="submit">Submit</button>
+    </form>
+
+    <div id="container"></div>
+</div>
 <script>
-    // 准备数据
-    const data = [
-        { genre: 'Sports', sold: 275 },
-        { genre: 'Strategy', sold: 115 },
-        { genre: 'Action', sold: 120 },
-        { genre: 'Shooter', sold: 350 },
-        { genre: 'Other', sold: 150 },
-    ];
 
-    // 初始化图表实例
-    const chart = new G2.Chart({
-        container: 'container',
-        theme: 'classic',
-    });
+    fetch('./data.json')
+        .then((res) => res.json())
+        .then((data) => {
+            const linePlot = new Line('container', {
+                data,
+                padding: "auto",
+                xField: 'year',
+                yField: 'gdp',
+                seriesField: 'name',
+                yAxis: {
+                    title: {
+                        text: "金额（元）",
+                    }
+                },
+                xAxis: {
+                    title: {
+                        text: "还款期数（月）",
+                    },
+                },
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    customItems: originalItems => originalItems.sort(function (a, b) {
+                        return b.value - a.value
+                    })
+                },
+                animation: {
+                    appear: {
+                        animation: 'path-in',
+                        duration: 3000,
+                    },
+                },
+            });
 
-    // 声明可视化
-    chart
-        .interval() // 创建一个 Interval 标记
-        .data(data) // 绑定数据
-        .encode('x', 'genre') // 编码 x 通道
-        .encode('y', 'sold'); // 编码 y 通道
+            linePlot.render();
+        });
 
-    // 渲染可视化
-    chart.render();
+
 </script>
 </body>
