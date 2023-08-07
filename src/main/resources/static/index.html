@@ -7,32 +7,34 @@
     <script>
         const {Line} = G2Plot;
     </script>
+    <link href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/4.6.1/css/bootstrap.min.css" type="text/css"
+          rel="stylesheet"/>
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/4.6.1/js/bootstrap.bundle.min.js"
+            type="application/javascript"></script>
     <link rel="stylesheet" type="text/css" href="input.css">
 </head>
 <body>
 
 <div>
-    <form class="form">
-
-        <label>
-            <input required="" placeholder="" type="text" class="input">
-            <span>Firstname</span>
-        </label>
-        <label>
-            <input required="" placeholder="" type="email" class="input">
-            <span>Email</span>
-        </label>
-
-        <label>
-            <input required="" placeholder="" type="password" class="input">
-            <span>Password</span>
-        </label>
-        <label>
-            <input required="" placeholder="" type="password" class="input">
-            <span>Confirm password</span>
-        </label>
-        <button class="submit">Submit</button>
-    </form>
+    <div class="bs-form">
+        <form>
+            <div class="form-group">
+                <label for="exampleInputEmail1">Email address</label>
+                <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone
+                    else.</small>
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Password</label>
+                <input type="password" class="form-control" id="exampleInputPassword1">
+            </div>
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                <label class="form-check-label" for="exampleCheck1">Check me out</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
 
     <div id="container"></div>
 </div>
@@ -56,6 +58,7 @@
                     title: {
                         text: "还款期数（月）",
                     },
+                    tickInterval: 12,
                 },
                 legend: {
                     position: 'top',
@@ -74,7 +77,8 @@
             });
 
             linePlot.render();
-        });
+        })
+    ;
 
 
 </script>
