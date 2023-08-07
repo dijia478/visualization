@@ -8,6 +8,7 @@
         const {Line} = G2Plot;
     </script>
     <link href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/4.6.1/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.min.js" type="application/javascript"></script>
     <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/4.6.1/js/bootstrap.bundle.min.js" type="application/javascript"></script>
     <link rel="stylesheet" type="text/css" href="input.css">
 </head>
@@ -15,48 +16,67 @@
 
 <div>
     <div class="bs-form">
-        <form>
+        <form id="form1">
             <div class="form-group">
-                <label for="exampleInput1">贷款额度</label>
+                <label for="amount">贷款额度</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id = "exampleInput1" placeholder="例如：100">
+                    <input type="text" class="form-control" id="amount" name="amount" placeholder="例如：100">
                     <div class="input-group-append">
                         <span class="input-group-text">万元</span>
                     </div>
                 </div>
             </div>
             <div class="form-group">
-                <label for="exampleInput2">年利率</label>
+                <label for="rate">年利率</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id = "exampleInput2" placeholder="例如：4.2">
+                    <input type="text" class="form-control" id="rate" name="rate" placeholder="例如：4.2">
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
                     </div>
                 </div>
             </div>
             <div class="form-group">
-                <label for="exampleInput3">贷款期限</label>
+                <label for="year">贷款期限</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id = "exampleInput3" placeholder="例如：30">
+                    <input type="text" class="form-control" id="year" name="year" placeholder="例如：30">
                     <div class="input-group-append">
                         <span class="input-group-text">年</span>
                     </div>
                 </div>
             </div>
             <div class="form-group">
-                <label for="exampleFormControlSelect1">还款方式</label>
-                <select class="form-control" id="exampleFormControlSelect1">
-                    <option>等额本息</option>
-                    <option>等额本金</option>
+                <label for="type">还款方式</label>
+                <select class="form-control" id="type" name="type">
+                    <option value="1">等额本息</option>
+                    <option value="2">等额本金</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">计算</button>
+            <button id="submit-btn" type="button" class="btn btn-primary">计算</button>
         </form>
     </div>
 
     <div id="container"></div>
 </div>
 <script>
+
+    // 提交按钮点击事件
+    $('#submit-btn').click(function (e) {
+        // ajax提交
+        $.ajax({
+            method: 'POST',
+            url: '/loanCalculator',
+            data: $("#form1").serialize(),
+            dataType: 'json',
+        })
+            .done(function (response) {
+                // 数据提交成功后处理返回结果
+                console.log(response);
+            })
+            .fail(function (xhr, status) {
+                // 数据提交失败后处理
+                console.log(status);
+            });
+    });
 
     fetch('./data.json')
         .then((res) => res.json())

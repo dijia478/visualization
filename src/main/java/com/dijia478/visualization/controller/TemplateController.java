@@ -9,6 +9,8 @@ import org.icepear.echarts.components.series.LineStyle;
 import org.icepear.echarts.render.Engine;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -19,6 +21,12 @@ import java.io.IOException;
  */
 @RestController
 public class TemplateController {
+
+    @PostMapping("loanCalculator")
+    public String loanCalculator(@RequestParam("amount") String amount, @RequestParam("rate") String rate, @RequestParam("year") String year, @RequestParam("type") String type) {
+        System.out.println(amount + rate + year + type);
+        return "ok";
+    }
 
     @GetMapping("/")
     public String index() {
