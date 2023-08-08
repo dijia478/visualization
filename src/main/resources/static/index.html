@@ -65,59 +65,59 @@
         $.ajax({
             method: 'POST',
             url: '/loanCalculator',
-            data: $("#form1").serialize(),
             dataType: 'json',
-        })
-            .done(function (response) {
-                // 数据提交成功后处理返回结果
-                console.log(response);
-            })
-            .fail(function (xhr, status) {
-                // 数据提交失败后处理
-                console.log(status);
-            });
+            contentType: 'application/json;charset=UTF-8',
+            data: JSON.stringify({
+                amount: $("#amount").val(),
+                rate: $("#rate").val(),
+                year: $("#year").val(),
+                type: $("#type").val(),
+            }),
+        }).done(function (response) {
+            // 数据提交成功后处理返回结果
+            drawPicture(response);
+        }).fail(function (xhr, status) {
+            // 数据提交失败后处理
+            console.log(status);
+        });
     });
 
-    fetch('./data.json')
-        .then((res) => res.json())
-        .then((data) => {
-            const linePlot = new Line('container', {
-                data,
-                padding: "auto",
-                xField: 'year',
-                yField: 'gdp',
-                seriesField: 'name',
-                yAxis: {
-                    title: {
-                        text: "金额（元）",
-                    }
+    function drawPicture(data) {
+        const linePlot = new Line('container', {
+            data,
+            padding: "auto",
+            xField: 'year',
+            yField: 'gdp',
+            seriesField: 'name',
+            yAxis: {
+                title: {
+                    text: "金额（元）",
+                }
+            },
+            xAxis: {
+                title: {
+                    text: "还款期数（月）",
                 },
-                xAxis: {
-                    title: {
-                        text: "还款期数（月）",
-                    },
-                    tickInterval: 12,
+                tickInterval: 12,
+            },
+            legend: {
+                position: 'top',
+            },
+            tooltip: {
+                customItems: originalItems => originalItems.sort(function (a, b) {
+                    return b.value - a.value
+                })
+            },
+            animation: {
+                appear: {
+                    animation: 'path-in',
+                    duration: 3000,
                 },
-                legend: {
-                    position: 'top',
-                },
-                tooltip: {
-                    customItems: originalItems => originalItems.sort(function (a, b) {
-                        return b.value - a.value
-                    })
-                },
-                animation: {
-                    appear: {
-                        animation: 'path-in',
-                        duration: 3000,
-                    },
-                },
-            });
+            },
+        });
 
-            linePlot.render();
-        })
-    ;
-
+        linePlot.render();
+    }
 
 </script>
 </body>
