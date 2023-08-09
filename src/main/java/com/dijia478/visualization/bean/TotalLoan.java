@@ -1,4 +1,4 @@
-package com.dijia478.visualization.pojo;
+package com.dijia478.visualization.bean;
 
 import lombok.Data;
 
@@ -18,13 +18,13 @@ public class TotalLoan {
     private BigDecimal loanAmount;
 
     /** 贷款期限（30年） */
-    private Integer loanYear;
+    private BigDecimal loanYear;
 
     /** 年利率（0.042） */
     private BigDecimal loanRate;
 
     /** 还款方式，1等额本息，2等额本金 */
-    private int type;
+    private Integer type;
 
     /** 总利息 */
     private BigDecimal totalInterest;

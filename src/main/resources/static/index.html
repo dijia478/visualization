@@ -15,12 +15,14 @@
 <body>
 
 <div>
+    <div id="errorMsg"></div>
+
     <div class="bs-form">
         <form id="form1">
             <div class="form-group">
                 <label for="amount">贷款金额</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="amount" name="amount" placeholder="例如：100">
+                    <input type="text" class="form-control" id="amount" name="amount" required placeholder="例如：100">
                     <div class="input-group-append">
                         <span class="input-group-text">万元</span>
                     </div>
@@ -29,7 +31,7 @@
             <div class="form-group">
                 <label for="year">贷款期限</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="year" name="year" placeholder="例如：30">
+                    <input type="text" class="form-control" id="year" name="year" placeholder="例如：30" required>
                     <div class="input-group-append">
                         <span class="input-group-text">年</span>
                     </div>
@@ -38,7 +40,7 @@
             <div class="form-group">
                 <label for="rate">年利率</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="rate" name="rate" placeholder="例如：4.2">
+                    <input type="text" class="form-control" id="rate" name="rate" placeholder="例如：4.2" required>
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
                     </div>
@@ -74,11 +76,17 @@
                 type: $("#type").val(),
             }),
         }).done(function (response) {
-            // 数据提交成功后处理返回结果
-            drawPicture(response);
+            if (response.code == 200) {
+                // 数据提交成功后处理返回结果
+                drawPicture(response);
+            } else if (response.code == 602) {
+                // 数据提交失败后处理
+                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+            } else {
+                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+response.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+            }
         }).fail(function (xhr, status) {
-            // 数据提交失败后处理
-            console.log(status);
+            $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+status+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
         });
     });
 

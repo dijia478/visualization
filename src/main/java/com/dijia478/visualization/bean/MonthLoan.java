@@ -1,4 +1,4 @@
-package com.dijia478.visualization.pojo;
+package com.dijia478.visualization.bean;
 
 import lombok.Data;
 

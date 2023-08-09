@@ -1,7 +1,8 @@
 package com.dijia478.visualization.service;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.dijia478.visualization.pojo.TotalLoan;
+import com.dijia478.visualization.bean.LoanDTO;
+import com.dijia478.visualization.bean.TotalLoan;
 
 /**
  * 贷款计算器接口
@@ -17,6 +18,6 @@ public interface LoanCalculator {
      * @param data
      * @return
      */
-    TotalLoan compute(JSONObject data);
+    TotalLoan compute(LoanDTO data);
 
 }

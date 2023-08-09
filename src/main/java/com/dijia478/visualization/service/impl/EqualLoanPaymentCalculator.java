@@ -2,14 +2,14 @@ package com.dijia478.visualization.service.impl;
 
 import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson2.JSONObject;
-import com.dijia478.visualization.pojo.MonthLoan;
-import com.dijia478.visualization.pojo.TotalLoan;
+import com.dijia478.visualization.bean.LoanDTO;
+import com.dijia478.visualization.bean.MonthLoan;
+import com.dijia478.visualization.bean.TotalLoan;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,12 +23,12 @@ import java.util.List;
 public class EqualLoanPaymentCalculator implements LoanCalculator {
 
     @Override
-    public TotalLoan compute(JSONObject data) {
-        BigDecimal loanAmount = data.getBigDecimal("amount");
+    public TotalLoan compute(LoanDTO data) {
+        BigDecimal loanAmount = new BigDecimal(data.getAmount().toString());
         loanAmount = LoanUtil.totalLoan(loanAmount);
-        Integer loanYear = data.getInteger("year");
-        BigDecimal loanRate = data.getBigDecimal("rate");
-        Integer type = data.getInteger("type");
+        BigDecimal loanYear = new BigDecimal(data.getYear().toString());
+        BigDecimal loanRate = new BigDecimal(data.getRate().toString());
+        Integer type = data.getType();
 
         TotalLoan loan = new TotalLoan();
         loan.setLoanAmount(loanAmount);
@@ -37,11 +37,11 @@ public class EqualLoanPaymentCalculator implements LoanCalculator {
         loan.setType(type);
 
         // 贷款总期数（月）
-        int totalMonth = LoanUtil.totalMonth(loanYear);
+        BigDecimal totalMonth = LoanUtil.totalMonth(loanYear);
         // 月利率
         BigDecimal loanRateMonth = LoanUtil.loanRateMonth(loanRate);
         // （1+月利率）^ 还款月数
-        BigDecimal factor = NumberUtil.add(loanRateMonth, 1).pow(totalMonth);
+        BigDecimal factor = NumberUtil.add(loanRateMonth, 1).pow(totalMonth.intValue());
         // 每月还款额 = [贷款本金 ×月利率 ×（1+月利率）^ 还款月数] ÷[（1+月利率）^ 还款月数－1]
         BigDecimal repayment = NumberUtil.div(NumberUtil.mul(loanAmount, loanRateMonth, factor), NumberUtil.sub(factor, 1));
         // 总还款额 = 每月还款额 ×贷款总期数
@@ -58,7 +58,7 @@ public class EqualLoanPaymentCalculator implements LoanCalculator {
         List<MonthLoan> monthLoanList = new ArrayList<>();
         int year = 0;
         int monthInYear = 0;
-        for (int i = 0; i < totalMonth; i++) {
+        for (int i = 0; i < totalMonth.intValue(); i++) {
             MonthLoan monthLoan = new MonthLoan();
             monthLoan.setMonth(i + 1);
             monthLoan.setYear(year + 1);

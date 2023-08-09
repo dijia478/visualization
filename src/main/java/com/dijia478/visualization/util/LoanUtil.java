@@ -1,8 +1,8 @@
 package com.dijia478.visualization.util;
 
 import cn.hutool.core.util.NumberUtil;
-import com.dijia478.visualization.pojo.MonthLoan;
-import com.dijia478.visualization.pojo.TotalLoan;
+import com.dijia478.visualization.bean.MonthLoan;
+import com.dijia478.visualization.bean.TotalLoan;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -60,8 +60,8 @@ public class LoanUtil {
      * @param year
      * @return
      */
-    public static int totalMonth(int year) {
-        return 12 * year;
+    public static BigDecimal totalMonth(BigDecimal year) {
+        return NumberUtil.mul(year, new BigDecimal("12"));
     }
 
 }
