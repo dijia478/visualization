@@ -18,7 +18,7 @@ public class TotalLoan {
     private BigDecimal loanAmount;
 
     /** 贷款期限（30年） */
-    private Integer totalYear;
+    private Integer loanYear;
 
     /** 年利率（0.042） */
     private BigDecimal loanRate;

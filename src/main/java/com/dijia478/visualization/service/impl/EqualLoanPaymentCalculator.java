@@ -9,6 +9,7 @@ import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,22 +25,23 @@ public class EqualLoanPaymentCalculator implements LoanCalculator {
     @Override
     public TotalLoan compute(JSONObject data) {
         BigDecimal loanAmount = data.getBigDecimal("amount");
-        Integer totalYear = data.getInteger("year");
+        loanAmount = LoanUtil.totalLoan(loanAmount);
+        Integer loanYear = data.getInteger("year");
         BigDecimal loanRate = data.getBigDecimal("rate");
         Integer type = data.getInteger("type");
 
         TotalLoan loan = new TotalLoan();
         loan.setLoanAmount(loanAmount);
-        loan.setTotalYear(totalYear);
+        loan.setLoanYear(loanYear);
         loan.setLoanRate(loanRate);
         loan.setType(type);
 
         // 贷款总期数（月）
-        int totalMonth = LoanUtil.totalMonth(totalYear);
+        int totalMonth = LoanUtil.totalMonth(loanYear);
         // 月利率
-        BigDecimal loanRateMonth = NumberUtil.div(NumberUtil.div(loanRate, 100), 12);
+        BigDecimal loanRateMonth = LoanUtil.loanRateMonth(loanRate);
         // （1+月利率）^ 还款月数
-        BigDecimal factor = NumberUtil.pow(NumberUtil.add(loanRateMonth, 1), totalMonth);
+        BigDecimal factor = NumberUtil.add(loanRateMonth, 1).pow(totalMonth);
         // 每月还款额 = [贷款本金 ×月利率 ×（1+月利率）^ 还款月数] ÷[（1+月利率）^ 还款月数－1]
         BigDecimal repayment = NumberUtil.div(NumberUtil.mul(loanAmount, loanRateMonth, factor), NumberUtil.sub(factor, 1));
         // 总还款额 = 每月还款额 ×贷款总期数
@@ -51,16 +53,13 @@ public class EqualLoanPaymentCalculator implements LoanCalculator {
         BigDecimal totalInterest = new BigDecimal("0");
         // 已还款总数
         BigDecimal totalRepayment = new BigDecimal("0");
+        // 剩余本金
+        BigDecimal remainPrincipal = new BigDecimal(loanAmount.toString());
         List<MonthLoan> monthLoanList = new ArrayList<>();
         int year = 0;
         int monthInYear = 0;
         for (int i = 0; i < totalMonth; i++) {
             MonthLoan monthLoan = new MonthLoan();
-            BigDecimal remainPrincipal = NumberUtil.sub(loanAmount, totalPrincipal);
-            BigDecimal interest = NumberUtil.mul(remainPrincipal, loanRateMonth);
-            totalInterest = NumberUtil.add(totalInterest, interest);
-            BigDecimal principal = NumberUtil.sub(repayment, interest);
-            totalPrincipal = NumberUtil.add(totalPrincipal, principal);
             monthLoan.setMonth(i + 1);
             monthLoan.setYear(year + 1);
             monthLoan.setMonthInYear(++monthInYear);
@@ -68,11 +67,20 @@ public class EqualLoanPaymentCalculator implements LoanCalculator {
                 year++;
                 monthInYear = 0;
             }
+
+            BigDecimal interest = NumberUtil.mul(remainPrincipal, loanRateMonth);
+            totalInterest = NumberUtil.add(totalInterest, interest);
+            BigDecimal principal = NumberUtil.sub(repayment, interest);
+            totalPrincipal = NumberUtil.add(totalPrincipal, principal);
+            remainPrincipal = NumberUtil.sub(loanAmount, totalPrincipal);
             monthLoan.setInterest(interest);
             monthLoan.setPrincipal(principal);
             monthLoan.setRepayment(repayment);
-            totalRepayment = totalRepayment.add(monthLoan.getRepayment());
             monthLoan.setRemainPrincipal(remainPrincipal);
+
+            totalRepayment = totalRepayment.add(monthLoan.getRepayment());
+            monthLoan.setTotalRepayment(totalRepayment);
+            monthLoan.setTotalRepaymentAndRemainPrincipal(NumberUtil.add(totalRepayment, remainPrincipal));
             monthLoan.setRemainTotal(NumberUtil.sub(loan.getTotalRepayment(), totalRepayment));
             monthLoanList.add(monthLoan);
         }
