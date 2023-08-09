@@ -28,6 +28,12 @@ public class EqualLoanPaymentCalculator implements LoanCalculator {
         BigDecimal loanRate = data.getBigDecimal("rate");
         Integer type = data.getInteger("type");
 
+        TotalLoan loan = new TotalLoan();
+        loan.setLoanAmount(loanAmount);
+        loan.setTotalYear(totalYear);
+        loan.setLoanRate(loanRate);
+        loan.setType(type);
+
         // 贷款总期数（月）
         int totalMonth = LoanUtil.totalMonth(totalYear);
         // 月利率
@@ -36,14 +42,11 @@ public class EqualLoanPaymentCalculator implements LoanCalculator {
         BigDecimal factor = NumberUtil.pow(NumberUtil.add(loanRateMonth, 1), totalMonth);
         // 每月还款额 = [贷款本金 ×月利率 ×（1+月利率）^ 还款月数] ÷[（1+月利率）^ 还款月数－1]
         BigDecimal repayment = NumberUtil.div(NumberUtil.mul(loanAmount, loanRateMonth, factor), NumberUtil.sub(factor, 1));
-        TotalLoan loan = new TotalLoan();
-        loan.setLoanAmount(loanAmount);
-        loan.setTotalYear(totalYear);
-        loan.setLoanRate(loanRate);
-        loan.setType(type);
+        // 总还款额 = 每月还款额 ×贷款总期数
         loan.setTotalRepayment(NumberUtil.mul(repayment, totalMonth));
+
         // 累积所还本金
-        BigDecimal totalPayedPrincipal = new BigDecimal("0");
+        BigDecimal totalPrincipal = new BigDecimal("0");
         // 总利息
         BigDecimal totalInterest = new BigDecimal("0");
         // 已还款总数
@@ -53,11 +56,11 @@ public class EqualLoanPaymentCalculator implements LoanCalculator {
         int monthInYear = 0;
         for (int i = 0; i < totalMonth; i++) {
             MonthLoan monthLoan = new MonthLoan();
-            BigDecimal remainPrincipal = NumberUtil.sub(loanAmount, totalPayedPrincipal);
+            BigDecimal remainPrincipal = NumberUtil.sub(loanAmount, totalPrincipal);
             BigDecimal interest = NumberUtil.mul(remainPrincipal, loanRateMonth);
             totalInterest = NumberUtil.add(totalInterest, interest);
             BigDecimal principal = NumberUtil.sub(repayment, interest);
-            totalPayedPrincipal = NumberUtil.add(totalPayedPrincipal, principal);
+            totalPrincipal = NumberUtil.add(totalPrincipal, principal);
             monthLoan.setMonth(i + 1);
             monthLoan.setYear(year + 1);
             monthLoan.setMonthInYear(++monthInYear);
