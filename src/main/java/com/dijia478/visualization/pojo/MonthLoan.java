@@ -5,7 +5,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 /**
- * 月贷款情况
+ * 月还贷情况
  *
  * @author dijia478
  * @date 2023/8/8
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class MonthLoan {
 
     /** 月份（期数） */
-    private int month;
+    private Integer month;
 
     /** 月还款（元） */
     private BigDecimal repayment;
@@ -30,5 +30,17 @@ public class MonthLoan {
 
     /** 剩余本金（元） */
     private BigDecimal remainPrincipal;
+
+    /** 累计已还款总额（元） */
+    private BigDecimal totalRepayment;
+
+    /** 累计已还款总额（元） + 剩余本金（元） */
+    private BigDecimal totalRepaymentAndRemainPrincipal;
+
+    /** 第几年 */
+    private Integer year;
+
+    /** 年里的第几月 */
+    private Integer monthInYear;
 
 }

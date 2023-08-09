@@ -18,10 +18,13 @@ public class TotalLoan {
     private BigDecimal loanAmount;
 
     /** 贷款期限（30年） */
-    private int totalYear;
+    private Integer totalYear;
 
     /** 年利率（0.042） */
     private BigDecimal loanRate;
+
+    /** 还款方式，1等额本息，2等额本金 */
+    private int type;
 
     /** 总利息 */
     private BigDecimal totalInterest;
@@ -29,7 +32,10 @@ public class TotalLoan {
     /** 总还款额 */
     private BigDecimal totalRepayment;
 
-    /** 每月贷款情况 */
-    private List<MonthLoan> monthLoan;
+    /** 每月还贷情况 */
+    private List<MonthLoan> monthLoanList;
+
+    /** 第几期之前提前还款（如13，就是在12期还完后提前还款，第13期重新计算还款额） */
+    private Integer prepaymentMonth;
 
 }
