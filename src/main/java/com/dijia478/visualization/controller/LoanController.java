@@ -6,6 +6,7 @@ import com.dijia478.visualization.bean.BaseResponse;
 import com.dijia478.visualization.bean.LoanDTO;
 import com.dijia478.visualization.bean.TotalLoan;
 import com.dijia478.visualization.service.LoanCalculator;
+import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,14 +36,15 @@ public class LoanController {
      * @return
      */
     @PostMapping("loanCalculator")
-    public BaseResponse<TotalLoan> loanCalculator(@RequestBody @Validated LoanDTO data) {
+    public TotalLoan loanCalculator(@RequestBody @Validated LoanDTO data) {
         TotalLoan totalLoan;
         if (data.getType() == 1) {
             totalLoan = equalLoanPayment.compute(data);
         } else {
             totalLoan = equalPrincipalPayment.compute(data);
         }
-        return new BaseResponse<>(totalLoan);
+        LoanUtil.setScale(totalLoan);
+        return totalLoan;
     }
 
 }

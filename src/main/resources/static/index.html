@@ -6,6 +6,7 @@
     <script type="text/javascript" src="https://unpkg.com/@antv/g2plot@latest/dist/g2plot.min.js"></script>
     <script>
         const {Line} = G2Plot;
+        const {Bar} = G2Plot;
     </script>
     <link href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/4.6.1/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
     <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.min.js" type="application/javascript"></script>
@@ -57,12 +58,16 @@
         </form>
     </div>
 
-    <div id="container"></div>
+    <div id="container1"></div>
+    <div id="container2"></div>
 </div>
 <script>
-
     // 提交按钮点击事件
     $('#submit-btn').click(function (e) {
+        $('#errorMsg').html("");
+        $('#container1').html("");
+        $('#container2').html("");
+
         // ajax提交
         $.ajax({
             method: 'POST',
@@ -78,7 +83,8 @@
         }).done(function (response) {
             if (response.code == 200) {
                 // 数据提交成功后处理返回结果
-                drawPicture(response);
+                drawPicture1(response);
+                // drawPicture2(response);
             } else if (response.code == 602) {
                 // 数据提交失败后处理
                 $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
@@ -90,9 +96,86 @@
         });
     });
 
-    function drawPicture(data) {
-        const linePlot = new Line('container', {
-            data,
+    function drawPicture1(response) {
+        let arr = [];
+        let data = response.data
+        for (let i = 0, n = data.monthLoanList.length; i < n; i++) {
+            let monthLoan = data.monthLoanList[i];
+            arr.push({
+                months: monthLoan.month + "期",
+                value: monthLoan.interest,
+                type: "利息",
+            });
+            arr.push({
+                months: monthLoan.month + "期",
+                value: monthLoan.principal,
+                type: "本金",
+            });
+        }
+
+        const stackedBarPlot = new Bar('container1', {
+            data: arr,
+            isStack: true,
+            xField: 'value',
+            yField: 'months',
+            seriesField: 'type',
+            label: {
+                // 可手动配置 label 数据标签位置
+                position: 'middle', // 'left', 'middle', 'right'
+                // 可配置附加的布局方法
+                layout: [
+                    // 柱形图数据标签位置自动调整
+                    { type: 'interval-adjust-position' },
+                    // 数据标签防遮挡
+                    { type: 'interval-hide-overlap' },
+                    // 数据标签文颜色自动调整
+                    { type: 'adjust-color' },
+                ],
+            },
+            yAxis: {
+                label: {
+                    autoRotate: false,
+                },
+            },
+            scrollbar: {
+                type: 'vertical',
+            },
+            slider: {
+                start: 0.0,
+                end: 0.1,
+                trendCfg: {
+                    isArea: true,
+                },
+            },
+            width: 400,
+            height: 600,
+            theme: {
+                components: {
+                    scrollbar: {
+                        // 默认样式
+                        default: {
+                            style: {
+                                trackColor: 'rgba(0,0,0,0)',
+                                thumbColor: 'rgba(100,170,255,0.4)',
+                            },
+                        },
+                        // hover 时，可以设置滑块样式
+                        hover: {
+                            style: {
+                                thumbColor: 'rgba(100,170,255,0.8)',
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        // stackedBarPlot.changeSize(400, 7000);
+        stackedBarPlot.render();
+    }
+
+    function drawPicture2(response) {
+        const linePlot = new Line('container2', {
+            response,
             padding: "auto",
             xField: 'year',
             yField: 'gdp',
