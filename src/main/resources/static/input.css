@@ -10,11 +10,19 @@
     margin: auto;
 }
 
-#container1 {
+#nav-tab {
     width: 70%;
     margin: auto;
 }
-#container2 {
+#nav-tabContent {
     width: 70%;
+    margin: auto;
+}
+#container1 {
+    /*width: 70%;*/
+    margin: auto;
+}
+#container2 {
+    /*width: 70%;*/
     margin: auto;
 }
