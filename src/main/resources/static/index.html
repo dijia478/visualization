@@ -196,13 +196,13 @@
             let monthLoan = data.monthLoanList[i];
             arr.push({
                 months: monthLoan.month + "期",
-                value: monthLoan.interest,
-                type: "利息",
+                value: monthLoan.principal,
+                type: "本金",
             });
             arr.push({
                 months: monthLoan.month + "期",
-                value: monthLoan.principal,
-                type: "本金",
+                value: monthLoan.interest,
+                type: "利息",
             });
         }
 
