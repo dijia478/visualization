@@ -85,6 +85,7 @@ public class EqualPrincipalPaymentCalculator implements LoanCalculator {
         for (MonthLoan monthLoan : monthLoanList) {
             totalPayedRepayment = NumberUtil.add(totalPayedRepayment, monthLoan.getRepayment());
             monthLoan.setRemainTotal(NumberUtil.sub(totalRepayment, totalPayedRepayment));
+            monthLoan.setRemainInterest(NumberUtil.sub(monthLoan.getRemainTotal(), monthLoan.getRemainPrincipal()));
         }
         loan.setMonthLoanList(monthLoanList);
         return loan;

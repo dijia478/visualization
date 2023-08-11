@@ -28,6 +28,9 @@ public class MonthLoan {
     /** 剩余贷款（元） */
     private BigDecimal remainTotal;
 
+    /** 剩余利息（元） */
+    private BigDecimal remainInterest;
+
     /** 剩余本金（元） */
     private BigDecimal remainPrincipal;
 

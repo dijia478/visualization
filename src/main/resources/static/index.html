@@ -63,11 +63,10 @@
     </div>
 
 
-    <div id="container1"></div>
-    <div></div>
-    <div id="container2"></div>
-    <div></div>
     <div id="container3"></div>
+    <div id="container4"></div>
+    <div id="container2"></div>
+    <div id="container1"></div>
 </div>
 <script>
     validated();
@@ -77,6 +76,7 @@
         $('#container1').html("");
         $('#container2').html("");
         $('#container3').html("");
+        $('#container4').html("");
 
         // ajax提交
         $.ajax({
@@ -95,6 +95,7 @@
                 // 数据提交成功后处理返回结果
                 drawPicture1(response);
                 drawPicture2(response);
+                drawPicture3(response);
             } else if (response.code == 602) {
                 // 数据提交失败后处理
                 $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
@@ -119,6 +120,7 @@
                 principal: monthLoan.principal.toFixed(2),
                 interest: monthLoan.interest.toFixed(2),
                 remainPrincipal: monthLoan.remainPrincipal.toFixed(2),
+                remainInterest: monthLoan.remainInterest.toFixed(2),
                 totalRepayment: monthLoan.totalRepayment.toFixed(2),
                 totalRepaymentAndRemainPrincipal: monthLoan.totalRepaymentAndRemainPrincipal.toFixed(2),
             });
@@ -134,7 +136,7 @@
         const container = document.getElementById('container1');
         const s2DataConfig = {
             fields: {
-                columns: ['month', 'repayment', 'principal', 'interest', 'remainPrincipal', 'totalRepayment', 'totalRepaymentAndRemainPrincipal'],
+                columns: ['month', 'repayment', 'principal', 'interest', 'remainPrincipal', 'remainInterest', 'totalRepayment', 'totalRepaymentAndRemainPrincipal'],
             },
             meta: [
                 {
@@ -156,6 +158,10 @@
                 {
                     field: 'remainPrincipal',
                     name: '剩余本金',
+                },
+                {
+                    field: 'remainInterest',
+                    name: '剩余利息',
                 },
                 {
                     field: 'totalRepayment',
@@ -266,11 +272,55 @@
     }
 
     function drawPicture3(response) {
+        let arr1 = [];
+        let arr2 = [];
+        let respData = response.data;
+
+        for (let i = 0, n = respData.monthLoanList.length; i < n; i++) {
+            let monthLoan = respData.monthLoanList[i];
+            let month = monthLoan.month + '';
+            arr1.push({
+                name: "当月还款",
+                month: month,
+                value: monthLoan.repayment,
+            });
+            arr1.push({
+                name: "其中本金",
+                month: month,
+                value: monthLoan.principal,
+            });
+            arr1.push({
+                name: "其中利息",
+                month: month,
+                value: monthLoan.interest,
+            });
+            arr2.push({
+                name: "剩余本金",
+                month: month,
+                value: monthLoan.remainPrincipal,
+            });
+            arr2.push({
+                name: "剩余利息",
+                month: month,
+                value: monthLoan.remainInterest,
+            });
+            arr2.push({
+                name: "累计还款",
+                month: month,
+                value: monthLoan.totalRepayment,
+            });
+            arr2.push({
+                name: "累计还款+剩余本金",
+                month: month,
+                value: monthLoan.totalRepaymentAndRemainPrincipal,
+            });
+        }
+
         const linePlot = new Line('container3', {
-            response,
+            data: arr1,
             padding: "auto",
-            xField: 'year',
-            yField: 'gdp',
+            xField: 'month',
+            yField: 'value',
             seriesField: 'name',
             yAxis: {
                 title: {
@@ -294,12 +344,46 @@
             animation: {
                 appear: {
                     animation: 'path-in',
-                    duration: 3000,
+                    duration: 5000,
+                },
+            },
+        });
+
+        const linePlot2 = new Line('container4', {
+            data: arr2,
+            padding: "auto",
+            xField: 'month',
+            yField: 'value',
+            seriesField: 'name',
+            yAxis: {
+                title: {
+                    text: "金额（元）",
+                }
+            },
+            xAxis: {
+                title: {
+                    text: "还款期数（月）",
+                },
+                tickInterval: 12,
+            },
+            legend: {
+                position: 'top',
+            },
+            tooltip: {
+                customItems: originalItems => originalItems.sort(function (a, b) {
+                    return b.value - a.value
+                })
+            },
+            animation: {
+                appear: {
+                    animation: 'path-in',
+                    duration: 5000,
                 },
             },
         });
 
         linePlot.render();
+        linePlot2.render();
     }
 
     // 小数补0指2位小数

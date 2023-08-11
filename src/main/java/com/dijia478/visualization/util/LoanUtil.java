@@ -28,6 +28,7 @@ public class LoanUtil {
             monthLoan.setPrincipal(monthLoan.getPrincipal().setScale(2, RoundingMode.HALF_UP));
             monthLoan.setInterest(monthLoan.getInterest().setScale(2, RoundingMode.HALF_UP));
             monthLoan.setRemainTotal(monthLoan.getRemainTotal().setScale(2, RoundingMode.HALF_UP));
+            monthLoan.setRemainInterest(monthLoan.getRemainInterest().setScale(2, RoundingMode.HALF_UP));
             monthLoan.setRemainPrincipal(monthLoan.getRemainPrincipal().setScale(2, RoundingMode.HALF_UP));
             monthLoan.setTotalRepayment(monthLoan.getTotalRepayment().setScale(2, RoundingMode.HALF_UP));
             monthLoan.setTotalRepaymentAndRemainPrincipal(monthLoan.getTotalRepaymentAndRemainPrincipal().setScale(2, RoundingMode.HALF_UP));
