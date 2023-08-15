@@ -12,8 +12,8 @@ import javax.validation.constraints.*;
 @Data
 public class LoanDTO {
 
-    @NotNull(message = "贷款额度不能为空")
-    @Min(value = 1, message = "贷款额度不能小于1万元")
+    @NotNull(message = "贷款金额不能为空")
+    @Min(value = 1, message = "贷款金额不能小于1万元")
     private Integer amount;
 
     @NotNull(message = "贷款期限不能为空")
