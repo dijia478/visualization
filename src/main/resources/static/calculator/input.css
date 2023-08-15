@@ -1,16 +1,15 @@
 body {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: auto;
 }
 .bs-form {
     padding: 5rem;
     border-width: 0.2rem;
-    width: 80%;
     margin: auto;
 }
 
 #errorMsg {
-    width: 50%;
+    width: 70%;
     margin: auto;
 }
 
@@ -30,6 +29,9 @@ body {
     width: 70%;
     margin: auto;
 }
-.empty {
+.empty-5 {
     margin-bottom: 5rem;
+}
+.empty-2 {
+    margin-bottom: 2rem;
 }

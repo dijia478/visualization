@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>公众号：万户楼台</title>
+    <link rel="icon" href="javascript:;">
     <script type="text/javascript" src="https://unpkg.com/@antv/g2plot@latest/dist/g2plot.min.js"></script>
     <script src="https://unpkg.com/@antv/s2@latest/dist/index.min.js"></script>
 
@@ -27,7 +28,7 @@
             <div class="form-group row">
                 <label for="amount" class="col-sm-2 col-form-label">贷款金额</label>
                 <div class="input-group mb-3 col-sm-10">
-                    <input type="text" class="form-control" id="amount" name="amount" placeholder="例如：100" required>
+                    <input type="text" class="form-control" id="amount" name="amount" placeholder="例如：100，即贷款100万元" required>
                     <div class="input-group-append">
                         <span class="input-group-text">万元</span>
                     </div>
@@ -36,34 +37,30 @@
             <div class="form-group row">
                 <label for="year" class="col-sm-2 col-form-label">贷款期限</label>
                 <div class="input-group mb-3 col-sm-10">
-                    <input type="text" class="form-control" id="year" name="year" placeholder="例如：30" required>
+                    <input type="text" class="form-control" id="year" name="year" placeholder="例如：30，即分30年（360期）还清" required>
                     <div class="input-group-append">
                         <span class="input-group-text">年</span>
                     </div>
                 </div>
             </div>
             <div class="form-group row">
-                <label for="rate" class="col-sm-2 col-form-label">年利率</label>
-                <div class="input-group mb-3  col-sm-10">
-                    <input type="text" class="form-control" id="rate" name="rate" placeholder="例如：4.2" required>
+                <label for="rate" class="col-sm-2 col-form-label">贷款利率</label>
+                <div class="input-group mb-3 col-sm-10">
+                    <input type="text" class="form-control" id="rate" name="rate" placeholder="例如：4.2，即年化利率4.2%" required>
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
                     </div>
                 </div>
             </div>
-            <fieldset class="form-group row">
-                <legend class="col-form-label col-sm-2 float-sm-left pt-0">还款方式</legend>
-                <div class="col-sm-10">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="type" id="type1" value="1" checked>
-                        <label class="form-check-label" for="type1">等额本息</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="type" id="type2" value="2">
-                        <label class="form-check-label" for="type2">等额本金</label>
-                    </div>
+            <div class="form-group row">
+                <label for="type" class="col-sm-2 col-form-label">还款方式</label>
+                <div class="input-group mb-3 col-sm-10">
+                    <select class="form-control" id="type" name="type">
+                        <option value="1">等额本息</option>
+                        <option value="2">等额本金</option>
+                    </select>
                 </div>
-            </fieldset>
+            </div>
             <fieldset class="form-group row">
                 <legend class="col-form-label col-sm-2 float-sm-left pt-0">提前还款</legend>
                 <div class="col-sm-10">
@@ -77,22 +74,83 @@
                     </div>
                 </div>
             </fieldset>
+            <div id="prepayment-template" class="alert alert-info alert-dismissible fade show" role="alert" style="display:none">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <div class="card-body">
+                    <div class="form-group row">
+                        <label for="prepaymentMonth" class="col-sm-2 col-form-label">还款期数</label>
+                        <div class="input-group mb-3 col-sm-10">
+                            <input type="text" class="form-control" id="prepaymentMonth" name="prepaymentMonth" placeholder="例如：13，即在第12期还完后，第13期之前进行提前还款">
+                            <div class="input-group-append">
+                                <span class="input-group-text">期（月）</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="repayment" class="col-sm-2 col-form-label">还款金额</label>
+                        <div class="input-group mb-3 col-sm-10">
+                            <input type="text" class="form-control" id="repayment" name="repayment" placeholder="例如：10，即提前还款10万元">
+                            <div class="input-group-append">
+                                <span class="input-group-text">万元</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="newType" class="col-sm-2 col-form-label">新还款方式</label>
+                        <div class="input-group mb-3 col-sm-10">
+                            <select class="form-control" id="newType" name="newType">
+                                <option value="1">等额本息</option>
+                                <option value="2">等额本金</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="repaymentType" class="col-sm-2 col-form-label">还款方案</label>
+                        <div class="input-group mb-3 col-sm-10">
+                            <select class="form-control" id="repaymentType" name="repaymentType">
+                                <option value="1">缩短还款期限，月还款额基本不变</option>
+                                <option value="2">减少月还款额，还款期限不变</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="empty-2"></div>
+            <button id="addPrepaymentBtn" type="button" class="btn btn-secondary btn-sm btn-block" style="display:none">新增提前还款</button>
             <button id="submit-btn" type="button" class="btn btn-primary btn-block">计算</button>
         </form>
     </div>
 
 
     <div id="container3"></div>
-    <div class="empty"></div>
+    <div class="empty-5"></div>
     <div id="container4"></div>
-    <div class="empty"></div>
+    <div class="empty-5"></div>
     <div id="container2"></div>
-    <div class="empty"></div>
+    <div class="empty-5"></div>
     <div id="container1"></div>
-    <div class="empty"></div>
+    <div class="empty-5"></div>
 </div>
 <script>
+    // 校验主表参数
     validated();
+    validatedPrepayment();
+
+    // 添加提前还款计划
+    addPrepayment();
+
+    $('#prepayment1').click(function() {
+        $('#prepayment-template').hide();
+        $('#addPrepaymentBtn').hide();
+    });
+
+    $('#prepayment2').click(function() {
+        $('#prepayment-template').show();
+        $('#addPrepaymentBtn').show();
+    });
+
     // 提交按钮点击事件
     $('#submit-btn').click(function (e) {
         $('#errorMsg').html("");
@@ -104,14 +162,14 @@
         // ajax提交
         $.ajax({
             method: 'POST',
-            url: '/loanCalculator',
+            url: '/calculator/loanCalculator',
             dataType: 'json',
             contentType: 'application/json;charset=UTF-8',
             data: JSON.stringify({
                 amount: $("#amount").val(),
                 rate: $("#rate").val(),
                 year: $("#year").val(),
-                type: $('input[name="type"]:checked').val(),
+                type: $("#type").val(),
                 prepayment: $('input[name="prepayment"]:checked').val(),
             }),
         }).done(function (response) {
@@ -410,16 +468,19 @@
         linePlot2.render();
     }
 
-    // 小数补0指2位小数
-    function padDecimal(num, decimal) {
-        const parts = num.toString().split('.');
-        if (parts.length < 2) {
-            parts.push(''); // 整数需要追加小数部分
-        }
-
-        // 末尾补0
-        parts[1] += '0'.repeat(decimal - parts[1].length);
-        return Number(parts.join('.'));
+    function addPrepayment() {
+        let prepaymentIndex = 0;
+        $('#addPrepaymentBtn').click(function () {
+            let $new = $('#prepayment-template').clone();
+            // 修改id,使其不重复
+            $new.find('[id]').each(function () {
+                this.id += '-' + (prepaymentIndex);
+            });
+            ++prepaymentIndex;
+            // 插入到表单末尾
+            $new.insertBefore('#addPrepaymentBtn');
+            validatedPrepayment();
+        });
     }
 
     // 校验输入的参数合法性
@@ -440,7 +501,6 @@
         });
 
         const rateInput = document.getElementById('rate');
-
         rateInput.addEventListener('input', function(e) {
             const value = e.target.value;
 
@@ -454,6 +514,32 @@
                 }
             }
         });
+    }
+
+    function validatedPrepayment() {
+        const prepaymentMonthInputs = document.getElementsByName('prepaymentMonth');
+        for (let i = 0; i < prepaymentMonthInputs.length; i++) {
+            const prepaymentMonthInput = prepaymentMonthInputs[i];
+            // 遍历每个input
+            prepaymentMonthInput.addEventListener('input', function (e) {
+                const value = e.target.value;
+                if (!/^\d+$/.test(value)) {
+                    e.target.value = value.replace(/\D/g, '');
+                }
+            });
+        }
+
+        const repaymentInputs = document.getElementsByName('repayment');
+        for (let i = 0; i < repaymentInputs.length; i++) {
+            const repaymentInput = repaymentInputs[i];
+            // 遍历每个input
+            repaymentInput.addEventListener('input', function (e) {
+                const value = e.target.value;
+                if (!/^\d+$/.test(value)) {
+                    e.target.value = value.replace(/\D/g, '');
+                }
+            });
+        }
     }
 
 </script>

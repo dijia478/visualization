@@ -21,8 +21,8 @@ public class LoanDTO {
     @Min(value = 1, message = "贷款期限不能小于1年")
     private Integer year;
 
-    @NotNull(message = "年利率不能为空")
-    @Min(value = 0, message = "年利率不能小于0")
+    @NotNull(message = "贷款利率不能为空")
+    @Min(value = 0, message = "贷款利率不能小于0")
     private Double rate;
 
     @NotNull(message = "还款方式不能为空")

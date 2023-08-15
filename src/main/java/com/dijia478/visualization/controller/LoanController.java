@@ -35,7 +35,7 @@ public class LoanController {
      * @param data
      * @return
      */
-    @PostMapping("loanCalculator")
+    @PostMapping("/calculator/loanCalculator")
     public TotalLoan loanCalculator(@RequestBody @Validated LoanDTO data) {
         TotalLoan totalLoan;
         if (data.getType() == 1) {
