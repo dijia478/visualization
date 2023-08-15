@@ -58,7 +58,7 @@ public class ResponseControllerAdvice implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object o, MethodParameter methodParameter, MediaType mediaType, Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
         // String类型不能直接返回，所以要进行些特别的处理
         BaseResponse<Object> response = new BaseResponse<>(o);
-        log.info("resp: {}", response);
+        // log.info("resp: {}", response);
         // 进行国际化转换，根据需要传入第三个参数
         i18nUtil.responseToI18n(response);
 

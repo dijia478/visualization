@@ -24,49 +24,80 @@
 
     <div class="bs-form">
         <form id="form1">
-            <div class="form-group">
-                <label for="amount">贷款金额</label>
-                <div class="input-group">
-                    <input type="text" class="form-control" id="amount" name="amount" placeholder="例如：100">
+            <div class="form-group row">
+                <label for="amount" class="col-sm-2 col-form-label">贷款金额</label>
+                <div class="input-group mb-3 col-sm-10">
+                    <input type="text" class="form-control" id="amount" name="amount" placeholder="例如：100" required>
                     <div class="input-group-append">
                         <span class="input-group-text">万元</span>
                     </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="year">贷款期限</label>
-                <div class="input-group">
+            <div class="form-group row">
+                <label for="year" class="col-sm-2 col-form-label">贷款期限</label>
+                <div class="input-group mb-3 col-sm-10">
                     <input type="text" class="form-control" id="year" name="year" placeholder="例如：30" required>
                     <div class="input-group-append">
                         <span class="input-group-text">年</span>
                     </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="rate">年利率</label>
-                <div class="input-group">
+            <div class="form-group row">
+                <label for="rate" class="col-sm-2 col-form-label">年利率</label>
+                <div class="input-group mb-3  col-sm-10">
                     <input type="text" class="form-control" id="rate" name="rate" placeholder="例如：4.2" required>
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
                     </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="type">还款方式</label>
-                <select class="form-control" id="type" name="type">
-                    <option value="1">等额本息</option>
-                    <option value="2">等额本金</option>
-                </select>
-            </div>
+            <fieldset class="form-group row">
+                <legend class="col-form-label col-sm-2 float-sm-left pt-0">还款方式</legend>
+                <div class="col-sm-10">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="type" id="type1" value="1" checked>
+                        <label class="form-check-label" for="type1">
+                            等额本息
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="type" id="type2" value="2">
+                        <label class="form-check-label" for="type2">
+                            等额本金
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="form-group row">
+                <legend class="col-form-label col-sm-2 float-sm-left pt-0">提前还款</legend>
+                <div class="col-sm-10">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="prepayment" id="prepayment1" value="0" checked>
+                        <label class="form-check-label" for="prepayment1">
+                            否
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="prepayment" id="prepayment2" value="1">
+                        <label class="form-check-label" for="prepayment2">
+                            是
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
             <button id="submit-btn" type="button" class="btn btn-primary">计算</button>
         </form>
     </div>
 
 
     <div id="container3"></div>
+    <div class="empty"></div>
     <div id="container4"></div>
+    <div class="empty"></div>
     <div id="container2"></div>
+    <div class="empty"></div>
     <div id="container1"></div>
+    <div class="empty"></div>
 </div>
 <script>
     validated();
@@ -93,9 +124,9 @@
         }).done(function (response) {
             if (response.code == 200) {
                 // 数据提交成功后处理返回结果
+                drawPicture3(response);
                 drawPicture1(response);
                 drawPicture2(response);
-                drawPicture3(response);
             } else if (response.code == 602) {
                 // 数据提交失败后处理
                 $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
@@ -122,7 +153,7 @@
                 remainPrincipal: monthLoan.remainPrincipal.toFixed(2),
                 remainInterest: monthLoan.remainInterest.toFixed(2),
                 totalRepayment: monthLoan.totalRepayment.toFixed(2),
-                totalRepaymentAndRemainPrincipal: monthLoan.totalRepaymentAndRemainPrincipal.toFixed(2),
+                // totalRepaymentAndRemainPrincipal: monthLoan.totalRepaymentAndRemainPrincipal.toFixed(2),
             });
         }
         let loanAmount = respData.loanAmount;
@@ -136,7 +167,7 @@
         const container = document.getElementById('container1');
         const s2DataConfig = {
             fields: {
-                columns: ['month', 'repayment', 'principal', 'interest', 'remainPrincipal', 'remainInterest', 'totalRepayment', 'totalRepaymentAndRemainPrincipal'],
+                columns: ['month', 'repayment', 'principal', 'interest', 'remainPrincipal', 'remainInterest', 'totalRepayment'],
             },
             meta: [
                 {
@@ -167,16 +198,16 @@
                     field: 'totalRepayment',
                     name: '累计还款',
                 },
-                {
-                    field: 'totalRepaymentAndRemainPrincipal',
-                    name: '累计还款+剩余本金',
-                },
+                // {
+                //     field: 'totalRepaymentAndRemainPrincipal',
+                //     name: '累计还款+剩余本金',
+                // },
             ],
             data: arr,
         };
 
         const s2Options = {
-            width: 1000,
+            width: 600,
             height: 600,
         };
         const s2 = new TableSheet(container, s2DataConfig, s2Options);
@@ -344,7 +375,7 @@
             animation: {
                 appear: {
                     animation: 'path-in',
-                    duration: 5000,
+                    duration: 10000,
                 },
             },
         });
@@ -377,7 +408,7 @@
             animation: {
                 appear: {
                     animation: 'path-in',
-                    duration: 5000,
+                    duration: 10000,
                 },
             },
         });
