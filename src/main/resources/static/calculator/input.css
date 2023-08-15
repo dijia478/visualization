@@ -9,8 +9,13 @@ body {
 }
 
 #errorMsg {
-    width: 70%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     margin: auto;
+    width: 50%;
+    z-index: 999;
 }
 
 #container1 {
