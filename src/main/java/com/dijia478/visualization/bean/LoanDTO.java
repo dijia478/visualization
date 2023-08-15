@@ -28,4 +28,7 @@ public class LoanDTO {
     @NotNull(message = "还款方式不能为空")
     private Integer type;
 
+    @NotNull(message = "提前还款不能为空")
+    private Integer prepayment;
+
 }
