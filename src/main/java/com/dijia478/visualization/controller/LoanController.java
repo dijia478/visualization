@@ -47,4 +47,17 @@ public class LoanController {
         return totalLoan;
     }
 
+    /**
+     * 提前还款计算接口
+     *
+     * @param data
+     * @return
+     */
+    @PostMapping("/calculator/prepaymentCalculator")
+    public TotalLoan prepaymentCalculator(@RequestBody @Validated LoanDTO data) {
+        System.out.println(data);
+        TotalLoan totalLoan = new TotalLoan();
+        return totalLoan;
+    }
+
 }

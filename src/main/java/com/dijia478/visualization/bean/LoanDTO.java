@@ -1,7 +1,11 @@
 package com.dijia478.visualization.bean;
 
+import com.alibaba.fastjson2.JSONArray;
 import lombok.Data;
+import org.apache.catalina.LifecycleState;
+
 import javax.validation.constraints.*;
+import java.util.List;
 
 /**
  * 前端请求的参数
@@ -30,5 +34,7 @@ public class LoanDTO {
 
     @NotNull(message = "提前还款不能为空")
     private Integer prepayment;
+
+    private List<PrepaymentDTO> prepaymentList;
 
 }

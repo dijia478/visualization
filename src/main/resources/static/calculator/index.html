@@ -75,9 +75,9 @@
                 </div>
             </fieldset>
             <div id="prepayment-template" name="prepayment-template" class="alert alert-info alert-dismissible fade show" role="alert" style="display:none">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+<!--                <button type="button" class="close" data-dismiss="alert" aria-label="Close">-->
+<!--                    <span aria-hidden="true">&times;</span>-->
+<!--                </button>-->
                 <div class="card-body">
                     <div class="form-group row">
                         <label for="prepaymentMonth" class="col-sm-2 col-form-label">还款期数</label>
@@ -138,24 +138,10 @@
     validated();
     validatedPrepayment();
 
+    // 控制是否显示提前还款计划
+    showPrepayment();
     // 添加提前还款计划
     addPrepayment();
-
-    $('#prepayment1').click(function() {
-        let prepayments = document.getElementsByName('prepayment-template');
-        for (let i = 0; i < prepayments.length; i++) {
-            prepayments[i].style.display = 'none';
-        }
-        $('#addPrepaymentBtn').hide();
-    });
-
-    $('#prepayment2').click(function() {
-        let prepayments = document.getElementsByName('prepayment-template');
-        for (let i = 0; i < prepayments.length; i++) {
-            prepayments[i].style.display = 'block';
-        }
-        $('#addPrepaymentBtn').show();
-    });
 
     // 提交按钮点击事件
     $('#submit-btn').click(function (e) {
@@ -179,6 +165,48 @@
                     year: $("#year").val(),
                     type: $("#type").val(),
                     prepayment: prepayment,
+                }),
+            }).done(function (response) {
+                if (response.code == 200) {
+                    // 数据提交成功后处理返回结果
+                    drawPicture3(response);
+                    drawPicture1(response);
+                    drawPicture2(response);
+                } else if (response.code == 602) {
+                    // 数据提交失败后处理
+                    $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+                } else {
+                    $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+response.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+                }
+            }).fail(function (xhr, status) {
+                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+status+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+            });
+        } else {
+            // 有提前还款的提交
+            const prepaymentElements = document.getElementsByName('prepayment-template');
+            const prepaymentList = [];
+            for (let i = 0; i < prepaymentElements.length; i++) {
+                const element = prepaymentElements[i];
+                const prepayment = {
+                    prepaymentMonth: element.querySelector('input[name="prepaymentMonth"]').value,
+                    repayment: element.querySelector('input[name="repayment"]').value,
+                    newType: element.querySelector('select[name="newType"]').value,
+                    repaymentType: element.querySelector('select[name="repaymentType"]').value,
+                };
+                prepaymentList.push(prepayment);
+            }
+            $.ajax({
+                method: 'POST',
+                url: '/calculator/prepaymentCalculator',
+                dataType: 'json',
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify({
+                    amount: $("#amount").val(),
+                    rate: $("#rate").val(),
+                    year: $("#year").val(),
+                    type: $("#type").val(),
+                    prepayment: prepayment,
+                    prepaymentList: prepaymentList,
                 }),
             }).done(function (response) {
                 if (response.code == 200) {
@@ -483,6 +511,7 @@
             let $new = $('#prepayment-template').clone();
             // 修改id,使其不重复
             $new.each(function () {
+                $(this).append('<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
                 this.id += '-' + (prepaymentIndex);
             });
             $new.find('[id]').each(function () {
@@ -552,6 +581,24 @@
                 }
             });
         }
+    }
+
+    function showPrepayment() {
+        $('#prepayment1').click(function () {
+            let prepayments = document.getElementsByName('prepayment-template');
+            for (let i = 0; i < prepayments.length; i++) {
+                prepayments[i].style.display = 'none';
+            }
+            $('#addPrepaymentBtn').hide();
+        });
+
+        $('#prepayment2').click(function () {
+            let prepayments = document.getElementsByName('prepayment-template');
+            for (let i = 0; i < prepayments.length; i++) {
+                prepayments[i].style.display = 'block';
+            }
+            $('#addPrepaymentBtn').show();
+        });
     }
 
 </script>
