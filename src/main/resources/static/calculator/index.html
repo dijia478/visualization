@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>公众号：万户楼台</title>
-    <link rel="icon" href="javascript:;">
+    <link rel="icon" href="data:image/ico;base64,aWNv">
     <script type="text/javascript" src="https://unpkg.com/@antv/g2plot@latest/dist/g2plot.min.js"></script>
     <script src="https://unpkg.com/@antv/s2@latest/dist/index.min.js"></script>
 
@@ -74,7 +74,7 @@
                     </div>
                 </div>
             </fieldset>
-            <div id="prepayment-template" class="alert alert-info alert-dismissible fade show" role="alert" style="display:none">
+            <div id="prepayment-template" name="prepayment-template" class="alert alert-info alert-dismissible fade show" role="alert" style="display:none">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -117,7 +117,7 @@
                     </div>
                 </div>
             </div>
-            <div class="empty-2"></div>
+<!--            <div class="empty-2"></div>-->
             <button id="addPrepaymentBtn" type="button" class="btn btn-secondary btn-sm btn-block" style="display:none">新增提前还款</button>
             <button id="submit-btn" type="button" class="btn btn-primary btn-block">计算</button>
         </form>
@@ -142,12 +142,18 @@
     addPrepayment();
 
     $('#prepayment1').click(function() {
-        $('#prepayment-template').hide();
+        let prepayments = document.getElementsByName('prepayment-template');
+        for (let i = 0; i < prepayments.length; i++) {
+            prepayments[i].style.display = 'none';
+        }
         $('#addPrepaymentBtn').hide();
     });
 
     $('#prepayment2').click(function() {
-        $('#prepayment-template').show();
+        let prepayments = document.getElementsByName('prepayment-template');
+        for (let i = 0; i < prepayments.length; i++) {
+            prepayments[i].style.display = 'block';
+        }
         $('#addPrepaymentBtn').show();
     });
 
@@ -159,34 +165,37 @@
         $('#container3').html("");
         $('#container4').html("");
 
-        // ajax提交
-        $.ajax({
-            method: 'POST',
-            url: '/calculator/loanCalculator',
-            dataType: 'json',
-            contentType: 'application/json;charset=UTF-8',
-            data: JSON.stringify({
-                amount: $("#amount").val(),
-                rate: $("#rate").val(),
-                year: $("#year").val(),
-                type: $("#type").val(),
-                prepayment: $('input[name="prepayment"]:checked').val(),
-            }),
-        }).done(function (response) {
-            if (response.code == 200) {
-                // 数据提交成功后处理返回结果
-                drawPicture3(response);
-                drawPicture1(response);
-                drawPicture2(response);
-            } else if (response.code == 602) {
-                // 数据提交失败后处理
-                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
-            } else {
-                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+response.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
-            }
-        }).fail(function (xhr, status) {
-            $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+status+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
-        });
+        let prepayment = $('input[name="prepayment"]:checked').val();
+        if (prepayment == 0) {
+            // ajax提交
+            $.ajax({
+                method: 'POST',
+                url: '/calculator/loanCalculator',
+                dataType: 'json',
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify({
+                    amount: $("#amount").val(),
+                    rate: $("#rate").val(),
+                    year: $("#year").val(),
+                    type: $("#type").val(),
+                    prepayment: prepayment,
+                }),
+            }).done(function (response) {
+                if (response.code == 200) {
+                    // 数据提交成功后处理返回结果
+                    drawPicture3(response);
+                    drawPicture1(response);
+                    drawPicture2(response);
+                } else if (response.code == 602) {
+                    // 数据提交失败后处理
+                    $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+                } else {
+                    $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+response.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+                }
+            }).fail(function (xhr, status) {
+                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+status+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+            });
+        }
     });
 
     function drawPicture1(response) {
@@ -473,6 +482,9 @@
         $('#addPrepaymentBtn').click(function () {
             let $new = $('#prepayment-template').clone();
             // 修改id,使其不重复
+            $new.each(function () {
+                this.id += '-' + (prepaymentIndex);
+            });
             $new.find('[id]').each(function () {
                 this.id += '-' + (prepaymentIndex);
             });
