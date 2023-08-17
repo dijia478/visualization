@@ -369,25 +369,6 @@
             },
             width: 400,
             height: 600,
-            theme: {
-                components: {
-                    scrollbar: {
-                        // 默认样式
-                        default: {
-                            style: {
-                                trackColor: 'rgba(0,0,0,0)',
-                                thumbColor: 'rgba(100,170,255,0.4)',
-                            },
-                        },
-                        // hover 时，可以设置滑块样式
-                        hover: {
-                            style: {
-                                thumbColor: 'rgba(100,170,255,0.8)',
-                            },
-                        },
-                    },
-                },
-            },
         });
         stackedBarPlot.render();
     }
@@ -457,6 +438,7 @@
             legend: {
                 position: 'top',
             },
+            smooth: true,
             tooltip: {
                 customItems: originalItems => originalItems.sort(function (a, b) {
                     return b.value - a.value
@@ -468,6 +450,7 @@
                     duration: 10000,
                 },
             },
+            interactions: [{ type: 'brush' }],
         });
 
         const linePlot2 = new Line('container4', {
@@ -490,6 +473,7 @@
             legend: {
                 position: 'top',
             },
+            smooth: true,
             tooltip: {
                 customItems: originalItems => originalItems.sort(function (a, b) {
                     return b.value - a.value
@@ -501,6 +485,7 @@
                     duration: 10000,
                 },
             },
+            interactions: [{ type: 'brush' }],
         });
 
         linePlot.render();
