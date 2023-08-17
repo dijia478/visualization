@@ -2,9 +2,7 @@ package com.dijia478.visualization.controller;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.dijia478.visualization.bean.BaseResponse;
-import com.dijia478.visualization.bean.LoanDTO;
-import com.dijia478.visualization.bean.TotalLoan;
+import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author dijia478
@@ -55,9 +54,29 @@ public class LoanController {
      */
     @PostMapping("/calculator/prepaymentCalculator")
     public TotalLoan prepaymentCalculator(@RequestBody @Validated LoanDTO data) {
+        validatedPrepayment(data);
         System.out.println(data);
         TotalLoan totalLoan = new TotalLoan();
         return totalLoan;
+    }
+
+    /**
+     * 参数校验
+     *
+     * @param data
+     */
+    private void validatedPrepayment(LoanDTO data) {
+        int totalMonth = data.getYear() * 12;
+        int amount = data.getAmount();
+        List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
+        for (PrepaymentDTO prepaymentDTO : prepaymentList) {
+            if (prepaymentDTO.getPrepaymentMonth() > totalMonth) {
+                throw new LoanException(ResultEnum.PREPAYMENT_MONTH_TOO_BIG);
+            }
+            if (prepaymentDTO.getRepayment() > amount) {
+                throw new LoanException(ResultEnum.REPAYMENT_TOO_BIG);
+            }
+        }
     }
 
 }

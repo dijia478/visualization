@@ -32,7 +32,11 @@ public enum ResultEnum {
     NOT_EXIST(604, "数据不存在"),
 
     /** 请求错误 */
-    REQUEST_ERR(605, "请求错误");
+    REQUEST_ERR(605, "请求错误"),
+
+    PREPAYMENT_MONTH_TOO_BIG(701, "提前还款时的还款期数超过范围"),
+
+    REPAYMENT_TOO_BIG(702, "提前还款时的还款金额超过范围");
 
     private final Integer code;
 

@@ -217,6 +217,8 @@
                 } else if (response.code == 602) {
                     // 数据提交失败后处理
                     $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+                } else if (response.code > 700) {
+                    $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
                 } else {
                     $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+response.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
                 }

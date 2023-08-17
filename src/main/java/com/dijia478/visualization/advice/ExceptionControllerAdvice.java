@@ -72,7 +72,7 @@ public class ExceptionControllerAdvice {
         log.error("请求尚未到controller层", e);
         BaseResponse<String> response = new BaseResponse<>(ResultEnum.REQUEST_ERR, e.toString());
         // 进行国际化转换
-        i18nUtil.responseToI18n(response);
+        // i18nUtil.responseToI18n(response);
         return response;
     }
 
@@ -98,7 +98,7 @@ public class ExceptionControllerAdvice {
 
         BaseResponse<String> response = new BaseResponse<>(ResultEnum.VALIDATE_ERR, msg.substring(2));
         // 进行国际化转换
-        i18nUtil.responseToI18n(response);
+        // i18nUtil.responseToI18n(response);
         return response;
     }
 
@@ -113,7 +113,7 @@ public class ExceptionControllerAdvice {
         log.error("", e);
         BaseResponse<String> response = new BaseResponse<>(e.getResultEnum());
         // 进行国际化转换
-        i18nUtil.responseToI18n(response);
+        // i18nUtil.responseToI18n(response);
         return response;
     }
 
@@ -128,7 +128,7 @@ public class ExceptionControllerAdvice {
         log.error("", e);
         BaseResponse<String> response = new BaseResponse<>(ResultEnum.UNKNOWN_ERR, e.toString());
         // 进行国际化转换
-        i18nUtil.responseToI18n(response);
+        // i18nUtil.responseToI18n(response);
         return response;
     }
 
