@@ -28,6 +28,10 @@ public class LoanController {
     @Resource(name = "equalPrincipalPayment")
     private LoanCalculator equalPrincipalPayment;
 
+    /** 提前还款计算器 */
+    @Resource(name = "prepaymentCalculator")
+    private LoanCalculator prepaymentCalculator;
+
     /**
      * 贷款计算接口
      *
@@ -55,8 +59,8 @@ public class LoanController {
     @PostMapping("/calculator/prepaymentCalculator")
     public TotalLoan prepaymentCalculator(@RequestBody @Validated LoanDTO data) {
         validatedPrepayment(data);
-        System.out.println(data);
-        TotalLoan totalLoan = new TotalLoan();
+        TotalLoan totalLoan = prepaymentCalculator.compute(data);
+        LoanUtil.setScale(totalLoan);
         return totalLoan;
     }
 
@@ -70,7 +74,7 @@ public class LoanController {
         int amount = data.getAmount();
         List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
         for (PrepaymentDTO prepaymentDTO : prepaymentList) {
-            if (prepaymentDTO.getPrepaymentMonth() > totalMonth) {
+            if (prepaymentDTO.getPrepaymentMonth() > 12 && prepaymentDTO.getPrepaymentMonth() > totalMonth) {
                 throw new LoanException(ResultEnum.PREPAYMENT_MONTH_TOO_BIG);
             }
             if (prepaymentDTO.getRepayment() > amount) {

@@ -1,11 +1,10 @@
 package com.dijia478.visualization.service.impl;
 
 import cn.hutool.core.util.NumberUtil;
-import com.alibaba.fastjson2.JSONObject;
 import com.dijia478.visualization.bean.LoanDTO;
 import com.dijia478.visualization.bean.MonthLoan;
 import com.dijia478.visualization.bean.TotalLoan;
-import com.dijia478.visualization.service.LoanCalculator;
+import com.dijia478.visualization.service.LoanCalculatorAdapter;
 import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +19,7 @@ import java.util.List;
  * @date 2023/8/9
  */
 @Service("equalLoanPayment")
-public class EqualLoanPaymentCalculator implements LoanCalculator {
+public class EqualLoanPaymentCalculator extends LoanCalculatorAdapter {
 
     @Override
     public TotalLoan compute(LoanDTO data) {

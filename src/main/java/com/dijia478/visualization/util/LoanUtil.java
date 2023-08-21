@@ -15,6 +15,8 @@ import java.math.RoundingMode;
  */
 public class LoanUtil {
 
+    private LoanUtil() {}
+
     /**
      * 对最终结果进行四舍五入保留两位小数，用于给前端展示
      *
