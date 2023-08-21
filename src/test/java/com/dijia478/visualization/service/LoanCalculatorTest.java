@@ -14,12 +14,12 @@ import javax.annotation.Resource;
 class LoanCalculatorTest {
 
     /** 等额本息计算器 */
-    @Resource(name = "equalLoanPayment")
-    private LoanCalculator equalLoanPayment;
+    @Resource(name = "equalRepaymentCalculator")
+    private LoanCalculator equalRepaymentCalculator;
 
     /** 等额本金计算器 */
-    @Resource(name = "equalPrincipalPayment")
-    private LoanCalculator equalPrincipalPayment;
+    @Resource(name = "equalPrincipalCalculator")
+    private LoanCalculator equalPrincipalCalculator;
 
     @Test
     void compute1() {
@@ -28,7 +28,7 @@ class LoanCalculatorTest {
         data.setYear(30);
         data.setRate(4.0);
         data.setType(1);
-        TotalLoan compute = equalLoanPayment.compute(data);
+        TotalLoan compute = equalRepaymentCalculator.compute(data);
         LoanUtil.setScale(compute);
         MonthLoan monthLoan = compute.getMonthLoanList().get(compute.getMonthLoanList().size() - 1);
         System.out.println(compute);
@@ -41,8 +41,8 @@ class LoanCalculatorTest {
         data.setAmount(150);
         data.setYear(30);
         data.setRate(4.0);
-        data.setType(1);
-        TotalLoan compute = equalPrincipalPayment.compute(data);
+        data.setType(2);
+        TotalLoan compute = equalPrincipalCalculator.compute(data);
         LoanUtil.setScale(compute);
         MonthLoan monthLoan = compute.getMonthLoanList().get(compute.getMonthLoanList().size() - 1);
         System.out.println(compute);

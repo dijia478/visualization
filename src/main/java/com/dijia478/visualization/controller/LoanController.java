@@ -1,7 +1,5 @@
 package com.dijia478.visualization.controller;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.util.LoanUtil;
@@ -21,12 +19,12 @@ import java.util.List;
 public class LoanController {
 
     /** 等额本息计算器 */
-    @Resource(name = "equalLoanPayment")
-    private LoanCalculator equalLoanPayment;
+    @Resource(name = "equalRepaymentCalculator")
+    private LoanCalculator equalRepaymentCalculator;
 
     /** 等额本金计算器 */
-    @Resource(name = "equalPrincipalPayment")
-    private LoanCalculator equalPrincipalPayment;
+    @Resource(name = "equalPrincipalCalculator")
+    private LoanCalculator equalPrincipalCalculator;
 
     /** 提前还款计算器 */
     @Resource(name = "prepaymentCalculator")
@@ -42,9 +40,9 @@ public class LoanController {
     public TotalLoan loanCalculator(@RequestBody @Validated LoanDTO data) {
         TotalLoan totalLoan;
         if (data.getType() == 1) {
-            totalLoan = equalLoanPayment.compute(data);
+            totalLoan = equalRepaymentCalculator.compute(data);
         } else {
-            totalLoan = equalPrincipalPayment.compute(data);
+            totalLoan = equalPrincipalCalculator.compute(data);
         }
         LoanUtil.setScale(totalLoan);
         return totalLoan;
