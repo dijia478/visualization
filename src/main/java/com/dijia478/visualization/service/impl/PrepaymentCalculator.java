@@ -59,7 +59,8 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         BigDecimal totalInterest = new BigDecimal("0");
         int year = 0;
         int monthInYear = 0;
-        for (int i = 0; i < totalLoan.getMonthLoanList().size(); i++) {
+        int size = totalLoan.getMonthLoanList().size();
+        for (int i = 0; i < size; i++) {
             MonthLoan monthLoan = totalLoan.getMonthLoanList().get(i);
             monthLoan.setMonth(i + 1);
             monthLoan.setYear(year + 1);
@@ -83,6 +84,11 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
             monthLoan.setTotalRepaymentAndRemainPrincipal(NumberUtil.add(totalRepayment, monthLoan.getRemainPrincipal()));
         }
         totalLoan.setLoanAmount(data.getAmount());
+        totalLoan.setLoanMonth(new BigDecimal(size));
+        totalLoan.setLoanRate(data.getRate());
+        totalLoan.setType(data.getType());
+        totalLoan.setTotalRepayment(totalLoan.getMonthLoanList().get(size - 1).getTotalRepayment());
+        totalLoan.setTotalInterest(totalLoan.getMonthLoanList().get(size - 1).getTotalInterest());
         return totalLoan;
     }
 
