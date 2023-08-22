@@ -80,6 +80,7 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
             monthLoan.setTotalRepayment(totalRepayment);
             monthLoan.setTotalPrincipal(totalPrincipal);
             monthLoan.setTotalInterest(totalInterest);
+            monthLoan.setTotalRepaymentAndRemainPrincipal(NumberUtil.add(totalRepayment, monthLoan.getRemainPrincipal()));
         }
         totalLoan.setLoanAmount(data.getAmount());
         return totalLoan;
