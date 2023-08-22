@@ -1,6 +1,8 @@
 package com.dijia478.visualization.util;
 
 import cn.hutool.core.util.NumberUtil;
+import com.dijia478.visualization.bean.LoanBO;
+import com.dijia478.visualization.bean.LoanDTO;
 import com.dijia478.visualization.bean.MonthLoan;
 import com.dijia478.visualization.bean.TotalLoan;
 
@@ -65,6 +67,23 @@ public class LoanUtil {
      */
     public static BigDecimal totalMonth(BigDecimal year) {
         return NumberUtil.mul(year, new BigDecimal("12"));
+    }
+
+    /**
+     * 参数转换
+     *
+     * @param data
+     * @return
+     */
+    public static LoanBO convertParam(LoanDTO data) {
+        return LoanBO.builder()
+                .amount(LoanUtil.totalLoan(new BigDecimal(data.getAmount().toString())))
+                .month(LoanUtil.totalMonth(new BigDecimal(data.getYear().toString())))
+                .rate(new BigDecimal(data.getRate().toString()))
+                .type(data.getType())
+                .prepayment(data.getPrepayment())
+                .prepaymentList(data.getPrepaymentList())
+                .build();
     }
 
 }

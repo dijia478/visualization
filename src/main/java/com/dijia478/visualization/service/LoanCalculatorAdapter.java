@@ -1,9 +1,6 @@
 package com.dijia478.visualization.service;
 
-import com.dijia478.visualization.bean.LoanDTO;
-import com.dijia478.visualization.bean.MonthLoan;
-import com.dijia478.visualization.bean.PrepaymentDTO;
-import com.dijia478.visualization.bean.TotalLoan;
+import com.dijia478.visualization.bean.*;
 
 import java.util.List;
 
@@ -16,7 +13,7 @@ import java.util.List;
 public class LoanCalculatorAdapter implements LoanCalculator {
 
     @Override
-    public TotalLoan compute(LoanDTO data) {
+    public TotalLoan compute(LoanBO data) {
         return null;
     }
 

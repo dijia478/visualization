@@ -1,10 +1,12 @@
 package com.dijia478.visualization.bean;
 
-import com.alibaba.fastjson2.JSONArray;
 import lombok.Data;
-import org.apache.catalina.LifecycleState;
+import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.*;
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**

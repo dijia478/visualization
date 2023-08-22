@@ -1,6 +1,6 @@
 package com.dijia478.visualization.service;
 
-import com.alibaba.fastjson2.JSONObject;
+import com.dijia478.visualization.bean.LoanBO;
 import com.dijia478.visualization.bean.LoanDTO;
 import com.dijia478.visualization.bean.MonthLoan;
 import com.dijia478.visualization.bean.TotalLoan;
@@ -28,7 +28,8 @@ class LoanCalculatorTest {
         data.setYear(30);
         data.setRate(4.0);
         data.setType(1);
-        TotalLoan compute = equalRepaymentCalculator.compute(data);
+        LoanBO loanBO = LoanUtil.convertParam(data);
+        TotalLoan compute = equalRepaymentCalculator.compute(loanBO);
         LoanUtil.setScale(compute);
         MonthLoan monthLoan = compute.getMonthLoanList().get(compute.getMonthLoanList().size() - 1);
         System.out.println(compute);
@@ -42,7 +43,8 @@ class LoanCalculatorTest {
         data.setYear(30);
         data.setRate(4.0);
         data.setType(2);
-        TotalLoan compute = equalPrincipalCalculator.compute(data);
+        LoanBO loanBO = LoanUtil.convertParam(data);
+        TotalLoan compute = equalPrincipalCalculator.compute(loanBO);
         LoanUtil.setScale(compute);
         MonthLoan monthLoan = compute.getMonthLoanList().get(compute.getMonthLoanList().size() - 1);
         System.out.println(compute);

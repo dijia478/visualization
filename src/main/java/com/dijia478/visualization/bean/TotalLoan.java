@@ -17,8 +17,8 @@ public class TotalLoan {
     /** 贷款金额（1000000元） */
     private BigDecimal loanAmount;
 
-    /** 贷款期限（30年） */
-    private BigDecimal loanYear;
+    /** 贷款期限（360期） */
+    private BigDecimal loanMonth;
 
     /** 年利率（0.042） */
     private BigDecimal loanRate;

@@ -1,10 +1,7 @@
 package com.dijia478.visualization.service.impl;
 
 import cn.hutool.core.util.NumberUtil;
-import com.dijia478.visualization.bean.LoanDTO;
-import com.dijia478.visualization.bean.MonthLoan;
-import com.dijia478.visualization.bean.PrepaymentDTO;
-import com.dijia478.visualization.bean.TotalLoan;
+import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
 import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.stereotype.Service;
@@ -23,21 +20,18 @@ import java.util.List;
 public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
 
     @Override
-    public TotalLoan compute(LoanDTO data) {
-        BigDecimal loanAmount = new BigDecimal(data.getAmount().toString());
-        loanAmount = LoanUtil.totalLoan(loanAmount);
-        BigDecimal loanYear = new BigDecimal(data.getYear().toString());
-        BigDecimal loanRate = new BigDecimal(data.getRate().toString());
+    public TotalLoan compute(LoanBO data) {
+        BigDecimal loanAmount = data.getAmount();
+        BigDecimal totalMonth = data.getMonth();
+        BigDecimal loanRate = data.getRate();
         Integer type = data.getType();
 
         TotalLoan loan = new TotalLoan();
         loan.setLoanAmount(loanAmount);
-        loan.setLoanYear(loanYear);
+        loan.setLoanMonth(totalMonth);
         loan.setLoanRate(loanRate);
         loan.setType(type);
 
-        // 贷款总期数（月）
-        BigDecimal totalMonth = LoanUtil.totalMonth(loanYear);
         // 月利率
         BigDecimal loanRateMonth = LoanUtil.loanRateMonth(loanRate);
         // 每月要还本金 = 总贷款额 ÷贷款总期数
@@ -75,6 +69,8 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
 
             totalRepayment = NumberUtil.add(totalRepayment, monthLoan.getRepayment());
             monthLoan.setTotalRepayment(totalRepayment);
+            monthLoan.setTotalPrincipal(totalPrincipal);
+            monthLoan.setTotalInterest(totalInterest);
             monthLoan.setTotalRepaymentAndRemainPrincipal(NumberUtil.add(totalRepayment,monthLoan.getRemainPrincipal()));
             monthLoanList.add(monthLoan);
         }

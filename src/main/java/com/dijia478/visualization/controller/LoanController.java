@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -39,10 +40,11 @@ public class LoanController {
     @PostMapping("/calculator/loanCalculator")
     public TotalLoan loanCalculator(@RequestBody @Validated LoanDTO data) {
         TotalLoan totalLoan;
+        LoanBO loanBO = LoanUtil.convertParam(data);
         if (data.getType() == 1) {
-            totalLoan = equalRepaymentCalculator.compute(data);
+            totalLoan = equalRepaymentCalculator.compute(loanBO);
         } else {
-            totalLoan = equalPrincipalCalculator.compute(data);
+            totalLoan = equalPrincipalCalculator.compute(loanBO);
         }
         LoanUtil.setScale(totalLoan);
         return totalLoan;
@@ -57,7 +59,8 @@ public class LoanController {
     @PostMapping("/calculator/prepaymentCalculator")
     public TotalLoan prepaymentCalculator(@RequestBody @Validated LoanDTO data) {
         validatedPrepayment(data);
-        TotalLoan totalLoan = prepaymentCalculator.compute(data);
+        LoanBO loanBO = LoanUtil.convertParam(data);
+        TotalLoan totalLoan = prepaymentCalculator.compute(loanBO);
         LoanUtil.setScale(totalLoan);
         return totalLoan;
     }
@@ -72,7 +75,8 @@ public class LoanController {
         int amount = data.getAmount();
         List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
         for (PrepaymentDTO prepaymentDTO : prepaymentList) {
-            if (prepaymentDTO.getPrepaymentMonth() > 12 && prepaymentDTO.getPrepaymentMonth() > totalMonth) {
+            if (prepaymentDTO.getPrepaymentMonth() < 2
+                    || prepaymentDTO.getPrepaymentMonth() > 12 && prepaymentDTO.getPrepaymentMonth() > totalMonth) {
                 throw new LoanException(ResultEnum.PREPAYMENT_MONTH_TOO_BIG);
             }
             if (prepaymentDTO.getRepayment() > amount) {

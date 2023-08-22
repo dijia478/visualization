@@ -153,6 +153,7 @@
 
         let prepayment = $('input[name="prepayment"]:checked').val();
         if (prepayment == 0) {
+            const prepaymentList = []
             // ajax提交
             $.ajax({
                 method: 'POST',
@@ -164,13 +165,14 @@
                     rate: $("#rate").val(),
                     year: $("#year").val(),
                     type: $("#type").val(),
+                    prepayment: prepayment,
                 }),
             }).done(function (response) {
                 if (response.code == 200) {
                     // 数据提交成功后处理返回结果
                     drawPicture3(response);
-                    drawPicture1(response);
                     drawPicture2(response);
+                    drawPicture1(response, prepaymentList);
                 } else if (response.code == 602) {
                     // 数据提交失败后处理
                     $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
@@ -211,8 +213,8 @@
                 if (response.code == 200) {
                     // 数据提交成功后处理返回结果
                     drawPicture3(response);
-                    drawPicture1(response);
                     drawPicture2(response);
+                    drawPicture1(response, prepaymentList);
                 } else if (response.code == 602) {
                     // 数据提交失败后处理
                     $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
@@ -227,7 +229,7 @@
         }
     });
 
-    function drawPicture1(response) {
+    function drawPicture1(response, prepaymentList) {
         let arr = [];
         let respData = response.data;
         let repayment = 0;
@@ -235,14 +237,26 @@
             let monthLoan = respData.monthLoanList[i];
             repayment += monthLoan.repayment;
             arr.push({
-                month: monthLoan.month,
+                month: monthLoan.month + "（" + (monthLoan.year - 1) + "年" + monthLoan.monthInYear + "月）",
                 repayment: monthLoan.repayment.toFixed(2),
                 principal: monthLoan.principal.toFixed(2),
                 interest: monthLoan.interest.toFixed(2),
                 remainPrincipal: monthLoan.remainPrincipal.toFixed(2),
                 remainInterest: monthLoan.remainInterest.toFixed(2),
                 totalRepayment: monthLoan.totalRepayment.toFixed(2),
-                // totalRepaymentAndRemainPrincipal: monthLoan.totalRepaymentAndRemainPrincipal.toFixed(2),
+                totalPrincipal: monthLoan.totalPrincipal.toFixed(2),
+                totalInterest: monthLoan.totalInterest.toFixed(2),
+            });
+        }
+        for (let i = 0, n = prepaymentList.length; i < n; i++) {
+            let prepaymentElement = prepaymentList[i];
+            let prepaymentMonth = prepaymentElement.prepaymentMonth;
+            repayment += prepaymentElement.repayment * 10000;
+            arr.splice(prepaymentMonth - 1 + i, 0, {
+                month: "提前还款",
+                repayment: (prepaymentElement.repayment * 10000).toFixed(2),
+                principal: (prepaymentElement.repayment * 10000).toFixed(2),
+                interest: "0.00",
             });
         }
         let loanAmount = respData.loanAmount;
@@ -256,7 +270,7 @@
         const container = document.getElementById('container1');
         const s2DataConfig = {
             fields: {
-                columns: ['month', 'repayment', 'principal', 'interest', 'remainPrincipal', 'remainInterest', 'totalRepayment'],
+                columns: ['month', 'repayment', 'principal', 'interest', 'remainPrincipal', 'remainInterest', 'totalRepayment', 'totalPrincipal', 'totalInterest'],
             },
             meta: [
                 {
@@ -285,19 +299,38 @@
                 },
                 {
                     field: 'totalRepayment',
-                    name: '累计还款',
+                    name: '累计已还总额',
                 },
-                // {
-                //     field: 'totalRepaymentAndRemainPrincipal',
-                //     name: '累计还款+剩余本金',
-                // },
+                {
+                    field: 'totalPrincipal',
+                    name: '累计已还本金',
+                },
+                {
+                    field: 'totalInterest',
+                    name: '累计已还利息',
+                },
             ],
             data: arr,
         };
 
         const s2Options = {
-            width: 600,
+            width: 1000,
             height: 600,
+            conditions: {
+                background: [
+                    {
+                        field: new RegExp('.*'),
+                        mapping(fieldValue, data) {
+                            if (data.month === '提前还款') {
+                                console.log(data);
+                                return {
+                                    fill: '#ffe9e9',
+                                };
+                            }
+                        },
+                    },
+                ],
+            },
         };
         const s2 = new TableSheet(container, s2DataConfig, s2Options);
         s2.render();

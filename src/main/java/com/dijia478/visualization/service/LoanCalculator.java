@@ -1,9 +1,6 @@
 package com.dijia478.visualization.service;
 
-import com.dijia478.visualization.bean.LoanDTO;
-import com.dijia478.visualization.bean.MonthLoan;
-import com.dijia478.visualization.bean.PrepaymentDTO;
-import com.dijia478.visualization.bean.TotalLoan;
+import com.dijia478.visualization.bean.*;
 
 import java.util.List;
 
@@ -21,7 +18,7 @@ public interface LoanCalculator {
      * @param data
      * @return
      */
-    TotalLoan compute(LoanDTO data);
+    TotalLoan compute(LoanBO data);
 
     /**
      * 计算提前还款

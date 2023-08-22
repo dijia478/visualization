@@ -1,13 +1,12 @@
 package com.dijia478.visualization.service.impl;
 
-import com.dijia478.visualization.bean.LoanDTO;
-import com.dijia478.visualization.bean.PrepaymentDTO;
-import com.dijia478.visualization.bean.TotalLoan;
+import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -28,7 +27,7 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
     private LoanCalculator equalPrincipalCalculator;
 
     @Override
-    public TotalLoan compute(LoanDTO data) {
+    public TotalLoan compute(LoanBO data) {
         TotalLoan totalLoan;
         if (data.getType() == 1) {
             totalLoan = equalRepaymentCalculator.compute(data);
@@ -38,9 +37,17 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
 
         List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
         for (PrepaymentDTO prepaymentDTO : prepaymentList) {
-
+            // 默认认为贷款利率一直不变
+            prepaymentDTO.setNewRate(new BigDecimal(data.getRate().toString()));
+            List<MonthLoan> monthLoanList = totalLoan.getMonthLoanList();
+            if (prepaymentDTO.getNewType() == 1) {
+                totalLoan = equalRepaymentCalculator.computePrepayment(monthLoanList, prepaymentDTO);
+            } else {
+                totalLoan = equalPrincipalCalculator.computePrepayment(monthLoanList, prepaymentDTO);
+            }
         }
-        return null;
+        totalLoan.setLoanAmount(data.getAmount());
+        return totalLoan;
     }
 
 }

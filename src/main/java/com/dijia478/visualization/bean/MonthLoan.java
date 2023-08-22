@@ -37,6 +37,12 @@ public class MonthLoan {
     /** 累计已还款总额（元） */
     private BigDecimal totalRepayment;
 
+    /** 累计已还本金（元） */
+    private BigDecimal totalPrincipal;
+
+    /** 累计已还利息（元） */
+    private BigDecimal totalInterest;
+
     /** 累计已还款总额（元） + 剩余本金（元） */
     private BigDecimal totalRepaymentAndRemainPrincipal;
 

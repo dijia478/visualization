@@ -2,6 +2,8 @@ package com.dijia478.visualization.bean;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * 提前还款计划请求参数
  *
@@ -16,6 +18,9 @@ public class PrepaymentDTO {
 
     /** 还款金额 */
     private Integer repayment;
+
+    /** 贷款利率 */
+    private BigDecimal newRate;
 
     /** 新还款方式 1等额本息、2等额本金 */
     private Integer newType;

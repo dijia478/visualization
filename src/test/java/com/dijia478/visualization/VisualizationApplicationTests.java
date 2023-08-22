@@ -1,5 +1,6 @@
 package com.dijia478.visualization;
 
+import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,6 +37,19 @@ class VisualizationApplicationTests {
 		}
 
 		System.out.println(JSON.toJSONString(list));
+	}
+
+	@Test
+	void test() {
+		double totalMonth = NumberUtil.div(Math.log(NumberUtil.div(4774.15d, NumberUtil.sub(4774.15d, NumberUtil.mul(898559.18d, 0.04/12)))), Math.log(NumberUtil.add(0.04/12, 1)));
+		totalMonth = Math.ceil(totalMonth);
+		System.out.println(totalMonth);
+
+		System.out.println(Math.ceil(1.1));
+		System.out.println(Math.ceil(1.0));
+		System.out.println(Math.ceil(1.5));
+		System.out.println(Math.ceil(1.9));
+
 	}
 
 }
