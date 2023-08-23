@@ -37,6 +37,7 @@ public class LoanDTO {
     @NotNull(message = "提前还款不能为空")
     private Integer prepayment;
 
+    @Valid
     private List<PrepaymentDTO> prepaymentList;
 
 }
