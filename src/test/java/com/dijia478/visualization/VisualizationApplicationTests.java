@@ -41,15 +41,13 @@ class VisualizationApplicationTests {
 
 	@Test
 	void test() {
-		double totalMonth = NumberUtil.div(Math.log(NumberUtil.div(4774.15d, NumberUtil.sub(4774.15d, NumberUtil.mul(898559.18d, 0.04/12)))), Math.log(NumberUtil.add(0.04/12, 1)));
-		totalMonth = Math.ceil(totalMonth);
-		System.out.println(totalMonth);
+		double P1 = 898559.18;
+		double P = 1000000;
+		double n1 = P1 / P * 360;
+		double i = 0.04 / 12;
 
-		System.out.println(Math.ceil(1.1));
-		System.out.println(Math.ceil(1.0));
-		System.out.println(Math.ceil(1.5));
-		System.out.println(Math.ceil(1.9));
-
+		double Y1 = i * (P1 - (P1 / n1) * (2 - 1)) + (P1 / n1);
+		System.out.println(Y1);
 	}
 
 }

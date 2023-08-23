@@ -75,6 +75,7 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
             monthLoan.setPrincipal(principal);
             monthLoan.setRepayment(repayment);
             monthLoan.setRemainPrincipal(remainPrincipal);
+            monthLoan.setRemainMonth(totalMonth.intValue() - i - 1);
 
             totalRepayment = totalRepayment.add(monthLoan.getRepayment());
             monthLoan.setTotalRepayment(totalRepayment);
@@ -119,7 +120,6 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
                     .month(new BigDecimal(String.valueOf(totalMonth)))
                     .rate(newRate)
                     .type(prepaymentDTO.getNewType())
-                    .prepayment(prepaymentDTO.getRepayment())
                     .build();
             totalLoan = compute(loanBO);
         } else {
@@ -129,7 +129,6 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
                     .month(new BigDecimal(String.valueOf(monthLoanList.size() - lastMonthLoan.getMonth())))
                     .rate(newRate)
                     .type(prepaymentDTO.getNewType())
-                    .prepayment(prepaymentDTO.getRepayment())
                     .build();
             totalLoan = compute(loanBO);
         }

@@ -24,8 +24,6 @@ public class LoanBO {
 
     private Integer type;
 
-    private Integer prepayment;
-
     private List<PrepaymentDTO> prepaymentList;
 
 }

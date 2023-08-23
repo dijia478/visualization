@@ -83,7 +83,6 @@ public class LoanUtil {
                 .month(LoanUtil.totalMonth(new BigDecimal(data.getYear().toString())))
                 .rate(new BigDecimal(data.getRate().toString()))
                 .type(data.getType())
-                .prepayment(data.getPrepayment())
                 .prepaymentList(data.getPrepaymentList())
                 .build();
     }

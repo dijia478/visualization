@@ -1,5 +1,6 @@
 package com.dijia478.visualization.service.impl;
 
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
@@ -66,6 +67,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
             monthLoan.setPrincipal(principal);
             monthLoan.setRepayment(NumberUtil.add(principal, interest));
             monthLoan.setRemainPrincipal(remainPrincipal);
+            monthLoan.setRemainMonth(totalMonth.intValue() - i - 1);
 
             totalRepayment = NumberUtil.add(totalRepayment, monthLoan.getRepayment());
             monthLoan.setTotalRepayment(totalRepayment);
@@ -89,7 +91,51 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
 
     @Override
     public TotalLoan computePrepayment(List<MonthLoan> monthLoanList, PrepaymentDTO prepaymentDTO) {
-        return super.computePrepayment(monthLoanList, prepaymentDTO);
+        BigDecimal repayment = new BigDecimal(prepaymentDTO.getRepayment().toString());
+        repayment = LoanUtil.totalLoan(repayment);
+        BigDecimal newRate = prepaymentDTO.getNewRate();
+        Integer prepaymentMonth = prepaymentDTO.getPrepaymentMonth();
+        Integer repaymentType = prepaymentDTO.getRepaymentType();
+
+        MonthLoan firstMonthLoan = monthLoanList.get(0);
+        MonthLoan lastMonthLoan = monthLoanList.get(prepaymentMonth - 2);
+
+        // 剩余本金
+        BigDecimal remainPrincipal = NumberUtil.sub(lastMonthLoan.getRemainPrincipal(), repayment);
+        if (remainPrincipal.compareTo(BigDecimal.ZERO) < 0) {
+            throw new LoanException(ResultEnum.REPAYMENT_TOO_BIG);
+        }
+        TotalLoan totalLoan;
+        if (repaymentType == 1) {
+            // 月供不变，期限缩短
+            // 原贷款总额
+            BigDecimal amount = NumberUtil.add(firstMonthLoan.getRemainPrincipal(), firstMonthLoan.getTotalPrincipal());
+            // 新贷款期限 = 剩余本金 / 原贷款总额 ×原贷款期限
+            double totalMonth = NumberUtil.mul(NumberUtil.div(remainPrincipal, amount), firstMonthLoan.getMonth() + firstMonthLoan.getRemainMonth()).doubleValue();
+            totalMonth = Math.ceil(totalMonth);
+            LoanBO loanBO = LoanBO.builder()
+                    .amount(remainPrincipal)
+                    .month(new BigDecimal(String.valueOf(totalMonth)))
+                    .rate(newRate)
+                    .type(prepaymentDTO.getNewType())
+                    .build();
+            totalLoan = compute(loanBO);
+        } else {
+            // 期限不变，月供减少
+            LoanBO loanBO = LoanBO.builder()
+                    .amount(remainPrincipal)
+                    .month(new BigDecimal(String.valueOf(monthLoanList.size() - lastMonthLoan.getMonth())))
+                    .rate(newRate)
+                    .type(prepaymentDTO.getNewType())
+                    .build();
+            totalLoan = compute(loanBO);
+        }
+
+        List<MonthLoan> sub = ListUtil.sub(monthLoanList, 0, prepaymentMonth - 1);
+        for (int i = sub.size() - 1; i >= 0; i--) {
+            totalLoan.getMonthLoanList().add(0, sub.get(i));
+        }
+        return totalLoan;
     }
 
 }

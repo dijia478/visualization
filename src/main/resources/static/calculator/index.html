@@ -98,6 +98,15 @@
                         </div>
                     </div>
                     <div class="form-group row">
+                        <label for="repayment" class="col-sm-2 col-form-label">新贷款利率</label>
+                        <div class="input-group mb-3 col-sm-10">
+                            <input type="text" class="form-control" id="newRate" name="newRate" placeholder="如：4.2，即年化利率4.2%">
+                            <div class="input-group-append">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
                         <label for="newType" class="col-sm-2 col-form-label">新还款方式</label>
                         <div class="input-group mb-3 col-sm-10">
                             <select class="form-control" id="newType" name="newType">
@@ -191,6 +200,7 @@
                 const prepayment = {
                     prepaymentMonth: element.querySelector('input[name="prepaymentMonth"]').value,
                     repayment: element.querySelector('input[name="repayment"]').value,
+                    newRate: element.querySelector('input[name="newRate"]').value,
                     newType: element.querySelector('select[name="newType"]').value,
                     repaymentType: element.querySelector('select[name="repaymentType"]').value,
                 };
@@ -600,6 +610,20 @@
                 }
             });
         }
+
+        const rateInput = document.getElementById('newRate');
+        rateInput.addEventListener('input', function(e) {
+            const value = e.target.value;
+            // 整数或1-2位小数的正则表达式
+            const regex = /^\d+(\.\d{1,2})?$|^[1-9]\d*$/;
+            if (!regex.test(value)) {
+                e.target.value = value.replace(/[^\d.]/g, '');
+                // 保留最多两位小数
+                if (value.split('.').length > 1 && value.split('.')[1].length > 2) {
+                    e.target.value = parseFloat(value).toFixed(2);
+                }
+            }
+        });
     }
 
     function showPrepayment() {

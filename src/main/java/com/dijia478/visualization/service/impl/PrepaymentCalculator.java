@@ -42,8 +42,6 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
 
         List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
         for (PrepaymentDTO prepaymentDTO : prepaymentList) {
-            // 默认认为贷款利率一直不变
-            prepaymentDTO.setNewRate(new BigDecimal(data.getRate().toString()));
             List<MonthLoan> monthLoanList = totalLoan.getMonthLoanList();
             if (prepaymentDTO.getNewType() == 1) {
                 totalLoan = equalRepaymentCalculator.computePrepayment(monthLoanList, prepaymentDTO);
