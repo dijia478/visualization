@@ -134,6 +134,9 @@
     </div>
 
 
+    <div id="container6"></div>
+    <div class="empty-5"></div>
+
     <div id="container5"></div>
     <div class="empty-5"></div>
 
@@ -167,6 +170,7 @@
         $('#container3').html("");
         $('#container4').html("");
         $('#container5').html("");
+        $('#container6').html("");
 
         let prepayment = $('input[name="prepayment"]:checked').val();
         if (prepayment == 0) {
@@ -187,8 +191,8 @@
             }).done(function (response) {
                 if (response.code == 200) {
                     // 数据提交成功后处理返回结果
-                    drawPicture5(response);
-                    drawPicture34(response);
+                    drawPicture6(response);
+                    drawPicture345(response);
                     drawPicture2(response);
                     drawPicture1(response, prepaymentList);
                 } else if (response.code == 602) {
@@ -231,8 +235,8 @@
             }).done(function (response) {
                 if (response.code == 200) {
                     // 数据提交成功后处理返回结果
-                    drawPicture5(response);
-                    drawPicture34(response);
+                    drawPicture6(response);
+                    drawPicture345(response);
                     drawPicture2(response);
                     drawPicture1(response, prepaymentList);
                 } else if (response.code == 602) {
@@ -261,6 +265,7 @@
                 repayment: monthLoan.repayment.toFixed(2),
                 principal: monthLoan.principal.toFixed(2),
                 interest: monthLoan.interest.toFixed(2),
+                remainTotal: monthLoan.remainTotal.toFixed(2),
                 remainPrincipal: monthLoan.remainPrincipal.toFixed(2),
                 remainInterest: monthLoan.remainInterest.toFixed(2),
                 totalRepayment: monthLoan.totalRepayment.toFixed(2),
@@ -290,7 +295,7 @@
         const container = document.getElementById('container1');
         const s2DataConfig = {
             fields: {
-                columns: ['month', 'repayment', 'principal', 'interest', 'remainPrincipal', 'remainInterest', 'totalRepayment', 'totalPrincipal', 'totalInterest'],
+                columns: ['month', 'repayment', 'principal', 'interest', 'remainTotal', 'remainPrincipal', 'remainInterest', 'totalRepayment', 'totalPrincipal', 'totalInterest'],
             },
             meta: [
                 {
@@ -308,6 +313,10 @@
                 {
                     field: 'interest',
                     name: '其中利息',
+                },
+                {
+                    field: 'remainTotal',
+                    name: '剩余贷款',
                 },
                 {
                     field: 'remainPrincipal',
@@ -424,9 +433,10 @@
         stackedBarPlot.render();
     }
 
-    function drawPicture34(response) {
+    function drawPicture345(response) {
         let arr1 = [];
         let arr2 = [];
+        let arr3 = [];
         let respData = response.data;
 
         for (let i = 0, n = respData.monthLoanList.length; i < n; i++) {
@@ -448,6 +458,11 @@
                 value: monthLoan.interest,
             });
             arr2.push({
+                name: "剩余贷款",
+                month: month,
+                value: monthLoan.remainTotal,
+            });
+            arr2.push({
                 name: "剩余本金",
                 month: month,
                 value: monthLoan.remainPrincipal,
@@ -457,19 +472,29 @@
                 month: month,
                 value: monthLoan.remainInterest,
             });
-            arr2.push({
-                name: "累计还款",
+            arr3.push({
+                name: "累计已还总额",
                 month: month,
                 value: monthLoan.totalRepayment,
             });
-            arr2.push({
-                name: "累计还款+剩余本金",
+            arr3.push({
+                name: "累计已还本金",
+                month: month,
+                value: monthLoan.totalPrincipal,
+            });
+            arr3.push({
+                name: "累计已还利息",
+                month: month,
+                value: monthLoan.totalInterest,
+            });
+            arr3.push({
+                name: "累计已还总额+剩余本金",
                 month: month,
                 value: monthLoan.totalRepaymentAndRemainPrincipal,
             });
         }
 
-        const linePlot = new Line('container3', {
+        const linePlot = new Line('container5', {
             data: arr1,
             padding: "auto",
             xField: 'month',
@@ -539,18 +564,54 @@
             interactions: [{ type: 'brush' }],
         });
 
+        const linePlot3 = new Line('container3', {
+            data: arr3,
+            padding: "auto",
+            xField: 'month',
+            yField: 'value',
+            seriesField: 'name',
+            yAxis: {
+                title: {
+                    text: "金额（元）",
+                }
+            },
+            xAxis: {
+                title: {
+                    text: "还款期数（月）",
+                },
+                tickInterval: 12,
+            },
+            legend: {
+                position: 'top',
+            },
+            smooth: true,
+            tooltip: {
+                customItems: originalItems => originalItems.sort(function (a, b) {
+                    return b.value - a.value
+                })
+            },
+            animation: {
+                appear: {
+                    animation: 'path-in',
+                    duration: 10000,
+                },
+            },
+            interactions: [{ type: 'brush' }],
+        });
+
         linePlot.render();
         linePlot2.render();
+        linePlot3.render();
     }
 
-    function drawPicture5(response) {
+    function drawPicture6(response) {
         let respData = response.data;
         const G = G2.getEngine('canvas');
         const data = [
             { type: '总本金', value: respData.loanAmount },
             { type: '总利息', value: respData.totalInterest },
         ];
-        const piePlot = new Pie('container5', {
+        const piePlot = new Pie('container6', {
             appendPadding: 10,
             data,
             angleField: 'value',
@@ -607,7 +668,7 @@
                     customHtml: (container, view, datum) => {
                         const { width, height } = container.getBoundingClientRect();
                         const d = Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2));
-                        const text = datum ? datum.type : '总计';
+                        const text = datum ? datum.type : '理论总还款';
                         return renderStatistic(d, text, { fontSize: 28 });
                     },
                 },
@@ -619,7 +680,7 @@
                     customHtml: (container, view, datum, data) => {
                         const { width } = container.getBoundingClientRect();
 
-                        const text = datum ? `¥ ${datum.value}` : `¥ ${data.reduce((r, d) => r + d.value, 0)}`;
+                        const text = datum ? `¥ ${datum.value}` : `¥ ` + (data.reduce((r, d) => r + d.value, 0)).toFixed(2);
                         return renderStatistic(width, text, { fontSize: 32 });
                     },
                 },
