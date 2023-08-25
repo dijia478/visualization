@@ -39,6 +39,7 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         } else {
             totalLoan = equalPrincipalCalculator.compute(data);
         }
+        BigDecimal originalTotalInterest = totalLoan.getTotalInterest();
 
         List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
         for (PrepaymentDTO prepaymentDTO : prepaymentList) {
@@ -47,6 +48,20 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
                 totalLoan = equalRepaymentCalculator.computePrepayment(monthLoanList, prepaymentDTO);
             } else {
                 totalLoan = equalPrincipalCalculator.computePrepayment(monthLoanList, prepaymentDTO);
+            }
+
+            int year = 0;
+            int monthInYear = 0;
+            int size = totalLoan.getMonthLoanList().size();
+            for (int i = 0; i < size; i++) {
+                MonthLoan monthLoan = totalLoan.getMonthLoanList().get(i);
+                monthLoan.setMonth(i + 1);
+                monthLoan.setYear(year + 1);
+                monthLoan.setMonthInYear(++monthInYear);
+                if ((i + 1) % 12 == 0) {
+                    year++;
+                    monthInYear = 0;
+                }
             }
         }
 
@@ -87,6 +102,7 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         totalLoan.setType(data.getType());
         totalLoan.setTotalRepayment(totalLoan.getMonthLoanList().get(size - 1).getTotalRepayment());
         totalLoan.setTotalInterest(totalLoan.getMonthLoanList().get(size - 1).getTotalInterest());
+        totalLoan.setOriginalTotalInterest(originalTotalInterest);
         return totalLoan;
     }
 

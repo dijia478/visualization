@@ -75,8 +75,7 @@ public class LoanController {
         int amount = data.getAmount();
         List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
         for (PrepaymentDTO prepaymentDTO : prepaymentList) {
-            if (prepaymentDTO.getPrepaymentMonth() < 2
-                    || prepaymentDTO.getPrepaymentMonth() > 12 && prepaymentDTO.getPrepaymentMonth() > totalMonth) {
+            if (prepaymentDTO.getPrepaymentMonth() > 12 && prepaymentDTO.getPrepaymentMonth() > totalMonth) {
                 throw new LoanException(ResultEnum.PREPAYMENT_MONTH_TOO_BIG);
             }
             if (prepaymentDTO.getRepayment() > amount) {

@@ -25,6 +25,9 @@ public class LoanUtil {
      * @param totalLoan
      */
     public static void setScale(TotalLoan totalLoan) {
+        if (totalLoan.getOriginalTotalInterest() != null) {
+            totalLoan.setOriginalTotalInterest(totalLoan.getOriginalTotalInterest().setScale(2, RoundingMode.HALF_UP));
+        }
         totalLoan.setTotalInterest(totalLoan.getTotalInterest().setScale(2, RoundingMode.HALF_UP));
         totalLoan.setTotalRepayment(totalLoan.getTotalRepayment().setScale(2, RoundingMode.HALF_UP));
         for (MonthLoan monthLoan : totalLoan.getMonthLoanList()) {

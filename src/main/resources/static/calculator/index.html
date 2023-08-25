@@ -134,6 +134,9 @@
     </div>
 
 
+    <div id="container7"></div>
+    <div class="empty-5"></div>
+
     <div id="container6"></div>
     <div class="empty-5"></div>
 
@@ -171,6 +174,7 @@
         $('#container4').html("");
         $('#container5').html("");
         $('#container6').html("");
+        $('#container7').html("");
 
         let prepayment = $('input[name="prepayment"]:checked').val();
         if (prepayment == 0) {
@@ -235,6 +239,7 @@
             }).done(function (response) {
                 if (response.code == 200) {
                     // 数据提交成功后处理返回结果
+                    drawPicture7(response);
                     drawPicture6(response);
                     drawPicture345(response);
                     drawPicture2(response);
@@ -681,6 +686,94 @@
                         const { width } = container.getBoundingClientRect();
 
                         const text = datum ? `¥ ${datum.value}` : `¥ ` + (data.reduce((r, d) => r + d.value, 0)).toFixed(2);
+                        return renderStatistic(width, text, { fontSize: 32 });
+                    },
+                },
+            },
+            // 添加 中心统计文本 交互
+            interactions: [{ type: 'element-selected' }, { type: 'element-active' }, { type: 'pie-statistic-active' }],
+        });
+
+        piePlot.render();
+    }
+
+    function drawPicture7(response) {
+        let respData = response.data;
+        const G = G2.getEngine('canvas');
+        const data = [
+            { type: '不提前还总利息', value: respData.originalTotalInterest },
+            { type: '提前还后总利息', value: respData.totalInterest },
+        ];
+        const piePlot = new Pie('container7', {
+            appendPadding: 10,
+            data,
+            angleField: 'value',
+            colorField: 'type',
+            radius: 1,
+            innerRadius: 0.64,
+            meta: {
+                value: {
+                    formatter: (v) => `${v} ¥`,
+                },
+            },
+            legend: false,
+            label: {
+                type: 'spider',
+                labelHeight: 40,
+                formatter: (data, mappingData) => {
+                    const group = new G.Group({});
+                    group.addShape({
+                        type: 'circle',
+                        attrs: {
+                            x: 0,
+                            y: 0,
+                            width: 40,
+                            height: 50,
+                            r: 5,
+                            fill: mappingData.color
+                        },
+                    });
+                    group.addShape({
+                        type: 'text',
+                        attrs: {
+                            x: 10,
+                            y: 8,
+                            text: `${data.type}`,
+                            fill: mappingData.color,
+                        },
+                    });
+                    group.addShape({
+                        type: 'text',
+                        attrs: {
+                            x: 0,
+                            y: 40,
+                            text: `¥${data.value}\n`+ (data.percent * 100).toFixed(2) +`%`,
+                            fill: 'rgba(0, 0, 0, 0.65)',
+                            fontWeight: 700,
+                        },
+                    });
+                    return group;
+                },
+            },
+            statistic: {
+                title: {
+                    offsetY: -4,
+                    customHtml: (container, view, datum) => {
+                        const { width, height } = container.getBoundingClientRect();
+                        const d = Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2));
+                        const text = datum ? datum.type : '共节省利息';
+                        return renderStatistic(d, text, { fontSize: 28 });
+                    },
+                },
+                content: {
+                    offsetY: 4,
+                    style: {
+                        fontSize: '32px',
+                    },
+                    customHtml: (container, view, datum, data) => {
+                        const { width } = container.getBoundingClientRect();
+
+                        const text = datum ? `¥ ${datum.value}` : `¥ ` + (data[0].value - data[1].value).toFixed(2);
                         return renderStatistic(width, text, { fontSize: 32 });
                     },
                 },

@@ -24,7 +24,7 @@ public class PrepaymentDTO {
 
     /** 还款金额 */
     @NotNull(message = "还款金额不能为空")
-    @Min(value = 1, message = "还款金额不能小于1万元")
+    @Min(value = 0, message = "还款金额不能小于0万元")
     private Integer repayment;
 
     /** 贷款利率 */

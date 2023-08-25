@@ -26,6 +26,9 @@ public class TotalLoan {
     /** 还款方式，1等额本息，2等额本金 */
     private Integer type;
 
+    /** 提前还款前原总利息 */
+    private BigDecimal originalTotalInterest;
+
     /** 总利息 */
     private BigDecimal totalInterest;
 
