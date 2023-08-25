@@ -658,8 +658,8 @@
                         type: 'text',
                         attrs: {
                             x: 0,
-                            y: 40,
-                            text: `¥${data.value}\n`+ (data.percent * 100).toFixed(2) +`%`,
+                            y: 25,
+                            text: `¥${data.value} / `+ (data.percent * 100).toFixed(2) +`%`,
                             fill: 'rgba(0, 0, 0, 0.65)',
                             fontWeight: 700,
                         },
@@ -746,8 +746,8 @@
                         type: 'text',
                         attrs: {
                             x: 0,
-                            y: 40,
-                            text: `¥${data.value}\n`+ (data.percent * 100).toFixed(2) +`%`,
+                            y: 25,
+                            text: `¥${data.value} / `+ (data.percent * 100).toFixed(2) +`%`,
                             fill: 'rgba(0, 0, 0, 0.65)',
                             fontWeight: 700,
                         },
@@ -795,7 +795,7 @@
             scale = Math.min(Math.sqrt(Math.abs(Math.pow(R, 2) / (Math.pow(textWidth / 2, 2) + Math.pow(textHeight, 2)))), 1);
         }
         const textStyleStr = `width:${containerWidth}px;`;
-        return `<div style="${textStyleStr};font-size:${scale}em;line-height:${scale < 1 ? 1 : 'inherit'};">${text}</div>`;
+        return `<div style="${textStyleStr};font-size:${scale}em;line-height:${scale < 1.2 ? 1.2 : 'inherit'};">${text}</div>`;
     }
 
     function addPrepayment() {
