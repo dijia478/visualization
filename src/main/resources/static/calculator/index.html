@@ -128,7 +128,7 @@
                 </div>
             </div>
 <!--            <div class="empty-2"></div>-->
-            <button id="addPrepaymentBtn" type="button" class="btn btn-secondary btn-sm btn-block" style="display:none">新增提前还款</button>
+            <button id="addPrepaymentBtn" type="button" class="btn btn-secondary btn-sm btn-block" style="display:none">新增提前还款计划</button>
             <button id="submit-btn" type="button" class="btn btn-primary btn-block">计算</button>
         </form>
     </div>
@@ -190,7 +190,6 @@
                     rate: $("#rate").val(),
                     year: $("#year").val(),
                     type: $("#type").val(),
-                    prepayment: prepayment,
                 }),
             }).done(function (response) {
                 if (response.code == 200) {
@@ -233,7 +232,6 @@
                     rate: $("#rate").val(),
                     year: $("#year").val(),
                     type: $("#type").val(),
-                    prepayment: prepayment,
                     prepaymentList: prepaymentList,
                 }),
             }).done(function (response) {
