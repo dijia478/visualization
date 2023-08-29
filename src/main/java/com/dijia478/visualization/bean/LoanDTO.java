@@ -1,7 +1,6 @@
 package com.dijia478.visualization.bean;
 
 import lombok.Data;
-import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;

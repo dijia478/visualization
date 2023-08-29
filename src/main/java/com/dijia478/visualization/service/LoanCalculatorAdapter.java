@@ -1,6 +1,9 @@
 package com.dijia478.visualization.service;
 
-import com.dijia478.visualization.bean.*;
+import com.dijia478.visualization.bean.LoanBO;
+import com.dijia478.visualization.bean.MonthLoan;
+import com.dijia478.visualization.bean.PrepaymentDTO;
+import com.dijia478.visualization.bean.TotalLoan;
 
 import java.util.List;
 

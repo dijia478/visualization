@@ -1,7 +1,10 @@
 package com.dijia478.visualization.service.impl;
 
 import cn.hutool.core.util.NumberUtil;
-import com.dijia478.visualization.bean.*;
+import com.dijia478.visualization.bean.LoanBO;
+import com.dijia478.visualization.bean.MonthLoan;
+import com.dijia478.visualization.bean.PrepaymentDTO;
+import com.dijia478.visualization.bean.TotalLoan;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
 import com.dijia478.visualization.util.LoanUtil;
