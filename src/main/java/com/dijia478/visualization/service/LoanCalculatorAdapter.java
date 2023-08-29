@@ -13,7 +13,7 @@ import java.util.List;
  * @author dijia478
  * @date 2023/8/21
  */
-public class LoanCalculatorAdapter implements LoanCalculator {
+public abstract class LoanCalculatorAdapter implements LoanCalculator {
 
     @Override
     public TotalLoan compute(LoanBO data) {

@@ -75,7 +75,7 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
             monthLoan.setRemainPrincipal(remainPrincipal);
             monthLoan.setRemainMonth(totalMonth.intValue() - i - 1);
 
-            totalRepayment = totalRepayment.add(monthLoan.getRepayment());
+            totalRepayment = NumberUtil.add(totalRepayment, monthLoan.getRepayment());
             monthLoan.setTotalRepayment(totalRepayment);
             monthLoan.setTotalPrincipal(totalPrincipal);
             monthLoan.setTotalInterest(totalInterest);
