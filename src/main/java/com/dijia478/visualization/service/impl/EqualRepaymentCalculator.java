@@ -35,12 +35,12 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
 
         // 月利率
         BigDecimal loanRateMonth = LoanUtil.loanRateMonth(loanRate);
-        // （1+月利率）^ 还款月数
-        BigDecimal factor = NumberUtil.add(loanRateMonth, 1).pow(totalMonth.intValue());
-        // 每月还款额 = [贷款本金 ×月利率 ×（1+月利率）^ 还款月数] ÷[（1+月利率）^ 还款月数－1]
-        BigDecimal repayment = NumberUtil.div(NumberUtil.mul(loanAmount, loanRateMonth, factor), NumberUtil.sub(factor, 1));
-        // 总还款额 = 每月还款额 ×贷款总期数
-        loan.setTotalRepayment(NumberUtil.mul(repayment, totalMonth));
+        // 月供
+        BigDecimal repayment = getRepayment(loanAmount, loanRateMonth, totalMonth);
+        // 总还款额
+        loan.setTotalRepayment(getTotalRepayment(repayment, totalMonth));
+        // 总利息
+        loan.setTotalInterest(getTotalInterest(loan.getTotalRepayment(), loanAmount));
 
         // 累积已还本金
         BigDecimal totalPrincipal = new BigDecimal("0");
@@ -49,8 +49,6 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
         // 累计已还总额
         BigDecimal totalRepayment = new BigDecimal("0");
 
-        // 剩余本金
-        BigDecimal remainPrincipal = new BigDecimal(loanAmount.toString());
         List<MonthLoan> monthLoanList = new ArrayList<>();
         int year = 0;
         int monthInYear = 0;
@@ -64,29 +62,128 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
                 monthInYear = 0;
             }
 
-            BigDecimal interest = NumberUtil.mul(remainPrincipal, loanRateMonth);
-            totalInterest = NumberUtil.add(totalInterest, interest);
-            BigDecimal principal = NumberUtil.sub(repayment, interest);
+            BigDecimal principal = getPrincipal(loanAmount, loanRateMonth, totalMonth, i + 1);
+            BigDecimal interest = getInterest(repayment, principal);
+            totalRepayment = NumberUtil.add(totalRepayment, repayment);
             totalPrincipal = NumberUtil.add(totalPrincipal, principal);
-            remainPrincipal = NumberUtil.sub(loanAmount, totalPrincipal);
-            monthLoan.setInterest(interest);
-            monthLoan.setPrincipal(principal);
+            totalInterest = NumberUtil.add(totalInterest, interest);
+            BigDecimal remainTotal = getRemainTotal(loan.getTotalRepayment(), totalRepayment);
+            BigDecimal remainPrincipal = getRemainPrincipal(loan.getLoanAmount(), loanRateMonth, repayment, i + 1);
+            BigDecimal remainInterest = getRemainInterest(loan.getTotalInterest(), totalInterest);
+
             monthLoan.setRepayment(repayment);
+            monthLoan.setPrincipal(principal);
+            monthLoan.setInterest(interest);
             monthLoan.setRemainPrincipal(remainPrincipal);
             monthLoan.setRemainMonth(totalMonth.intValue() - i - 1);
-
-            totalRepayment = NumberUtil.add(totalRepayment, monthLoan.getRepayment());
             monthLoan.setTotalRepayment(totalRepayment);
             monthLoan.setTotalPrincipal(totalPrincipal);
             monthLoan.setTotalInterest(totalInterest);
             monthLoan.setTotalRepaymentAndRemainPrincipal(NumberUtil.add(totalRepayment, remainPrincipal));
-            monthLoan.setRemainTotal(NumberUtil.sub(loan.getTotalRepayment(), totalRepayment));
-            monthLoan.setRemainInterest(NumberUtil.sub(monthLoan.getRemainTotal(), monthLoan.getRemainPrincipal()));
+            monthLoan.setRemainTotal(remainTotal);
+            monthLoan.setRemainInterest(remainInterest);
             monthLoanList.add(monthLoan);
         }
-        loan.setTotalInterest(totalInterest);
         loan.setMonthLoanList(monthLoanList);
         return loan;
+    }
+
+    /**
+     * 获取月供
+     *
+     * @param p 本金
+     * @param i 月利率
+     * @param n 贷款期数
+     * @return 月供
+     */
+    private BigDecimal getRepayment(BigDecimal p, BigDecimal i, BigDecimal n) {
+        BigDecimal b1 = NumberUtil.add(i, BigDecimal.ONE).pow(n.intValue());
+        return NumberUtil.div(NumberUtil.mul(p, i, b1), NumberUtil.sub(b1, BigDecimal.ONE));
+    }
+
+    /**
+     * 获取月供中本金
+     *
+     * @param p 本金
+     * @param i 月利率
+     * @param n 贷款期数
+     * @param k 当前期数
+     * @return 月供中本金
+     */
+    private BigDecimal getPrincipal(BigDecimal p, BigDecimal i, BigDecimal n, Integer k) {
+        BigDecimal b1 = NumberUtil.add(i, BigDecimal.ONE).pow(n.intValue());
+        BigDecimal b2 = NumberUtil.add(i, BigDecimal.ONE).pow(k - 1);
+        return NumberUtil.div(NumberUtil.mul(p, i, b2), NumberUtil.sub(b1, BigDecimal.ONE));
+    }
+
+    /**
+     * 获取月供中利息
+     *
+     * @param m 月供
+     * @param mp 月供中本金
+     * @return 月供中利息
+     */
+    private BigDecimal getInterest(BigDecimal m, BigDecimal mp) {
+        return NumberUtil.sub(m, mp);
+    }
+
+    /**
+     * 获取总还款额
+     *
+     * @param n 贷款期数
+     * @param m 月供
+     * @return 总还款额
+     */
+    private BigDecimal getTotalRepayment(BigDecimal n, BigDecimal m) {
+        return NumberUtil.mul(n, m);
+    }
+
+    /**
+     * 获取总利息
+     *
+     * @param t 总还款额
+     * @param p 本金
+     * @return 总利息
+     */
+    private BigDecimal getTotalInterest(BigDecimal t, BigDecimal p) {
+        return NumberUtil.sub(t, p);
+    }
+
+    /**
+     * 获取月供后剩余贷款
+     *
+     * @param t 总还款额
+     * @param totalRepayment 累计已还总额
+     * @return 月供后剩余贷款
+     */
+    private BigDecimal getRemainTotal(BigDecimal t, BigDecimal totalRepayment) {
+        return NumberUtil.sub(t, totalRepayment);
+    }
+
+    /**
+     * 获取月供后剩余本金
+     *
+     * @param p 本金
+     * @param i 月利率
+     * @param m 月供
+     * @param k 当前期数
+     * @return 月供后剩余本金
+     */
+    private BigDecimal getRemainPrincipal(BigDecimal p, BigDecimal i, BigDecimal m, Integer k) {
+        BigDecimal b1 = NumberUtil.add(i, BigDecimal.ONE).pow(k);
+        BigDecimal b2 = NumberUtil.div(m, i);
+        return NumberUtil.add(NumberUtil.mul(b1, NumberUtil.sub(p, b2)), b2);
+    }
+
+    /**
+     * 获取月供后剩余利息
+     *
+     * @param ti 总利息
+     * @param totalInterest 累计已还利息
+     * @return 月供后剩余利息
+     */
+    private BigDecimal getRemainInterest(BigDecimal ti, BigDecimal totalInterest) {
+        return NumberUtil.sub(ti, totalInterest);
     }
 
     @Override
