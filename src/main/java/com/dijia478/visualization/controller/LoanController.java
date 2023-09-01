@@ -2,7 +2,6 @@ package com.dijia478.visualization.controller;
 
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculator;
-import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
