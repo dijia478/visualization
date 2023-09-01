@@ -23,6 +23,8 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -89,9 +91,6 @@ public class ExceptionControllerAdvice {
         StringBuilder msg = new StringBuilder();
         for (ObjectError error : bindingResult.getAllErrors()) {
             msg.append(", ");
-            // if (error instanceof FieldError) {
-            //     msg.append(((FieldError)error).getField()).append(":");
-            // }
             msg.append(error.getDefaultMessage() == null ? "" : error.getDefaultMessage());
         }
 
@@ -110,6 +109,7 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(LoanException.class)
     public BaseResponse<String> LoanException(LoanException e) {
         log.error("", e);
+        ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest()
         BaseResponse<String> response = new BaseResponse<>(e.getResultEnum());
         // 进行国际化转换
         // i18nUtil.responseToI18n(response);

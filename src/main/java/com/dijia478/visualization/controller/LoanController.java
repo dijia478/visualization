@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 /**
@@ -39,13 +41,13 @@ public class LoanController {
     @PostMapping("/calculator/loanCalculator")
     public TotalLoan loanCalculator(@RequestBody @Validated LoanDTO data) {
         TotalLoan totalLoan;
-        LoanBO loanBO = LoanUtil.convertParam(data);
+        LoanBO loanBO = convertParam(data);
         if (data.getType() == 1) {
             totalLoan = equalRepaymentCalculator.compute(loanBO);
         } else {
             totalLoan = equalPrincipalCalculator.compute(loanBO);
         }
-        LoanUtil.setScale(totalLoan);
+        setScale(totalLoan);
         return totalLoan;
     }
 
@@ -58,10 +60,51 @@ public class LoanController {
     @PostMapping("/calculator/prepaymentCalculator")
     public TotalLoan prepaymentCalculator(@RequestBody @Validated LoanDTO data) {
         validatedPrepayment(data);
-        LoanBO loanBO = LoanUtil.convertParam(data);
+        LoanBO loanBO = convertParam(data);
         TotalLoan totalLoan = prepaymentCalculator.compute(loanBO);
-        LoanUtil.setScale(totalLoan);
+        setScale(totalLoan);
         return totalLoan;
+    }
+
+    /**
+     * 参数转换
+     *
+     * @param data
+     * @return
+     */
+    public LoanBO convertParam(LoanDTO data) {
+        return LoanBO.builder()
+                .amount(equalRepaymentCalculator.totalLoan(new BigDecimal(data.getAmount().toString())))
+                .month(equalRepaymentCalculator.totalMonth(new BigDecimal(data.getYear().toString())))
+                .rate(new BigDecimal(data.getRate().toString()))
+                .type(data.getType())
+                .prepaymentList(data.getPrepaymentList())
+                .build();
+    }
+
+    /**
+     * 对最终结果进行四舍五入保留两位小数，用于给前端展示
+     *
+     * @param totalLoan
+     */
+    public void setScale(TotalLoan totalLoan) {
+        if (totalLoan.getOriginalTotalInterest() != null) {
+            totalLoan.setOriginalTotalInterest(totalLoan.getOriginalTotalInterest().setScale(2, RoundingMode.HALF_UP));
+        }
+        totalLoan.setTotalInterest(totalLoan.getTotalInterest().setScale(2, RoundingMode.HALF_UP));
+        totalLoan.setTotalRepayment(totalLoan.getTotalRepayment().setScale(2, RoundingMode.HALF_UP));
+        for (MonthLoan monthLoan : totalLoan.getMonthLoanList()) {
+            monthLoan.setRepayment(monthLoan.getRepayment().setScale(2, RoundingMode.HALF_UP));
+            monthLoan.setPrincipal(monthLoan.getPrincipal().setScale(2, RoundingMode.HALF_UP));
+            monthLoan.setInterest(monthLoan.getInterest().setScale(2, RoundingMode.HALF_UP));
+            monthLoan.setRemainTotal(monthLoan.getRemainTotal().setScale(2, RoundingMode.HALF_UP));
+            monthLoan.setRemainInterest(monthLoan.getRemainInterest().setScale(2, RoundingMode.HALF_UP));
+            monthLoan.setRemainPrincipal(monthLoan.getRemainPrincipal().setScale(2, RoundingMode.HALF_UP));
+            monthLoan.setTotalRepayment(monthLoan.getTotalRepayment().setScale(2, RoundingMode.HALF_UP));
+            monthLoan.setTotalPrincipal(monthLoan.getTotalPrincipal().setScale(2, RoundingMode.HALF_UP));
+            monthLoan.setTotalInterest(monthLoan.getTotalInterest().setScale(2, RoundingMode.HALF_UP));
+            monthLoan.setTotalRepaymentAndRemainPrincipal(monthLoan.getTotalRepaymentAndRemainPrincipal().setScale(2, RoundingMode.HALF_UP));
+        }
     }
 
     /**

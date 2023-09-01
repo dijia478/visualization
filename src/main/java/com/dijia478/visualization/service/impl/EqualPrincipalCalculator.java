@@ -4,7 +4,6 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
-import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -34,11 +33,11 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
         loan.setType(type);
 
         // 月利率
-        BigDecimal loanRateMonth = LoanUtil.loanRateMonth(loanRate);
+        BigDecimal monthRate = monthRate(loanRate);
         // 月供中本金
         BigDecimal principal = getPrincipal(loanAmount, totalMonth);
         // 总利息
-        loan.setTotalInterest(getTotalInterest(loanAmount, loanRateMonth, totalMonth));
+        loan.setTotalInterest(getTotalInterest(loanAmount, monthRate, totalMonth));
         // 总还款额
         loan.setTotalRepayment(getTotalRepayment(loanAmount, loan.getTotalInterest()));
 
@@ -62,7 +61,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
                 monthInYear = 0;
             }
 
-            BigDecimal interest = getInterest(loanAmount, loanRateMonth, totalMonth, i + 1);
+            BigDecimal interest = getInterest(loanAmount, monthRate, totalMonth, i + 1);
             BigDecimal repayment = getRepayment(principal, interest);
             totalRepayment = NumberUtil.add(totalRepayment, repayment);
             totalPrincipal = NumberUtil.add(totalPrincipal, principal);
@@ -188,7 +187,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
     @Override
     public TotalLoan computePrepayment(List<MonthLoan> monthLoanList, PrepaymentDTO prepaymentDTO) {
         BigDecimal repayment = new BigDecimal(prepaymentDTO.getRepayment().toString());
-        repayment = LoanUtil.totalLoan(repayment);
+        repayment = totalLoan(repayment);
         BigDecimal newRate = prepaymentDTO.getNewRate();
         Integer prepaymentMonth = prepaymentDTO.getPrepaymentMonth();
         Integer repaymentType = prepaymentDTO.getRepaymentType();

@@ -7,7 +7,6 @@ import com.dijia478.visualization.bean.PrepaymentDTO;
 import com.dijia478.visualization.bean.TotalLoan;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
-import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -68,7 +67,7 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
             }
         }
 
-        Map<Integer, BigDecimal> collect = prepaymentList.stream().collect(Collectors.toMap(p -> p.getPrepaymentMonth() - 1, p -> LoanUtil.totalLoan(new BigDecimal(p.getRepayment().toString())), (a, b) -> a));
+        Map<Integer, BigDecimal> collect = prepaymentList.stream().collect(Collectors.toMap(p -> p.getPrepaymentMonth() - 1, p -> totalLoan(new BigDecimal(p.getRepayment().toString())), (a, b) -> a));
         Set<Integer> keySet = collect.keySet();
         BigDecimal totalRepayment = new BigDecimal("0");
         BigDecimal totalPrincipal = new BigDecimal("0");

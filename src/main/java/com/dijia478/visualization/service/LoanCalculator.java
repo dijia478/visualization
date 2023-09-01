@@ -5,6 +5,7 @@ import com.dijia478.visualization.bean.MonthLoan;
 import com.dijia478.visualization.bean.PrepaymentDTO;
 import com.dijia478.visualization.bean.TotalLoan;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -31,5 +32,29 @@ public interface LoanCalculator {
      * @return
      */
     TotalLoan computePrepayment(List<MonthLoan> monthLoanList, PrepaymentDTO prepaymentDTO);
+
+    /**
+     * 根据年利率获取月利率
+     *
+     * @param loanRate
+     * @return
+     */
+    BigDecimal monthRate(BigDecimal loanRate);
+
+    /**
+     * 将贷款总额（万元）单位转成（元）
+     *
+     * @param loanAmount
+     * @return
+     */
+    BigDecimal totalLoan(BigDecimal loanAmount);
+
+    /**
+     * 根据贷款年限获取贷款总期数
+     *
+     * @param year
+     * @return
+     */
+    BigDecimal totalMonth(BigDecimal year);
 
 }

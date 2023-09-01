@@ -4,7 +4,6 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
-import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -34,9 +33,9 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
         loan.setType(type);
 
         // 月利率
-        BigDecimal loanRateMonth = LoanUtil.loanRateMonth(loanRate);
+        BigDecimal monthRate = monthRate(loanRate);
         // 月供
-        BigDecimal repayment = getRepayment(loanAmount, loanRateMonth, totalMonth);
+        BigDecimal repayment = getRepayment(loanAmount, monthRate, totalMonth);
         // 总还款额
         loan.setTotalRepayment(getTotalRepayment(repayment, totalMonth));
         // 总利息
@@ -62,13 +61,13 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
                 monthInYear = 0;
             }
 
-            BigDecimal principal = getPrincipal(loanAmount, loanRateMonth, totalMonth, i + 1);
+            BigDecimal principal = getPrincipal(loanAmount, monthRate, totalMonth, i + 1);
             BigDecimal interest = getInterest(repayment, principal);
             totalRepayment = NumberUtil.add(totalRepayment, repayment);
             totalPrincipal = NumberUtil.add(totalPrincipal, principal);
             totalInterest = NumberUtil.add(totalInterest, interest);
             BigDecimal remainTotal = getRemainTotal(loan.getTotalRepayment(), totalRepayment);
-            BigDecimal remainPrincipal = getRemainPrincipal(loan.getLoanAmount(), loanRateMonth, repayment, i + 1);
+            BigDecimal remainPrincipal = getRemainPrincipal(loan.getLoanAmount(), monthRate, repayment, i + 1);
             BigDecimal remainInterest = getRemainInterest(loan.getTotalInterest(), totalInterest);
 
             monthLoan.setRepayment(repayment);
@@ -189,7 +188,7 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
     @Override
     public TotalLoan computePrepayment(List<MonthLoan> monthLoanList, PrepaymentDTO prepaymentDTO) {
         BigDecimal repayment = new BigDecimal(prepaymentDTO.getRepayment().toString());
-        repayment = LoanUtil.totalLoan(repayment);
+        repayment = totalLoan(repayment);
         BigDecimal newRate = prepaymentDTO.getNewRate();
         Integer prepaymentMonth = prepaymentDTO.getPrepaymentMonth();
         Integer repaymentType = prepaymentDTO.getRepaymentType();
@@ -204,11 +203,11 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
         if (repaymentType == 1) {
             // 月供不变，期限缩短
             // 月利率
-            BigDecimal loanRateMonth = LoanUtil.loanRateMonth(newRate);
+            BigDecimal monthRate = monthRate(newRate);
             // ln（原月供 / （原月供 - 剩余本金 × 月利率））
-            double numerator = Math.log(NumberUtil.div(lastMonthLoan.getRepayment(), NumberUtil.sub(lastMonthLoan.getRepayment(), NumberUtil.mul(remainPrincipal, loanRateMonth)), DEFAULT_SCALE).doubleValue());
+            double numerator = Math.log(NumberUtil.div(lastMonthLoan.getRepayment(), NumberUtil.sub(lastMonthLoan.getRepayment(), NumberUtil.mul(remainPrincipal, monthRate)), DEFAULT_SCALE).doubleValue());
             // 新贷款期限 = numerator / ln（月利率 + 1）
-            double totalMonth = NumberUtil.div(numerator, Math.log(NumberUtil.add(loanRateMonth, 1).doubleValue()), DEFAULT_SCALE);
+            double totalMonth = NumberUtil.div(numerator, Math.log(NumberUtil.add(monthRate, 1).doubleValue()), DEFAULT_SCALE);
             totalMonth = Math.ceil(totalMonth);
             LoanBO loanBO = LoanBO.builder()
                     .amount(remainPrincipal)

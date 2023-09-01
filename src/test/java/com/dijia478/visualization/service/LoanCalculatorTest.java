@@ -4,8 +4,10 @@ import com.dijia478.visualization.bean.LoanBO;
 import com.dijia478.visualization.bean.LoanDTO;
 import com.dijia478.visualization.bean.MonthLoan;
 import com.dijia478.visualization.bean.TotalLoan;
+import com.dijia478.visualization.controller.LoanController;
 import com.dijia478.visualization.util.LoanUtil;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
@@ -21,6 +23,9 @@ class LoanCalculatorTest {
     @Resource(name = "equalPrincipalCalculator")
     private LoanCalculator equalPrincipalCalculator;
 
+    @Autowired
+    private LoanController loanController;
+
     @Test
     void compute1() {
         LoanDTO data = new LoanDTO();
@@ -28,9 +33,9 @@ class LoanCalculatorTest {
         data.setYear(30);
         data.setRate(4.0);
         data.setType(1);
-        LoanBO loanBO = LoanUtil.convertParam(data);
+        LoanBO loanBO = loanController.convertParam(data);
         TotalLoan compute = equalRepaymentCalculator.compute(loanBO);
-        LoanUtil.setScale(compute);
+        loanController.setScale(compute);
         MonthLoan monthLoan = compute.getMonthLoanList().get(compute.getMonthLoanList().size() - 1);
         System.out.println(compute);
         System.out.println(monthLoan);
@@ -43,9 +48,9 @@ class LoanCalculatorTest {
         data.setYear(30);
         data.setRate(4.0);
         data.setType(2);
-        LoanBO loanBO = LoanUtil.convertParam(data);
+        LoanBO loanBO = loanController.convertParam(data);
         TotalLoan compute = equalPrincipalCalculator.compute(loanBO);
-        LoanUtil.setScale(compute);
+        loanController.setScale(compute);
         MonthLoan monthLoan = compute.getMonthLoanList().get(compute.getMonthLoanList().size() - 1);
         System.out.println(compute);
         System.out.println(monthLoan);
