@@ -15,6 +15,8 @@ import java.util.List;
  */
 public abstract class LoanCalculatorAdapter implements LoanCalculator {
 
+    protected static final int DEFAULT_SCALE = 100;
+
     @Override
     public TotalLoan compute(LoanBO data) {
         return null;

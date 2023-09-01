@@ -98,7 +98,7 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
      */
     private BigDecimal getRepayment(BigDecimal p, BigDecimal i, BigDecimal n) {
         BigDecimal b1 = NumberUtil.add(i, BigDecimal.ONE).pow(n.intValue());
-        return NumberUtil.div(NumberUtil.mul(p, i, b1), NumberUtil.sub(b1, BigDecimal.ONE));
+        return NumberUtil.div(NumberUtil.mul(p, i, b1), NumberUtil.sub(b1, BigDecimal.ONE), DEFAULT_SCALE);
     }
 
     /**
@@ -113,7 +113,7 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
     private BigDecimal getPrincipal(BigDecimal p, BigDecimal i, BigDecimal n, Integer k) {
         BigDecimal b1 = NumberUtil.add(i, BigDecimal.ONE).pow(n.intValue());
         BigDecimal b2 = NumberUtil.add(i, BigDecimal.ONE).pow(k - 1);
-        return NumberUtil.div(NumberUtil.mul(p, i, b2), NumberUtil.sub(b1, BigDecimal.ONE));
+        return NumberUtil.div(NumberUtil.mul(p, i, b2), NumberUtil.sub(b1, BigDecimal.ONE), DEFAULT_SCALE);
     }
 
     /**
@@ -171,7 +171,7 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
      */
     private BigDecimal getRemainPrincipal(BigDecimal p, BigDecimal i, BigDecimal m, Integer k) {
         BigDecimal b1 = NumberUtil.add(i, BigDecimal.ONE).pow(k);
-        BigDecimal b2 = NumberUtil.div(m, i);
+        BigDecimal b2 = NumberUtil.div(m, i, DEFAULT_SCALE);
         return NumberUtil.add(NumberUtil.mul(b1, NumberUtil.sub(p, b2)), b2);
     }
 
@@ -206,9 +206,9 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
             // 月利率
             BigDecimal loanRateMonth = LoanUtil.loanRateMonth(newRate);
             // ln（原月供 / （原月供 - 剩余本金 × 月利率））
-            double numerator = Math.log(NumberUtil.div(lastMonthLoan.getRepayment(), NumberUtil.sub(lastMonthLoan.getRepayment(), NumberUtil.mul(remainPrincipal, loanRateMonth))).doubleValue());
+            double numerator = Math.log(NumberUtil.div(lastMonthLoan.getRepayment(), NumberUtil.sub(lastMonthLoan.getRepayment(), NumberUtil.mul(remainPrincipal, loanRateMonth)), DEFAULT_SCALE).doubleValue());
             // 新贷款期限 = numerator / ln（月利率 + 1）
-            double totalMonth = NumberUtil.div(numerator, Math.log(NumberUtil.add(loanRateMonth, 1).doubleValue()));
+            double totalMonth = NumberUtil.div(numerator, Math.log(NumberUtil.add(loanRateMonth, 1).doubleValue()), DEFAULT_SCALE);
             totalMonth = Math.ceil(totalMonth);
             LoanBO loanBO = LoanBO.builder()
                     .amount(remainPrincipal)
