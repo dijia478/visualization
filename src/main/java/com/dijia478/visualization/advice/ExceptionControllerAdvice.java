@@ -109,7 +109,6 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(LoanException.class)
     public BaseResponse<String> LoanException(LoanException e) {
         log.error("", e);
-        ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest()
         BaseResponse<String> response = new BaseResponse<>(e.getResultEnum());
         // 进行国际化转换
         // i18nUtil.responseToI18n(response);
