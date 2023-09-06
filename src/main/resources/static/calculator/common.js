@@ -196,6 +196,17 @@ function drawPicture1(response, prepaymentList) {
                 },
             ],
         },
+        interaction: {
+            // 是否开启复制
+            enableCopy: true,
+            copyWithHeader: true,
+            // 圈选复制前，需要开启圈选功能
+            brushSelection: {
+                data: true, // 默认开启
+                row: true,
+                col: true,
+            }
+        }
     };
     const s2 = new TableSheet(container, s2DataConfig, s2Options);
     s2.render();
