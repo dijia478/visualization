@@ -1,0 +1,25 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: visualization
+  messages:
+    encoding: UTF-8
+    basename: i18n/messages
+
+# 日志配置文件路径
+logging:
+  config: config/log4j2.xml
+
+# 优雅停机
+management:
+  server:
+    port: 8081
+    address: 127.0.0.1
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    shutdown:
+      enabled: true
