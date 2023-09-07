@@ -83,7 +83,7 @@ public class ExceptionControllerAdvice {
      */
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
     public BaseResponse<String> bindException(BindException e) {
-        log.error("", e);
+        // log.error("", e.getFieldError());
         // 将所有参数校验绑定错误返回
         BindingResult bindingResult = e.getBindingResult();
         StringBuilder msg = new StringBuilder();
@@ -93,6 +93,7 @@ public class ExceptionControllerAdvice {
         }
 
         BaseResponse<String> response = new BaseResponse<>(ResultEnum.VALIDATE_ERR, msg.substring(2));
+        log.warn("{}", msg.substring(2));
         // 进行国际化转换
         // i18nUtil.responseToI18n(response);
         return response;
