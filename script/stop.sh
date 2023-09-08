@@ -16,7 +16,7 @@ function soft_stop() {
     local pid=$(ps -ef | grep -i "${PACKAGE_NAME}" | grep -v grep | awk '{ print $2 }')
     if [ "x${pid}" != "x" ] 
     then 
-        [[ "x${MANAGEMENT_PORT}" != "x" ]] && curl -X POST -m "${MAX_TIME}" "http://127.0.0.1:${MANAGEMENT_PORT}/shutdown"
+        [[ "x${MANAGEMENT_PORT}" != "x" ]] && curl -X POST -m "${MAX_TIME}" "http://127.0.0.1:${MANAGEMENT_PORT}/actuator/shutdown"
     else 
         echo "process has been shutdown"
     fi 

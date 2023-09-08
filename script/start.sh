@@ -61,7 +61,7 @@ function archive_gc_logs() {
     then 
         local time=$(date +%Y%m%d%H%M%S)
         cd ${BASE_DIR}/logs &>/dev/null
-        tar -cjvf "gc.log.${time}.tar.bz2" gc.log
+        tar -czvf "gc.log.${time}.tar.gz" gc.log
         echo -n "" > "${BASE_DIR}/logs/gc.log"
         cd - &>/dev/null
     fi
