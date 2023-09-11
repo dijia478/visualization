@@ -17,6 +17,7 @@
             <directory>script</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
+                <include>monitor.sh</include>
                 <include>start.sh</include>
                 <include>stop.sh</include>
                 <include>restart.sh</include>
