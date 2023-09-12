@@ -23,7 +23,7 @@ public class LoanWebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new RequestInterceptor())
                 .addPathPatterns("/**")
                 .excludePathPatterns("/calculator/input.css",
-                        "/calculator/common.js",
+                        "/calculator/index.js",
                         "/calculator/QR_code.png");
     }
 
