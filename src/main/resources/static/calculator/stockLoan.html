@@ -13,7 +13,10 @@
     <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/lodash.js/4.17.21/lodash.min.js" type="application/javascript"></script>
 
     <script type="text/javascript" src="js/common.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" type="text/css" href="css/stockLoan.css">
+
+    <link rel="stylesheet" href="css/datepicker.css">
+
     <script>
         const {Line} = G2Plot;
         const {Bar} = G2Plot;
@@ -29,7 +32,7 @@
     <div class="bs-form">
         <form id="form1">
             <div class="form-group row">
-                <label for="amount" class="col-sm-2 col-form-label">贷款金额</label>
+                <label for="amount" class="col-sm col-form-label">贷款金额</label>
                 <div class="input-group mb-3 col-sm-10">
                     <input type="text" class="form-control" id="amount" name="amount" placeholder="例如：100，即贷款100万元" required>
                     <div class="input-group-append">
@@ -38,7 +41,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="year" class="col-sm-2 col-form-label">贷款期限</label>
+                <label for="year" class="col-sm col-form-label">贷款期限</label>
                 <div class="input-group mb-3 col-sm-10">
                     <input type="text" class="form-control" id="year" name="year" placeholder="例如：30，即分30年（360期）还清" required>
                     <div class="input-group-append">
@@ -47,7 +50,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="rate" class="col-sm-2 col-form-label">贷款利率</label>
+                <label for="rate" class="col-sm col-form-label">贷款利率</label>
                 <div class="input-group mb-3 col-sm-10">
                     <input type="text" class="form-control" id="rate" name="rate" placeholder="例如：4.2，即年化利率4.2%" required>
                     <div class="input-group-append">
@@ -56,7 +59,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="type" class="col-sm-2 col-form-label">还款方式</label>
+                <label for="type" class="col-sm col-form-label">还款方式</label>
                 <div class="input-group mb-3 col-sm-10">
                     <select class="form-control" id="type" name="type">
                         <option value="1">等额本息</option>
@@ -64,8 +67,19 @@
                     </select>
                 </div>
             </div>
+            <div class="form-group row">
+                <label for="type" class="col-sm col-form-label">第一次还款日</label>
+                <div class="input-group mb-3 col-sm-10">
+                    <div class="mt40">
+                        <div class="c-datepicker-date-editor c-datepicker-single-editor J-datepicker-day mt10">
+                            <i class="c-datepicker-range__icon kxiconfont icon-clock"></i>
+                            <input type="text" autocomplete="off" name="" placeholder="选择日期" class=" c-datepicker-data-input only-date" value="">
+                        </div>
+                    </div>
+                </div>
+            </div>
             <fieldset class="form-group row">
-                <legend class="col-form-label col-sm-2 float-sm-left pt-0">提前还款</legend>
+                <legend class="col-form-label col-sm float-sm-left pt-0">提前还款</legend>
                 <div class="col-sm-10">
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="prepayment" id="prepayment1" value="0" checked>
@@ -83,7 +97,7 @@
 <!--                </button>-->
                 <div class="card-body">
                     <div class="form-group row">
-                        <label for="prepaymentMonth" class="col-sm-2 col-form-label">还款期数</label>
+                        <label for="prepaymentMonth" class="col-sm col-form-label">还款期数</label>
                         <div class="input-group mb-3 col-sm-10">
                             <input type="text" class="form-control" id="prepaymentMonth" name="prepaymentMonth" placeholder="例如：13，即在第12期还完后，第13期之前进行提前还款">
                             <div class="input-group-append">
@@ -92,7 +106,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="repayment" class="col-sm-2 col-form-label">还款金额</label>
+                        <label for="repayment" class="col-sm col-form-label">还款金额</label>
                         <div class="input-group mb-3 col-sm-10">
                             <input type="text" class="form-control" id="repayment" name="repayment" placeholder="例如：10，即提前还款10万元">
                             <div class="input-group-append">
@@ -101,7 +115,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="repayment" class="col-sm-2 col-form-label">新贷款利率</label>
+                        <label for="repayment" class="col-sm col-form-label">新贷款利率</label>
                         <div class="input-group mb-3 col-sm-10">
                             <input type="text" class="form-control" id="newRate" name="newRate" placeholder="如：4.2，即年化利率4.2%">
                             <div class="input-group-append">
@@ -110,7 +124,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="newType" class="col-sm-2 col-form-label">新还款方式</label>
+                        <label for="newType" class="col-sm col-form-label">新还款方式</label>
                         <div class="input-group mb-3 col-sm-10">
                             <select class="form-control" id="newType" name="newType">
                                 <option value="1">等额本息</option>
@@ -119,7 +133,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="repaymentType" class="col-sm-2 col-form-label">还款方案</label>
+                        <label for="repaymentType" class="col-sm col-form-label">还款方案</label>
                         <div class="input-group mb-3 col-sm-10">
                             <select class="form-control" id="repaymentType" name="repaymentType">
                                 <option value="1">缩短还款期限，月还款额基本不变</option>
@@ -129,7 +143,7 @@
                     </div>
                 </div>
             </div>
-<!--            <div class="empty-2"></div>-->
+<!--            <div class="empty"></div>-->
             <button id="addPrepaymentBtn" type="button" class="btn btn-secondary btn-sm btn-block" style="display:none">新增提前还款计划</button>
             <button id="submit-btn" type="button" class="btn btn-primary btn-block">计算</button>
         </form>
@@ -160,7 +174,109 @@
     <img src="QR_code.png" class="rounded mx-auto d-block" >
     <div class="empty-5"></div>
 </div>
+
+<script src="js/moment.min.js"></script>
+<script src="js/datepicker.all.min.js"></script>
+
 <script>
+    $(function(){
+
+        var DATAPICKERAPI = {
+            // 默认input显示当前月,自己获取后填充
+            activeMonthRange: function () {
+                return {
+                    begin: moment().set({ 'date': 1, 'hour': 0, 'minute': 0, 'second': 0 }).format('YYYY-MM-DD HH:mm:ss'),
+                    end: moment().set({ 'hour': 23, 'minute': 59, 'second': 59 }).format('YYYY-MM-DD HH:mm:ss')
+                }
+            },
+            shortcutMonth: function () {
+                // 当月
+                var nowDay = moment().get('date');
+                var prevMonthFirstDay = moment().subtract(1, 'months').set({ 'date': 1 });
+                var prevMonthDay = moment().diff(prevMonthFirstDay, 'days');
+                return {
+                    now: '-' + nowDay + ',0',
+                    prev: '-' + prevMonthDay + ',-' + nowDay
+                }
+            },
+            // 近n小时计算返回
+            shortcutPrevHours: function (hour) {
+                var nowDay = moment().get('date');
+                var prevHours = moment().subtract(hour, 'hours');
+                var prevDate=prevHours.get('date')- nowDay;
+                var nowTime=moment().format('HH:mm:ss');
+                var prevTime = prevHours.format('HH:mm:ss');
+                return {
+                    day: prevDate + ',0',
+                    time: prevTime+',' + nowTime,
+                    name: '近'+ hour+'小时'
+                }
+            },
+            // 注意为函数：快捷选项option:只能同一个月份内的
+            rangeMonthShortcutOption1: function () {
+                var result = DATAPICKERAPI.shortcutMonth();
+                // 近18小时
+                var resultTime= DATAPICKERAPI.shortcutPrevHours(18);
+                return [{
+                    name: '昨天',
+                    day: '-1,-1',
+                    time: '00:00:00,23:59:59'
+                }, {
+                    name: '这一月',
+                    day: result.now,
+                    time: '00:00:00,'
+                }, {
+                    name: '上一月',
+                    day: result.prev,
+                    time: '00:00:00,23:59:59'
+                }, {
+                    name: resultTime.name,
+                    day: resultTime.day,
+                    time: resultTime.time
+                }];
+            },
+            // 快捷选项option
+            rangeShortcutOption1: [{
+                name: '最近一周',
+                day: '-7,0'
+            }, {
+                name: '最近一个月',
+                day: '-30,0'
+            }, {
+                name: '最近三个月',
+                day: '-90, 0'
+            }],
+            singleShortcutOptions1: [{
+                name: '今天',
+                day: '0',
+                time: '00:00:00'
+            }, {
+                name: '昨天',
+                day: '-1',
+                time: '00:00:00'
+            }, {
+                name: '一周前',
+                day: '-7'
+            }]
+        };
+
+        //年月日单个
+        $('.J-datepicker-day').datePicker({
+            hasShortcut: true,
+            format:'YYYY-MM-DD',
+            shortcutOptions: [{
+                name: '今天',
+                day: '0'
+            }, {
+                name: '昨天',
+                day: '-1'
+            }, {
+                name: '一周前',
+                day: '-7'
+            }]
+        });
+    });
+
     // 校验主表参数
     validated();
     validatedPrepayment();
