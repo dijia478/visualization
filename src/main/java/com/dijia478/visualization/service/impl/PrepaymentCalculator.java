@@ -1,5 +1,6 @@
 package com.dijia478.visualization.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.dijia478.visualization.bean.LoanBO;
 import com.dijia478.visualization.bean.MonthLoan;
@@ -8,6 +9,7 @@ import com.dijia478.visualization.bean.TotalLoan;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;

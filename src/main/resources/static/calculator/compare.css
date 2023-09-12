@@ -7,6 +7,9 @@ body {
     border-width: 0.2rem;
     margin: auto;
 }
+h3 {
+    padding: 1rem;
+}
 
 .input-group-append {
     display: inline-block;
