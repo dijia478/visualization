@@ -10,40 +10,9 @@ function sendRequest() {
         $('#container7').html("");
 
         let prepayment = $('input[name="prepayment"]:checked').val();
-        if (prepayment == 0) {
-            const prepaymentList = []
-            // ajax提交
-            $.ajax({
-                method: 'POST',
-                url: '/calculator/loanCalculator',
-                dataType: 'json',
-                contentType: 'application/json;charset=UTF-8',
-                data: JSON.stringify({
-                    amount: $("#amount").val(),
-                    rate: $("#rate").val(),
-                    year: $("#year").val(),
-                    type: $("#type").val(),
-                }),
-            }).done(function (response) {
-                if (response.code == 200) {
-                    // 数据提交成功后处理返回结果
-                    drawPicture6(response);
-                    drawPicture345(response);
-                    drawPicture2(response);
-                    drawPicture1(response, prepaymentList);
-                } else if (response.code == 602) {
-                    // 数据提交失败后处理
-                    $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
-                } else {
-                    $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+response.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
-                }
-            }).fail(function (xhr, status) {
-                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+status+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
-            });
-        } else {
-            // 有提前还款的提交
+        const prepaymentList = [];
+        if (prepayment === "1") {
             const prepaymentElements = document.getElementsByName('prepayment-template');
-            const prepaymentList = [];
             for (let i = 0; i < prepaymentElements.length; i++) {
                 const element = prepaymentElements[i];
                 const prepayment = {
@@ -55,38 +24,41 @@ function sendRequest() {
                 };
                 prepaymentList.push(prepayment);
             }
-            $.ajax({
-                method: 'POST',
-                url: '/calculator/prepaymentCalculator',
-                dataType: 'json',
-                contentType: 'application/json;charset=UTF-8',
-                data: JSON.stringify({
-                    amount: $("#amount").val(),
-                    rate: $("#rate").val(),
-                    year: $("#year").val(),
-                    type: $("#type").val(),
-                    prepaymentList: prepaymentList,
-                }),
-            }).done(function (response) {
-                if (response.code == 200) {
-                    // 数据提交成功后处理返回结果
-                    drawPicture7(response);
-                    drawPicture6(response);
-                    drawPicture345(response);
-                    drawPicture2(response);
-                    drawPicture1(response, prepaymentList);
-                } else if (response.code == 602) {
-                    // 数据提交失败后处理
-                    $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
-                } else if (response.code > 700) {
-                    $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
-                } else {
-                    $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+response.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
-                }
-            }).fail(function (xhr, status) {
-                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+status+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
-            });
         }
+        $.ajax({
+            method: 'POST',
+            url: '/calculator/stockLoanCalculator',
+            dataType: 'json',
+            contentType: 'application/json;charset=UTF-8',
+            data: JSON.stringify({
+                amount: $("#amount").val(),
+                rate: $("#rate").val(),
+                year: $("#year").val(),
+                type: $("#type").val(),
+                firstPaymentDate: $("#firstPaymentDate").val(),
+                rateAdjustmentDay: $('input[name="rateAdjustmentDay"]:checked').val(),
+                prepayment: prepayment,
+                prepaymentList: prepaymentList,
+            }),
+        }).done(function (response) {
+            if (response.code == 200) {
+                // 数据提交成功后处理返回结果
+                drawPicture7(response);
+                drawPicture6(response);
+                drawPicture345(response);
+                drawPicture2(response);
+                drawPicture1(response, prepaymentList);
+            } else if (response.code == 602) {
+                // 数据提交失败后处理
+                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+            } else if (response.code > 700) {
+                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+            } else {
+                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+response.message+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+            }
+        }).fail(function (xhr, status) {
+            $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+status+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+        });
     });
 }
 
@@ -748,5 +720,17 @@ function showPrepayment() {
             prepayments[i].style.display = 'block';
         }
         $('#addPrepaymentBtn').show();
+    });
+}
+
+function initDatePicker() {
+    //年月日单个
+    $(function () {
+        $('.J-datepicker-day').datePicker({
+            min: '1949-10-01',
+            max: '2099-12-31',
+            hasShortcut: false,
+            format: 'YYYY-MM-DD',
+        });
     });
 }

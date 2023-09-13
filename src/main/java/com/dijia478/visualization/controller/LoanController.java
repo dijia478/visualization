@@ -66,6 +66,22 @@ public class LoanController {
     }
 
     /**
+     * 存量房贷计算接口
+     * 会自动添加lpr变化的还款计划
+     *
+     * @param data
+     * @return
+     */
+    @PostMapping("/calculator/stockLoanCalculator")
+    public TotalLoan stockLoanCalculator(@RequestBody @Validated StockLoanDTO data) {
+        validatedPrepayment(data);
+        LoanBO loanBO = convertParam(data);
+        TotalLoan totalLoan = prepaymentCalculator.compute(loanBO);
+        setScale(totalLoan);
+        return totalLoan;
+    }
+
+    /**
      * 参数转换
      *
      * @param data
