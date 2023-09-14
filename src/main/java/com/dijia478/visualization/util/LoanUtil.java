@@ -137,7 +137,11 @@ public class LoanUtil {
         }
 
         PrepaymentDTO prepaymentDTO = new PrepaymentDTO();
-        prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2023-09-25"), true) + 1);
+        if (DateUtil.dayOfMonth(loanDate) <= 25) {
+            prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2023-09-25"), true) + 1);
+        } else {
+            prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2023-09-25"), true));
+        }
         prepaymentDTO.setRepayment(0);
         prepaymentDTO.setNewRate(nowRate);
         prepaymentDTO.setNewType(type);
