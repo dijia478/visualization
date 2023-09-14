@@ -96,12 +96,17 @@ function drawPicture1(response, prepaymentList) {
     if (respData.lprMonth != null) {
         for (let i = 0, n = respData.lprMonth.length; i < n; i++) {
             let month = respData.lprMonth[i];
-            arr.splice(month - 1 + i, 0, {
-                month: "第" + (i + 1) + "次LPR变更",
-                repayment: "0.00",
-                principal: "0.00",
-                interest: "0.00",
-            });
+            for (let j = 0, m = arr.length; j < m; j++) {
+                if (arr[j].month.split("（")[0] == month) {
+                    arr.splice(j, 0, {
+                        month: "第" + (i + 1) + "次LPR变更",
+                        repayment: "0.00",
+                        principal: "0.00",
+                        interest: "0.00",
+                    });
+                    j++;
+                }
+            }
         }
     }
     let loanAmount = respData.loanAmount;
