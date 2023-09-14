@@ -68,7 +68,7 @@ function drawPicture1(response, prepaymentList) {
     let repayment = 0;
     for (let i = 0, n = respData.monthLoanList.length; i < n; i++) {
         let monthLoan = respData.monthLoanList[i];
-        repayment += monthLoan.repayment;
+        repayment = Big(repayment).plus(monthLoan.repayment);
         arr.push({
             month: monthLoan.month + "（" + (monthLoan.year - 1) + "年" + monthLoan.monthInYear + "月）",
             repayment: new Big(monthLoan.repayment).toFixed(2),
@@ -85,7 +85,7 @@ function drawPicture1(response, prepaymentList) {
     for (let i = 0, n = prepaymentList.length; i < n; i++) {
         let prepaymentElement = prepaymentList[i];
         let prepaymentMonth = prepaymentElement.prepaymentMonth;
-        repayment += prepaymentElement.repayment * 10000;
+        repayment = Big(repayment).plus(prepaymentElement.repayment * 10000);
         arr.splice(prepaymentMonth - 1 + i, 0, {
             month: "第" + (i + 1) + "次提前还款",
             repayment: new Big(prepaymentElement.repayment * 10000).toFixed(2),
