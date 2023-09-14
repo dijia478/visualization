@@ -109,6 +109,41 @@ public class LoanUtil {
                 prepaymentList.add(prepaymentDTO);
             }
         }
+
+        // 下面的代码如果到2023-9-25之后，需要进行修改，放到上面的循环里。目前先这么写。
+        Date rateAdjustmentDate;
+        if (Integer.valueOf(1).equals(rateAdjustmentDay)) {
+            rateAdjustmentDate = DateUtil.parse("2023-01-01");
+        } else {
+            rateAdjustmentDate = DateUtil.parse("2023-" + monthAndDay);
+        }
+        BigDecimal nowRate = BigDecimal.ZERO;
+        if (DateUtil.isIn(loanDate, DateUtil.parseDate("2000-01-01"), DateUtil.parseDate("2022-05-14"))) {
+            // 2019年10月8日（含）-2022年5月14日（含），下限按LPR算
+            for (Map.Entry<Date, BigDecimal> entry : FIVE_YEAR_LPR_MAP.entrySet()) {
+                if (entry.getKey().before(rateAdjustmentDate)) {
+                    nowRate = NumberUtil.add(0, entry.getValue());
+                    break;
+                }
+            }
+        } else if (DateUtil.isIn(loanDate, DateUtil.parseDate("2019-10-8"), DateUtil.parseDate("2059-12-31"))) {
+            // 2022年5月15日（含）-2023年8月31日（含），下限按LPR-20个基点算
+            for (Map.Entry<Date, BigDecimal> entry : FIVE_YEAR_LPR_MAP.entrySet()) {
+                if (entry.getKey().before(rateAdjustmentDate)) {
+                    nowRate = NumberUtil.add(-20, entry.getValue());
+                    break;
+                }
+            }
+        }
+
+        PrepaymentDTO prepaymentDTO = new PrepaymentDTO();
+        prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2023-09-25"), true) + 1);
+        prepaymentDTO.setRepayment(0);
+        prepaymentDTO.setNewRate(nowRate);
+        prepaymentDTO.setNewType(type);
+        prepaymentDTO.setRepaymentType(2);
+        prepaymentDTO.setLprRate(1);
+        prepaymentList.add(prepaymentDTO);
     }
 
 }
