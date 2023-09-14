@@ -1,7 +1,6 @@
 package com.dijia478.visualization.controller;
 
 import com.dijia478.visualization.bean.BaseResponse;
-import com.dijia478.visualization.bean.LoanException;
 import com.dijia478.visualization.bean.ResultEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController;

@@ -1,7 +1,10 @@
 package com.dijia478.visualization;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson2.JSON;
+import com.dijia478.visualization.util.LoanUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -41,13 +44,7 @@ class VisualizationApplicationTests {
 
 	@Test
 	void test() {
-		double P1 = 898559.18;
-		double P = 1000000;
-		double n1 = P1 / P * 360;
-		double i = 0.04 / 12;
-
-		double Y1 = i * (P1 - (P1 / n1) * (2 - 1)) + (P1 / n1);
-		System.out.println(Y1);
+		LoanUtil.addPrepaymentList(0.0563d, 1, "2021-08-27", 1, null);
 	}
 
 }

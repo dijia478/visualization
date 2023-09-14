@@ -2,6 +2,7 @@ package com.dijia478.visualization.controller;
 
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculator;
+import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,24 +58,9 @@ public class LoanController {
      * @return
      */
     @PostMapping("/calculator/prepaymentCalculator")
-    public TotalLoan prepaymentCalculator(@RequestBody @Validated LoanDTO data) {
+    public TotalLoan prepaymentCalculator(@RequestBody @Validated StockLoanDTO data) {
         validatedPrepayment(data);
-        LoanBO loanBO = convertParam(data);
-        TotalLoan totalLoan = prepaymentCalculator.compute(loanBO);
-        setScale(totalLoan);
-        return totalLoan;
-    }
-
-    /**
-     * 存量房贷计算接口
-     * 会自动添加lpr变化的还款计划
-     *
-     * @param data
-     * @return
-     */
-    @PostMapping("/calculator/stockLoanCalculator")
-    public TotalLoan stockLoanCalculator(@RequestBody @Validated StockLoanDTO data) {
-        validatedPrepayment(data);
+        LoanUtil.addPrepaymentList(data.getRate(), data.getType(), data.getFirstPaymentDate(), data.getRateAdjustmentDay(), data.getPrepaymentList());
         LoanBO loanBO = convertParam(data);
         TotalLoan totalLoan = prepaymentCalculator.compute(loanBO);
         setScale(totalLoan);

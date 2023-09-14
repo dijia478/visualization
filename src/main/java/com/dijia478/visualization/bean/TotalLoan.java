@@ -38,7 +38,7 @@ public class TotalLoan {
     /** 每月还贷情况 */
     private List<MonthLoan> monthLoanList;
 
-    // /** 第几期之前提前还款（如13，就是在12期还完后提前还款，第13期重新计算还款额） */
-    // private Integer prepaymentMonth;
+    /** lpr变更期数 */
+    private List<Integer> lprMonth;
 
 }

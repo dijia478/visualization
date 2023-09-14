@@ -40,4 +40,7 @@ public class PrepaymentDTO {
     @NotNull(message = "还款方案不能为空")
     private Integer repaymentType;
 
+    /** 是否是lpr利率调整，1是0否 */
+    private Integer lprRate;
+
 }

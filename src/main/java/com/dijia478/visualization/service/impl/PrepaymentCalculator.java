@@ -1,6 +1,5 @@
 package com.dijia478.visualization.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.dijia478.visualization.bean.LoanBO;
 import com.dijia478.visualization.bean.MonthLoan;
@@ -13,9 +12,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,9 +41,27 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
             totalLoan = equalPrincipalCalculator.compute(data);
         }
         BigDecimal originalTotalInterest = totalLoan.getTotalInterest();
-
+        totalLoan.setOriginalTotalInterest(originalTotalInterest);
         List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
-        for (PrepaymentDTO prepaymentDTO : prepaymentList) {
+        if (CollectionUtils.isEmpty(prepaymentList)) {
+            return totalLoan;
+        }
+
+        List<Integer> lprMonth = new ArrayList<>();
+        prepaymentList.sort(Comparator.comparingInt(PrepaymentDTO::getPrepaymentMonth));
+        for (int i = 0; i < prepaymentList.size(); i++) {
+            PrepaymentDTO prepaymentDTO = prepaymentList.get(i);
+            if (Integer.valueOf(1).equals(prepaymentDTO.getLprRate())) {
+                lprMonth.add(prepaymentDTO.getPrepaymentMonth());
+            }
+
+            if (i > 0 && prepaymentDTO.getRepayment() == 0 ) {
+                PrepaymentDTO beforePrepaymentDTO = prepaymentList.get(i - 1);
+                if (beforePrepaymentDTO.getNewRate().compareTo(prepaymentDTO.getNewRate()) == 0) {
+                    continue;
+                }
+            }
+
             List<MonthLoan> monthLoanList = totalLoan.getMonthLoanList();
             if (prepaymentDTO.getNewType() == 1) {
                 totalLoan = equalRepaymentCalculator.computePrepayment(monthLoanList, prepaymentDTO);
@@ -57,12 +72,12 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
             int year = 0;
             int monthInYear = 0;
             int size = totalLoan.getMonthLoanList().size();
-            for (int i = 0; i < size; i++) {
-                MonthLoan monthLoan = totalLoan.getMonthLoanList().get(i);
-                monthLoan.setMonth(i + 1);
+            for (int j = 0; j < size; j++) {
+                MonthLoan monthLoan = totalLoan.getMonthLoanList().get(j);
+                monthLoan.setMonth(j + 1);
                 monthLoan.setYear(year + 1);
                 monthLoan.setMonthInYear(++monthInYear);
-                if ((i + 1) % 12 == 0) {
+                if ((j + 1) % 12 == 0) {
                     year++;
                     monthInYear = 0;
                 }
@@ -107,6 +122,7 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         totalLoan.setTotalRepayment(totalLoan.getMonthLoanList().get(size - 1).getTotalRepayment());
         totalLoan.setTotalInterest(totalLoan.getMonthLoanList().get(size - 1).getTotalInterest());
         totalLoan.setOriginalTotalInterest(originalTotalInterest);
+        totalLoan.setLprMonth(lprMonth);
         return totalLoan;
     }
 

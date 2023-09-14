@@ -8,6 +8,10 @@ body {
     margin: auto;
 }
 
+.input-group-append {
+    display: inline-block;
+}
+
 #errorMsg {
     position: fixed;
     top: 0;
