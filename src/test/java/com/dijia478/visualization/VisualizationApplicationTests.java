@@ -44,7 +44,7 @@ class VisualizationApplicationTests {
 
 	@Test
 	void test() {
-		LoanUtil.addPrepaymentList(0.0563d, 1, "2021-08-27", 1, null);
+		LoanUtil.addPrepaymentList(0.0563d, 1, "2021-08-27", 1, new ArrayList<>());
 	}
 
 }
