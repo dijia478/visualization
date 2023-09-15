@@ -118,22 +118,18 @@ public class LoanUtil {
             rateAdjustmentDate = DateUtil.parse("2023-" + monthAndDay);
         }
         BigDecimal nowRate = BigDecimal.ZERO;
-        if (DateUtil.isIn(loanDate, DateUtil.parseDate("2000-01-01"), DateUtil.parseDate("2022-05-14"))) {
-            // 2019年10月8日（含）-2022年5月14日（含），下限按LPR算
-            for (Map.Entry<Date, BigDecimal> entry : FIVE_YEAR_LPR_MAP.entrySet()) {
-                if (entry.getKey().before(rateAdjustmentDate)) {
-                    nowRate = NumberUtil.add(0, entry.getValue());
-                    break;
-                }
+        for (Map.Entry<Date, BigDecimal> entry : FIVE_YEAR_LPR_MAP.entrySet()) {
+            if (!entry.getKey().before(rateAdjustmentDate)) {
+               continue;
             }
-        } else if (DateUtil.isIn(loanDate, DateUtil.parseDate("2019-10-8"), DateUtil.parseDate("2059-12-31"))) {
-            // 2022年5月15日（含）-2023年8月31日（含），下限按LPR-20个基点算
-            for (Map.Entry<Date, BigDecimal> entry : FIVE_YEAR_LPR_MAP.entrySet()) {
-                if (entry.getKey().before(rateAdjustmentDate)) {
-                    nowRate = NumberUtil.add(-20, entry.getValue());
-                    break;
-                }
+            if (DateUtil.isIn(loanDate, DateUtil.parseDate("2000-01-01"), DateUtil.parseDate("2022-05-14"))) {
+                // 2019年10月8日（含）-2022年5月14日（含），下限按LPR算
+                nowRate = NumberUtil.add(0, entry.getValue());
+            } else if (DateUtil.isIn(loanDate, DateUtil.parseDate("2019-10-8"), DateUtil.parseDate("2059-12-31"))) {
+                // 2022年5月15日（含）-2023年8月31日（含），下限按LPR-20个基点算
+                nowRate = NumberUtil.add(-20, entry.getValue());
             }
+            break;
         }
 
         PrepaymentDTO prepaymentDTO = new PrepaymentDTO();

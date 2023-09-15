@@ -2,10 +2,8 @@ package com.dijia478.visualization.service;
 
 import com.dijia478.visualization.bean.LoanBO;
 import com.dijia478.visualization.bean.LoanDTO;
-import com.dijia478.visualization.bean.MonthLoan;
 import com.dijia478.visualization.bean.TotalLoan;
 import com.dijia478.visualization.controller.LoanController;
-import com.dijia478.visualization.util.LoanUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,9 +34,6 @@ class LoanCalculatorTest {
         LoanBO loanBO = loanController.convertParam(data);
         TotalLoan compute = equalRepaymentCalculator.compute(loanBO);
         loanController.setScale(compute);
-        MonthLoan monthLoan = compute.getMonthLoanList().get(compute.getMonthLoanList().size() - 1);
-        System.out.println(compute);
-        System.out.println(monthLoan);
     }
 
     @Test
@@ -51,9 +46,6 @@ class LoanCalculatorTest {
         LoanBO loanBO = loanController.convertParam(data);
         TotalLoan compute = equalPrincipalCalculator.compute(loanBO);
         loanController.setScale(compute);
-        MonthLoan monthLoan = compute.getMonthLoanList().get(compute.getMonthLoanList().size() - 1);
-        System.out.println(compute);
-        System.out.println(monthLoan);
     }
 
 }
