@@ -48,20 +48,10 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         }
 
         List<Integer> lprMonth = new ArrayList<>();
-        prepaymentList.sort(Comparator.comparingInt(PrepaymentDTO::getPrepaymentMonth));
+        List<BigDecimal> lprRate = new ArrayList<>();
+        prepaymentList = filterSameMonth(prepaymentList, lprMonth, lprRate);
         for (int i = 0; i < prepaymentList.size(); i++) {
             PrepaymentDTO prepaymentDTO = prepaymentList.get(i);
-            if (Integer.valueOf(1).equals(prepaymentDTO.getLprRate())) {
-                lprMonth.add(prepaymentDTO.getPrepaymentMonth());
-            }
-
-            if (i > 0 && prepaymentDTO.getRepayment() == 0 ) {
-                PrepaymentDTO beforePrepaymentDTO = prepaymentList.get(i - 1);
-                if (beforePrepaymentDTO.getNewRate().compareTo(prepaymentDTO.getNewRate()) == 0) {
-                    continue;
-                }
-            }
-
             List<MonthLoan> monthLoanList = totalLoan.getMonthLoanList();
             if (prepaymentDTO.getNewType() == 1) {
                 totalLoan = equalRepaymentCalculator.computePrepayment(monthLoanList, prepaymentDTO);
@@ -123,7 +113,43 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         totalLoan.setTotalInterest(totalLoan.getMonthLoanList().get(size - 1).getTotalInterest());
         totalLoan.setOriginalTotalInterest(originalTotalInterest);
         totalLoan.setLprMonth(lprMonth);
+        totalLoan.setLprRate(lprRate);
         return totalLoan;
+    }
+
+    /**
+     * 将相同还款期限的还款计划进行过滤融合
+     *  @param prepaymentList
+     * @param lprMonth
+     * @param lprRate
+     * @return
+     */
+    private List<PrepaymentDTO> filterSameMonth(List<PrepaymentDTO> prepaymentList, List<Integer> lprMonth, List<BigDecimal> lprRate) {
+        prepaymentList.sort(Comparator.comparingInt(PrepaymentDTO::getPrepaymentMonth));
+        List<PrepaymentDTO> newPrepaymentList = new ArrayList<>();
+        for (int i = 0; i < prepaymentList.size(); i++) {
+            PrepaymentDTO prepaymentDTO = prepaymentList.get(i);
+            if (Integer.valueOf(1).equals(prepaymentDTO.getLprRate())) {
+                lprMonth.add(prepaymentDTO.getPrepaymentMonth());
+                lprRate.add(prepaymentDTO.getNewRate());
+            }
+
+            if (i > 0) {
+                PrepaymentDTO beforePrepaymentDTO = prepaymentList.get(i - 1);
+                if (beforePrepaymentDTO.getPrepaymentMonth().equals(prepaymentDTO.getPrepaymentMonth())) {
+                    beforePrepaymentDTO.setPrepaymentMonth(prepaymentDTO.getPrepaymentMonth());
+                    beforePrepaymentDTO.setRepayment(beforePrepaymentDTO.getRepayment() + prepaymentDTO.getRepayment());
+                    // 这里有点问题，默认取后面那个？？不知道，银行应该是精确到了天
+                    beforePrepaymentDTO.setNewRate(prepaymentDTO.getNewRate());
+                    beforePrepaymentDTO.setNewType(prepaymentDTO.getNewType());
+                    beforePrepaymentDTO.setRepaymentType(prepaymentDTO.getRepaymentType());
+                    beforePrepaymentDTO.setLprRate(prepaymentDTO.getLprRate());
+                    continue;
+                }
+            }
+            newPrepaymentList.add(prepaymentDTO);
+        }
+        return newPrepaymentList;
     }
 
 }

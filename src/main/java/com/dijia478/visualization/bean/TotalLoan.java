@@ -41,4 +41,7 @@ public class TotalLoan {
     /** lpr变更期数 */
     private List<Integer> lprMonth;
 
+    /** lpr变更数值 */
+    private List<BigDecimal> lprRate;
+
 }
