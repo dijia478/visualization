@@ -124,6 +124,7 @@ public class LoanUtil {
                 }
                 prepaymentDTO.setRepayment(0);
                 prepaymentDTO.setNewRate(newRate);
+                // 这个type会在后面重新设置，这里这样取不对
                 prepaymentDTO.setNewType(type);
                 prepaymentDTO.setRepaymentType(2);
                 prepaymentDTO.setLprRate(1);
@@ -135,11 +136,11 @@ public class LoanUtil {
         if (DateUtil.parseDate("2023-09-25").isAfter(DateUtil.offset(loanDate, DateField.YEAR, year))) {
             return;
         }
-        String loanYear = "2024";
+        String loanYear = "2023";
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(loanDate);
-        if (calendar.get(Calendar.YEAR) != 2023) {
-            loanYear = String.valueOf(calendar.get(Calendar.YEAR));
+        if (calendar.get(Calendar.YEAR) == 2023) {
+            loanYear = "2024";
         }
         Date rateAdjustmentDate;
         if (Integer.valueOf(1).equals(rateAdjustmentDay)) {

@@ -142,6 +142,9 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
 
             if (i > 0) {
                 PrepaymentDTO beforePrepaymentDTO = prepaymentList.get(i - 1);
+                if (prepaymentDTO.getLprRate() != null) {
+                    prepaymentDTO.setNewType(beforePrepaymentDTO.getNewType());
+                }
                 if (beforePrepaymentDTO.getPrepaymentMonth().equals(prepaymentDTO.getPrepaymentMonth())) {
                     beforePrepaymentDTO.setPrepaymentMonth(prepaymentDTO.getPrepaymentMonth());
                     beforePrepaymentDTO.setRepayment(beforePrepaymentDTO.getRepayment() + prepaymentDTO.getRepayment());
