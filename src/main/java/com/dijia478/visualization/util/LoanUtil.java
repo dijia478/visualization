@@ -145,7 +145,7 @@ public class LoanUtil {
                 nowRate = NumberUtil.add(0, entry.getValue());
             } else if (DateUtil.isIn(loanDate, DateUtil.parseDate("2019-10-8"), DateUtil.parseDate("2059-12-31"))) {
                 // 2022年5月15日（含）-2023年8月31日（含），下限按LPR-20个基点算
-                nowRate = NumberUtil.add(-20, entry.getValue());
+                nowRate = NumberUtil.add(-0.2, entry.getValue());
             }
             break;
         }

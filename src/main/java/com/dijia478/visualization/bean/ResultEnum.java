@@ -36,7 +36,9 @@ public enum ResultEnum {
 
     PREPAYMENT_MONTH_TOO_BIG(701, "提前还款时的还款期数超过范围"),
 
-    REPAYMENT_TOO_BIG(702, "提前还款时的还款金额超过范围");
+    REPAYMENT_TOO_BIG(702, "提前还款时的还款金额超过范围"),
+
+    DATE_FORMAT_ERR(801, "日期校验失败");
 
     private final Integer code;
 

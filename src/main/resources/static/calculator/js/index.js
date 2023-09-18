@@ -679,29 +679,29 @@ function validated() {
         const value = e.target.value;
 
         // 整数或1-2位小数的正则表达式
-        const regex = /^\d+(\.\d{1,2})?$|^[1-9]\d*$/;
+        const regex = /^\d+(\.\d{1,3})?$|^[1-9]\d*$/;
         if (!regex.test(value)) {
             e.target.value = value.replace(/[^\d.]/g, '');
             // 保留最多两位小数
-            if (value.split('.').length > 1 && value.split('.')[1].length > 2) {
-                e.target.value = new Big(parseFloat(value)).toFixed(2);
+            if (value.split('.').length > 1 && value.split('.')[1].length > 3) {
+                e.target.value = new Big(parseFloat(value)).toFixed(3);
             }
         }
     });
 }
 
 function validatedPrepayment() {
-    const prepaymentMonthInputs = document.getElementsByName('prepaymentMonth');
-    for (let i = 0; i < prepaymentMonthInputs.length; i++) {
-        const prepaymentMonthInput = prepaymentMonthInputs[i];
-        // 遍历每个input
-        prepaymentMonthInput.addEventListener('input', function (e) {
-            const value = e.target.value;
-            if (!/^\d+$/.test(value)) {
-                e.target.value = value.replace(/\D/g, '');
-            }
-        });
-    }
+    // const prepaymentMonthInputs = document.getElementsByName('prepaymentMonth');
+    // for (let i = 0; i < prepaymentMonthInputs.length; i++) {
+    //     const prepaymentMonthInput = prepaymentMonthInputs[i];
+    //     // 遍历每个input
+    //     prepaymentMonthInput.addEventListener('input', function (e) {
+    //         const value = e.target.value;
+    //         if (!/^\d+$/.test(value)) {
+    //             e.target.value = value.replace(/\D/g, '');
+    //         }
+    //     });
+    // }
 
     const repaymentInputs = document.getElementsByName('repayment');
     for (let i = 0; i < repaymentInputs.length; i++) {
@@ -719,12 +719,12 @@ function validatedPrepayment() {
     rateInput.addEventListener('input', function(e) {
         const value = e.target.value;
         // 整数或1-2位小数的正则表达式
-        const regex = /^\d+(\.\d{1,2})?$|^[1-9]\d*$/;
+        const regex = /^\d+(\.\d{1,3})?$|^[1-9]\d*$/;
         if (!regex.test(value)) {
             e.target.value = value.replace(/[^\d.]/g, '');
             // 保留最多两位小数
-            if (value.split('.').length > 1 && value.split('.')[1].length > 2) {
-                e.target.value = new Big(parseFloat(value)).toFixed(2);
+            if (value.split('.').length > 1 && value.split('.')[1].length > 3) {
+                e.target.value = new Big(parseFloat(value)).toFixed(3);
             }
         }
     });
