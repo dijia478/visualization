@@ -56,12 +56,14 @@ public class LoanController {
      * @return
      */
     public LoanBO convertParam(StockLoanDTO data) {
-        for (PrepaymentDTO prepaymentDTO : data.getPrepaymentList()) {
-            if (prepaymentDTO.getPrepaymentMonth() != null) {
-                continue;
+        if (data.getPrepaymentList() != null) {
+            for (PrepaymentDTO prepaymentDTO : data.getPrepaymentList()) {
+                if (prepaymentDTO.getPrepaymentMonth() != null) {
+                    continue;
+                }
+                long month = DateUtil.betweenMonth(DateUtil.parseDate(data.getFirstPaymentDate()), DateUtil.parseDate(prepaymentDTO.getPrepaymentDate()), false) + 2;
+                prepaymentDTO.setPrepaymentMonth(Integer.valueOf(String.valueOf(month)));
             }
-            long month = DateUtil.betweenMonth(DateUtil.parseDate(data.getFirstPaymentDate()), DateUtil.parseDate(prepaymentDTO.getPrepaymentDate()), false) + 2;
-            prepaymentDTO.setPrepaymentMonth(Integer.valueOf(String.valueOf(month)));
         }
         return LoanBO.builder()
                 .amount(prepaymentCalculator.totalLoan(new BigDecimal(data.getAmount().toString())))
