@@ -135,11 +135,17 @@ public class LoanUtil {
         if (DateUtil.parseDate("2023-09-25").isAfter(DateUtil.offset(loanDate, DateField.YEAR, year))) {
             return;
         }
+        String loanYear = "2024";
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(loanDate);
+        if (calendar.get(Calendar.YEAR) != 2023) {
+            loanYear = String.valueOf(calendar.get(Calendar.YEAR));
+        }
         Date rateAdjustmentDate;
         if (Integer.valueOf(1).equals(rateAdjustmentDay)) {
-            rateAdjustmentDate = DateUtil.parse("2023-01-01");
+            rateAdjustmentDate = DateUtil.parse(loanYear + "-01-01");
         } else {
-            rateAdjustmentDate = DateUtil.parse("2023-" + monthAndDay);
+            rateAdjustmentDate = DateUtil.parse(loanYear + "-" + monthAndDay);
         }
         BigDecimal nowRate = BigDecimal.ZERO;
         for (Map.Entry<Date, BigDecimal> entry : FIVE_YEAR_LPR_MAP.entrySet()) {

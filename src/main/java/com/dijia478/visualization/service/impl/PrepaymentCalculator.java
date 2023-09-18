@@ -54,6 +54,9 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         prepaymentList = filterSameMonth(prepaymentList, lprMonth, lprRate);
         for (int i = 0; i < prepaymentList.size(); i++) {
             PrepaymentDTO prepaymentDTO = prepaymentList.get(i);
+            if (prepaymentDTO.getPrepaymentMonth() < 2) {
+                continue;
+            }
             List<MonthLoan> monthLoanList = totalLoan.getMonthLoanList();
             if (prepaymentDTO.getNewType() == 1) {
                 totalLoan = equalRepaymentCalculator.computePrepayment(monthLoanList, prepaymentDTO);

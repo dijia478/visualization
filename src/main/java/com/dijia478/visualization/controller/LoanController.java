@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -57,13 +58,17 @@ public class LoanController {
      * @return
      */
     public LoanBO convertParam(StockLoanDTO data) {
-        if (data.getPrepaymentList() != null) {
-            for (PrepaymentDTO prepaymentDTO : data.getPrepaymentList()) {
-                if (prepaymentDTO.getPrepaymentMonth() != null) {
-                    continue;
+        List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
+        if (prepaymentList != null) {
+            for (PrepaymentDTO prepaymentDTO : prepaymentList) {
+                if (prepaymentDTO.getPrepaymentMonth() == null) {
+                    long month = DateUtil.betweenMonth(DateUtil.parseDate(data.getFirstPaymentDate()), DateUtil.parseDate(prepaymentDTO.getPrepaymentDate()), false) + 2;
+                    prepaymentDTO.setPrepaymentMonth(Integer.valueOf(String.valueOf(month)));
                 }
-                long month = DateUtil.betweenMonth(DateUtil.parseDate(data.getFirstPaymentDate()), DateUtil.parseDate(prepaymentDTO.getPrepaymentDate()), false) + 2;
-                prepaymentDTO.setPrepaymentMonth(Integer.valueOf(String.valueOf(month)));
+                // 第1次提前还款时lpr就变了
+                if (prepaymentDTO.getPrepaymentMonth() < 2) {
+                    data.setRate(prepaymentDTO.getNewRate().doubleValue());
+                }
             }
         }
         return LoanBO.builder()
@@ -72,7 +77,7 @@ public class LoanController {
                 .rate(new BigDecimal(data.getRate().toString()))
                 .type(data.getType())
                 .firstPaymentDate(data.getFirstPaymentDate())
-                .prepaymentList(data.getPrepaymentList())
+                .prepaymentList(prepaymentList)
                 .build();
     }
 
