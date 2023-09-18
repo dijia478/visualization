@@ -104,7 +104,7 @@ function drawPicture1(response, prepaymentList) {
                     arr.splice(j, 0, {
                         month: "第" + (i + 1) + "次利率调整",
                         repayment: "变更后利率：",
-                        principal: new Big(rate).toFixed(2) + "%",
+                        principal: new Big(rate).toFixed(3) + "%",
                         interest: "0.00",
                     });
                     j++;
