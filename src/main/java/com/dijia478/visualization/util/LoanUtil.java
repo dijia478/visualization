@@ -54,7 +54,7 @@ public class LoanUtil {
      * @param rateAdjustmentDay 利率调整日，1：1月1日，2：放贷日
      * @param prepaymentList 提前还款计划
      */
-    public static void addPrepaymentList(Double rate, Integer type, String firstPaymentDate, Integer rateAdjustmentDay, List<PrepaymentDTO> prepaymentList) {
+    public static void addPrepaymentList(Integer year, Double rate, Integer type, String firstPaymentDate, Integer rateAdjustmentDay, List<PrepaymentDTO> prepaymentList) {
         Date loanDate = getLoanDate(firstPaymentDate);
         String monthAndDay = DateUtil.format(loanDate, "MM-dd");
         BigDecimal addPoint = BigDecimal.ZERO;
@@ -73,6 +73,9 @@ public class LoanUtil {
         while (true) {
             month++;
             DateTime dateTime = DateUtil.offsetMonth(loanDate, month);
+            if (dateTime.isAfter(DateUtil.offset(loanDate, DateField.YEAR, year))) {
+                break;
+            }
 
             Date rateAdjustmentDate;
             if (Integer.valueOf(1).equals(rateAdjustmentDay)) {
@@ -129,6 +132,9 @@ public class LoanUtil {
         }
 
         // 下面的代码如果到2023-9-25之后，需要进行修改，放到上面的循环里。目前先这么写。
+        if (DateUtil.parseDate("2023-09-25").isAfter(DateUtil.offset(loanDate, DateField.YEAR, year))) {
+            return;
+        }
         Date rateAdjustmentDate;
         if (Integer.valueOf(1).equals(rateAdjustmentDay)) {
             rateAdjustmentDate = DateUtil.parse("2023-01-01");
