@@ -111,11 +111,13 @@
 <!--                </button>-->
                 <div class="card-body">
                     <div class="form-group row">
-                        <label for="prepaymentMonth" class="col-sm col-form-label">还款期数</label>
+                        <label for="prepaymentDate" class="col-sm col-form-label">还款日期</label>
                         <div class="input-group mb-3 col-sm-10">
-                            <input type="text" class="form-control" id="prepaymentMonth" name="prepaymentMonth" placeholder="例如：13，即在第12期还完后，第13期之前进行提前还款">
-                            <div class="input-group-append">
-                                <span class="input-group-text">期（月）</span>
+                            <div class="mt40">
+                                <div class="c-datepicker-date-editor c-datepicker-single-editor J-datepicker-day mt10">
+                                    <i class="c-datepicker-range__icon kxiconfont icon-clock"></i>
+                                    <input type="text" autocomplete="off" id="prepaymentDate" name="prepaymentDate" placeholder="选择日期" class="c-datepicker-data-input only-date" value="">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -163,6 +165,8 @@
         </form>
     </div>
 
+    <div id="container1"></div>
+    <div class="empty-5"></div>
 
     <div id="container7"></div>
     <div class="empty-5"></div>
@@ -180,9 +184,6 @@
     <div class="empty-5"></div>
 
     <div id="container2"></div>
-    <div class="empty-5"></div>
-
-    <div id="container1"></div>
     <div class="empty-5"></div>
 
     <img src="QR_code.png" class="rounded mx-auto d-block" >

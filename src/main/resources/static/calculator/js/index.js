@@ -16,7 +16,7 @@ function sendRequest() {
             for (let i = 0; i < prepaymentElements.length; i++) {
                 const element = prepaymentElements[i];
                 const prepayment = {
-                    prepaymentMonth: element.querySelector('input[name="prepaymentMonth"]').value,
+                    prepaymentDate: element.querySelector('input[name="prepaymentDate"]').value,
                     repayment: element.querySelector('input[name="repayment"]').value,
                     newRate: element.querySelector('input[name="newRate"]').value,
                     newType: element.querySelector('select[name="newType"]').value,
@@ -70,7 +70,7 @@ function drawPicture1(response, prepaymentList) {
         let monthLoan = respData.monthLoanList[i];
         repayment = Big(repayment).plus(monthLoan.repayment);
         arr.push({
-            month: monthLoan.month + "（" + (monthLoan.year - 1) + "年" + monthLoan.monthInYear + "月）",
+            month: monthLoan.month + "（" + (monthLoan.dateFormat) + "）",
             repayment: new Big(monthLoan.repayment).toFixed(2),
             principal: new Big(monthLoan.principal).toFixed(2),
             interest: new Big(monthLoan.interest).toFixed(2),
@@ -84,9 +84,11 @@ function drawPicture1(response, prepaymentList) {
     }
     for (let i = 0, n = prepaymentList.length; i < n; i++) {
         let prepaymentElement = prepaymentList[i];
-        let prepaymentMonth = prepaymentElement.prepaymentMonth;
+        let prepaymentDate = prepaymentElement.prepaymentDate;
+        let dateFormat = respData.monthLoanList[0].dateFormat;
+        let newVar = getMonthDifference(dateFormat, prepaymentDate) + 2;
         repayment = Big(repayment).plus(prepaymentElement.repayment * 10000);
-        arr.splice(prepaymentMonth - 1 + i, 0, {
+        arr.splice(newVar - 1 + i, 0, {
             month: "第" + (i + 1) + "次提前还款",
             repayment: new Big(prepaymentElement.repayment * 10000).toFixed(2),
             principal: new Big(prepaymentElement.repayment * 10000).toFixed(2),
@@ -100,7 +102,7 @@ function drawPicture1(response, prepaymentList) {
             for (let j = 0, m = arr.length; j < m; j++) {
                 if (arr[j].month.split("（")[0] == month) {
                     arr.splice(j, 0, {
-                        month: "第" + (i + 1) + "次LPR变更",
+                        month: "第" + (i + 1) + "次利率调整",
                         repayment: "变更后利率：",
                         principal: new Big(rate).toFixed(2) + "%",
                         interest: "0.00",
@@ -181,7 +183,7 @@ function drawPicture1(response, prepaymentList) {
                                 fill: '#ffe9e9',
                             };
                         }
-                        if (data.month.endsWith('LPR变更')) {
+                        if (data.month.endsWith('利率调整')) {
                             return {
                                 fill: '#f7ffe9',
                             };
@@ -651,6 +653,7 @@ function addPrepayment() {
         // 插入到表单末尾
         $new.insertBefore('#addPrepaymentBtn');
         validatedPrepayment();
+        initDatePicker();
     });
 }
 
@@ -755,4 +758,14 @@ function initDatePicker() {
             format: 'YYYY-MM-DD',
         });
     });
+}
+
+function getMonthDifference(date1, date2) {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+
+    if (d1.getDate() > d2.getDate()) {
+        d2.setMonth(d2.getMonth() - 1);
+    }
+    return (d2.getFullYear() - d1.getFullYear()) * 12 + (d2.getMonth() - d1.getMonth());
 }

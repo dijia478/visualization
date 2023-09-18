@@ -1,6 +1,8 @@
 package com.dijia478.visualization.service.impl;
 
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
@@ -81,6 +83,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
             monthLoan.setTotalRepaymentAndRemainPrincipal(NumberUtil.add(totalRepayment, remainPrincipal));
             monthLoan.setRemainTotal(remainTotal);
             monthLoan.setRemainInterest(remainInterest);
+            monthLoan.setDateFormat(DateUtil.parse(data.getFirstPaymentDate()).offset(DateField.MONTH, i).toDateStr());
             monthLoanList.add(monthLoan);
         }
         loan.setMonthLoanList(monthLoanList);
@@ -213,6 +216,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
                     .month(new BigDecimal(String.valueOf(totalMonth)))
                     .rate(newRate)
                     .type(prepaymentDTO.getNewType())
+                    .firstPaymentDate(monthLoanList.get(0).getDateFormat())
                     .build();
             totalLoan = compute(loanBO);
         } else {
@@ -222,6 +226,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
                     .month(new BigDecimal(String.valueOf(monthLoanList.size() - lastMonthLoan.getMonth())))
                     .rate(newRate)
                     .type(prepaymentDTO.getNewType())
+                    .firstPaymentDate(monthLoanList.get(0).getDateFormat())
                     .build();
             totalLoan = compute(loanBO);
         }

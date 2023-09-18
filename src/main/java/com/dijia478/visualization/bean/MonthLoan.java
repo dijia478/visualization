@@ -49,6 +49,9 @@ public class MonthLoan {
     /** 累计已还款总额（元） + 剩余本金（元） */
     private BigDecimal totalRepaymentAndRemainPrincipal;
 
+    /** 还款的年月日 */
+    private String dateFormat;
+
     /** 第几年 */
     private Integer year;
 

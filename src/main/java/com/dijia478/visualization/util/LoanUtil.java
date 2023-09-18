@@ -1,5 +1,6 @@
 package com.dijia478.visualization.util;
 
+import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -66,15 +67,12 @@ public class LoanUtil {
         }
 
 
-        Date today = new Date();
+        DateTime today = DateUtil.date();
         int month = 0;
         BigDecimal newRate = new BigDecimal(rate.toString());
         while (true) {
             month++;
             DateTime dateTime = DateUtil.offsetMonth(loanDate, month);
-            if (dateTime.isAfter(today)) {
-                break;
-            }
 
             Date rateAdjustmentDate;
             if (Integer.valueOf(1).equals(rateAdjustmentDay)) {
@@ -83,7 +81,27 @@ public class LoanUtil {
                 rateAdjustmentDate = DateUtil.parse(DateUtil.year(dateTime) + "-" + monthAndDay);
             }
 
+            if (today.isAfter(rateAdjustmentDate)) {
+                if (dateTime.isAfter(DateUtil.dateNew(rateAdjustmentDate).offset(DateField.YEAR, 1).offset(DateField.MONTH, 1))) {
+                    break;
+                }
+            } else {
+                if (dateTime.isAfter(DateUtil.dateNew(rateAdjustmentDate).offset(DateField.MONTH, 1))) {
+                    break;
+                }
+            }
+
             if (DateUtil.betweenMonth(dateTime, rateAdjustmentDate, true) == 0) {
+                if (dateTime.isAfter(DateUtil.parseDate("2023-09-24"))) {
+                    if (DateUtil.isIn(loanDate, DateUtil.parseDate("2000-01-01"), DateUtil.parseDate("2022-05-14"))) {
+                        // 2019年10月8日（含）-2022年5月14日（含），下限按LPR算
+                        addPoint = BigDecimal.ZERO;
+                    } else if (DateUtil.isIn(loanDate, DateUtil.parseDate("2019-10-8"), DateUtil.parseDate("2059-12-31"))) {
+                        // 2022年5月15日（含）-2023年8月31日（含），下限按LPR-20个基点算
+                        addPoint = new BigDecimal("-0.2");
+                    }
+                }
+
                 BigDecimal nowRate = BigDecimal.ZERO;
                 for (Map.Entry<Date, BigDecimal> entry : FIVE_YEAR_LPR_MAP.entrySet()) {
                     if (entry.getKey().before(rateAdjustmentDate)) {

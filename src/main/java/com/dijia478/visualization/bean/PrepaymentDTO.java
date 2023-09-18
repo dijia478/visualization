@@ -2,7 +2,6 @@ package com.dijia478.visualization.bean;
 
 import lombok.Data;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -16,10 +15,11 @@ import java.math.BigDecimal;
 @Data
 public class PrepaymentDTO {
 
+    /** 还款日期 */
+    @NotNull(message = "还款日期不能为空")
+    private String prepaymentDate;
+
     /** 还款期数 */
-    @NotNull(message = "还款期数不能为空")
-    @Max(value = 360, message = "还款期数不能大于360期")
-    @Min(value = 2, message = "还款期数不能小于2期")
     private Integer prepaymentMonth;
 
     /** 还款金额 */

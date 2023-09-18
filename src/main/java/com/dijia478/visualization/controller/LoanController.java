@@ -1,5 +1,6 @@
 package com.dijia478.visualization.controller;
 
+import cn.hutool.core.date.DateUtil;
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.util.LoanUtil;
@@ -33,25 +34,6 @@ public class LoanController {
     private LoanCalculator prepaymentCalculator;
 
     /**
-     * 贷款计算接口
-     *
-     * @param data
-     * @return
-     */
-    @PostMapping("/calculator/loanCalculator")
-    public TotalLoan loanCalculator(@RequestBody @Validated LoanDTO data) {
-        TotalLoan totalLoan;
-        LoanBO loanBO = convertParam(data);
-        if (data.getType() == 1) {
-            totalLoan = equalRepaymentCalculator.compute(loanBO);
-        } else {
-            totalLoan = equalPrincipalCalculator.compute(loanBO);
-        }
-        setScale(totalLoan);
-        return totalLoan;
-    }
-
-    /**
      * 提前还款计算接口
      *
      * @param data
@@ -73,12 +55,20 @@ public class LoanController {
      * @param data
      * @return
      */
-    public LoanBO convertParam(LoanDTO data) {
+    public LoanBO convertParam(StockLoanDTO data) {
+        for (PrepaymentDTO prepaymentDTO : data.getPrepaymentList()) {
+            if (prepaymentDTO.getPrepaymentMonth() != null) {
+                continue;
+            }
+            long month = DateUtil.betweenMonth(DateUtil.parseDate(data.getFirstPaymentDate()), DateUtil.parseDate(prepaymentDTO.getPrepaymentDate()), false) + 2;
+            prepaymentDTO.setPrepaymentMonth(Integer.valueOf(String.valueOf(month)));
+        }
         return LoanBO.builder()
-                .amount(equalRepaymentCalculator.totalLoan(new BigDecimal(data.getAmount().toString())))
-                .month(equalRepaymentCalculator.totalMonth(new BigDecimal(data.getYear().toString())))
+                .amount(prepaymentCalculator.totalLoan(new BigDecimal(data.getAmount().toString())))
+                .month(prepaymentCalculator.totalMonth(new BigDecimal(data.getYear().toString())))
                 .rate(new BigDecimal(data.getRate().toString()))
                 .type(data.getType())
+                .firstPaymentDate(data.getFirstPaymentDate())
                 .prepaymentList(data.getPrepaymentList())
                 .build();
     }
@@ -118,9 +108,6 @@ public class LoanController {
         int amount = data.getAmount();
         List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
         for (PrepaymentDTO prepaymentDTO : prepaymentList) {
-            if (prepaymentDTO.getPrepaymentMonth() > 12 && prepaymentDTO.getPrepaymentMonth() > totalMonth) {
-                throw new LoanException(ResultEnum.PREPAYMENT_MONTH_TOO_BIG);
-            }
             if (prepaymentDTO.getRepayment() > amount) {
                 throw new LoanException(ResultEnum.REPAYMENT_TOO_BIG);
             }

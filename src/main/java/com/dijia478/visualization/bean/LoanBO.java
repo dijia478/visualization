@@ -24,6 +24,8 @@ public class LoanBO {
 
     private Integer type;
 
+    private String firstPaymentDate;
+
     private List<PrepaymentDTO> prepaymentList;
 
 }
