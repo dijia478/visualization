@@ -3,7 +3,6 @@ package com.dijia478.visualization.service.impl;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.NumberUtil;
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
 import com.dijia478.visualization.util.NumUtil;
@@ -66,9 +65,9 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
 
             BigDecimal interest = getInterest(loanAmount, monthRate, totalMonth, i + 1);
             BigDecimal repayment = getRepayment(principal, interest);
-            totalRepayment = NumberUtil.add(totalRepayment, repayment);
-            totalPrincipal = NumberUtil.add(totalPrincipal, principal);
-            totalInterest = NumberUtil.add(totalInterest, interest);
+            totalRepayment = NumUtil.add(totalRepayment, repayment);
+            totalPrincipal = NumUtil.add(totalPrincipal, principal);
+            totalInterest = NumUtil.add(totalInterest, interest);
             BigDecimal remainTotal = getRemainTotal(loan.getTotalRepayment(), totalRepayment);
             BigDecimal remainPrincipal = getRemainPrincipal(loanAmount, totalMonth, i + 1);
             BigDecimal remainInterest = getRemainInterest(loan.getTotalInterest(), totalInterest);
@@ -81,7 +80,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
             monthLoan.setTotalRepayment(totalRepayment);
             monthLoan.setTotalPrincipal(totalPrincipal);
             monthLoan.setTotalInterest(totalInterest);
-            monthLoan.setTotalRepaymentAndRemainPrincipal(NumberUtil.add(totalRepayment, remainPrincipal));
+            monthLoan.setTotalRepaymentAndRemainPrincipal(NumUtil.add(totalRepayment, remainPrincipal));
             monthLoan.setRemainTotal(remainTotal);
             monthLoan.setRemainInterest(remainInterest);
             monthLoan.setDateFormat(DateUtil.parse(data.getFirstPaymentDate()).offset(DateField.MONTH, i).toDateStr());
@@ -99,7 +98,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
      * @return 月供
      */
     private BigDecimal getRepayment(BigDecimal mp, BigDecimal mi) {
-        return NumberUtil.add(mp, mi);
+        return NumUtil.add(mp, mi);
     }
 
     /**
@@ -124,7 +123,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
      */
     private BigDecimal getInterest(BigDecimal p, BigDecimal i, BigDecimal n, Integer k) {
         BigDecimal b1 = NumUtil.div(p, n);
-        BigDecimal b2 = NumberUtil.sub(p, NumUtil.mul(b1, NumberUtil.sub(k, BigDecimal.ONE)));
+        BigDecimal b2 = NumUtil.sub(p, NumUtil.mul(b1, NumUtil.sub(new BigDecimal(k), BigDecimal.ONE)));
         return NumUtil.mul(i, b2);
     }
 
@@ -136,7 +135,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
      * @return 总还款额
      */
     private BigDecimal getTotalRepayment(BigDecimal p, BigDecimal ti) {
-        return NumberUtil.add(p, ti);
+        return NumUtil.add(p, ti);
     }
 
     /**
@@ -148,7 +147,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
      * @return 总利息
      */
     private BigDecimal getTotalInterest(BigDecimal p, BigDecimal i, BigDecimal n) {
-        BigDecimal b1 = NumUtil.div(NumberUtil.add(n, BigDecimal.ONE), new BigDecimal(2));
+        BigDecimal b1 = NumUtil.div(NumUtil.add(n, BigDecimal.ONE), new BigDecimal(2));
         return NumUtil.mul(p, i, b1);
     }
 
@@ -160,7 +159,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
      * @return 月供后剩余贷款
      */
     private BigDecimal getRemainTotal(BigDecimal t, BigDecimal totalRepayment) {
-        return NumberUtil.sub(t, totalRepayment);
+        return NumUtil.sub(t, totalRepayment);
     }
 
     /**
@@ -173,7 +172,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
      */
     private BigDecimal getRemainPrincipal(BigDecimal p, BigDecimal n, Integer k) {
         BigDecimal b1 = NumUtil.div(p, n);
-        return NumberUtil.sub(p, NumUtil.mul(b1, new BigDecimal(k)));
+        return NumUtil.sub(p, NumUtil.mul(b1, new BigDecimal(k)));
     }
 
     /**
@@ -184,7 +183,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
      * @return 月供后剩余利息
      */
     private BigDecimal getRemainInterest(BigDecimal ti, BigDecimal totalInterest) {
-        return NumberUtil.sub(ti, totalInterest);
+        return NumUtil.sub(ti, totalInterest);
     }
 
 
@@ -200,7 +199,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
         MonthLoan lastMonthLoan = monthLoanList.get(prepaymentMonth - 2);
 
         // 剩余本金
-        BigDecimal remainPrincipal = NumberUtil.sub(lastMonthLoan.getRemainPrincipal(), repayment);
+        BigDecimal remainPrincipal = NumUtil.sub(lastMonthLoan.getRemainPrincipal(), repayment);
         if (remainPrincipal.compareTo(BigDecimal.ZERO) < 0) {
             throw new LoanException(ResultEnum.REPAYMENT_TOO_BIG);
         }
@@ -208,7 +207,7 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
         if (repaymentType == 1) {
             // 月供不变，期限缩短
             // 原贷款总额
-            BigDecimal amount = NumberUtil.add(firstMonthLoan.getRemainPrincipal(), firstMonthLoan.getTotalPrincipal());
+            BigDecimal amount = NumUtil.add(firstMonthLoan.getRemainPrincipal(), firstMonthLoan.getTotalPrincipal());
             // 新贷款期限 = 剩余本金 / 原贷款总额 ×原贷款期限
             double totalMonth = NumUtil.mul(NumUtil.div(remainPrincipal, amount), new BigDecimal(firstMonthLoan.getMonth() + firstMonthLoan.getRemainMonth())).doubleValue();
             totalMonth = Math.ceil(totalMonth);
