@@ -40,7 +40,7 @@ public class LoanUtil {
      * @param firstPaymentDate 第一次还贷日
      * @return
      */
-    public static Date getLoanDate(String firstPaymentDate) {
+    public static DateTime getLoanDate(String firstPaymentDate) {
         DateTime parse = DateUtil.parse(firstPaymentDate);
         return DateUtil.offsetMonth(parse, -1);
     }

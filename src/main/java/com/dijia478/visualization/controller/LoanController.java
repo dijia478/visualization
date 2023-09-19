@@ -1,7 +1,8 @@
 package com.dijia478.visualization.controller;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.io.unit.DataUnit;
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.util.LoanUtil;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -47,7 +47,7 @@ public class LoanController {
         LoanUtil.addPrepaymentList(data.getYear(), data.getRate(), data.getType(), data.getFirstPaymentDate(), data.getRateAdjustmentDay(), data.getPrepaymentList());
         LoanBO loanBO = convertParam(data);
         TotalLoan totalLoan = prepaymentCalculator.compute(loanBO);
-        setScale(totalLoan);
+        setScale(totalLoan, data);
         return totalLoan;
     }
 
@@ -85,13 +85,15 @@ public class LoanController {
      * 对最终结果进行四舍五入保留两位小数，用于给前端展示
      *
      * @param totalLoan
+     * @param data
      */
-    public void setScale(TotalLoan totalLoan) {
+    public void setScale(TotalLoan totalLoan, StockLoanDTO data) {
         if (totalLoan.getOriginalTotalInterest() != null) {
             totalLoan.setOriginalTotalInterest(totalLoan.getOriginalTotalInterest().setScale(2, RoundingMode.HALF_UP));
         }
         totalLoan.setTotalInterest(totalLoan.getTotalInterest().setScale(2, RoundingMode.HALF_UP));
         totalLoan.setTotalRepayment(totalLoan.getTotalRepayment().setScale(2, RoundingMode.HALF_UP));
+        DateTime loanDate = LoanUtil.getLoanDate(data.getFirstPaymentDate());
         for (MonthLoan monthLoan : totalLoan.getMonthLoanList()) {
             monthLoan.setRepayment(monthLoan.getRepayment().setScale(2, RoundingMode.HALF_UP));
             monthLoan.setPrincipal(monthLoan.getPrincipal().setScale(2, RoundingMode.HALF_UP));
@@ -103,6 +105,7 @@ public class LoanController {
             monthLoan.setTotalPrincipal(monthLoan.getTotalPrincipal().setScale(2, RoundingMode.HALF_UP));
             monthLoan.setTotalInterest(monthLoan.getTotalInterest().setScale(2, RoundingMode.HALF_UP));
             monthLoan.setTotalRepaymentAndRemainPrincipal(monthLoan.getTotalRepaymentAndRemainPrincipal().setScale(2, RoundingMode.HALF_UP));
+            monthLoan.setDateFormat(loanDate.offset(DateField.MONTH, 1).toDateStr());
         }
     }
 

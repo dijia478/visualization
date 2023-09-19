@@ -1,8 +1,5 @@
 package com.dijia478.visualization.service.impl;
 
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import com.dijia478.visualization.bean.LoanBO;
 import com.dijia478.visualization.bean.MonthLoan;
 import com.dijia478.visualization.bean.PrepaymentDTO;
@@ -88,7 +85,6 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         int year = 0;
         int monthInYear = 0;
         int size = totalLoan.getMonthLoanList().size();
-        DateTime firstPaymentDate = DateUtil.parse(data.getFirstPaymentDate());
         for (int i = 0; i < size; i++) {
             MonthLoan monthLoan = totalLoan.getMonthLoanList().get(i);
             monthLoan.setMonth(i + 1);
@@ -111,7 +107,6 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
             monthLoan.setTotalPrincipal(totalPrincipal);
             monthLoan.setTotalInterest(totalInterest);
             monthLoan.setTotalRepaymentAndRemainPrincipal(NumUtil.add(totalRepayment, monthLoan.getRemainPrincipal()));
-            monthLoan.setDateFormat(firstPaymentDate.offset(DateField.MONTH, i).toDateStr());
         }
         totalLoan.setLoanAmount(data.getAmount());
         totalLoan.setLoanMonth(new BigDecimal(size));

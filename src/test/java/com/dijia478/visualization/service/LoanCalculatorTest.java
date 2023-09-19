@@ -1,7 +1,6 @@
 package com.dijia478.visualization.service;
 
 import com.dijia478.visualization.bean.LoanBO;
-import com.dijia478.visualization.bean.LoanDTO;
 import com.dijia478.visualization.bean.StockLoanDTO;
 import com.dijia478.visualization.bean.TotalLoan;
 import com.dijia478.visualization.controller.LoanController;
@@ -35,7 +34,7 @@ class LoanCalculatorTest {
         data.setFirstPaymentDate("2021-05-15");
         LoanBO loanBO = loanController.convertParam(data);
         TotalLoan compute = equalRepaymentCalculator.compute(loanBO);
-        loanController.setScale(compute);
+        loanController.setScale(compute, data);
     }
 
     @Test
@@ -48,7 +47,7 @@ class LoanCalculatorTest {
         data.setFirstPaymentDate("2021-05-15");
         LoanBO loanBO = loanController.convertParam(data);
         TotalLoan compute = equalPrincipalCalculator.compute(loanBO);
-        loanController.setScale(compute);
+        loanController.setScale(compute, data);
     }
 
 }

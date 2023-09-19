@@ -1,8 +1,6 @@
 package com.dijia478.visualization.service.impl;
 
 import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateUtil;
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
 import com.dijia478.visualization.util.NumUtil;
@@ -83,7 +81,6 @@ public class EqualPrincipalCalculator extends LoanCalculatorAdapter {
             monthLoan.setTotalRepaymentAndRemainPrincipal(NumUtil.add(totalRepayment, remainPrincipal));
             monthLoan.setRemainTotal(remainTotal);
             monthLoan.setRemainInterest(remainInterest);
-            monthLoan.setDateFormat(DateUtil.parse(data.getFirstPaymentDate()).offset(DateField.MONTH, i).toDateStr());
             monthLoanList.add(monthLoan);
         }
         loan.setMonthLoanList(monthLoanList);
