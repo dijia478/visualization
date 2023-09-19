@@ -22,6 +22,12 @@ class NumUtilTest {
         assertEquals(mul1.setScale(2, RoundingMode.HALF_UP).toString(), "8.00");
         BigDecimal mul2 = NumUtil.mul(a, b, c);
         assertEquals(mul2.setScale(2, RoundingMode.HALF_UP).toString(), "16.00");
+
+        // 除法
+        BigDecimal div1 = NumUtil.div(a, b);
+        assertEquals(div1.setScale(2, RoundingMode.HALF_UP).toString(), "32.00");
+        double div2 = NumUtil.div(16.0d, 0.5d);
+        assertEquals(div2, 32.0d);
     }
 
 }
