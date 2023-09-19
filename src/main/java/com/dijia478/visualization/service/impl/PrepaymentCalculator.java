@@ -2,13 +2,13 @@ package com.dijia478.visualization.service.impl;
 
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.NumberUtil;
 import com.dijia478.visualization.bean.LoanBO;
 import com.dijia478.visualization.bean.MonthLoan;
 import com.dijia478.visualization.bean.PrepaymentDTO;
 import com.dijia478.visualization.bean.TotalLoan;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
+import com.dijia478.visualization.util.NumUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -98,17 +98,17 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
             }
 
             if (keySet.contains(i)) {
-                totalRepayment = NumberUtil.add(totalRepayment, monthLoan.getRepayment(), collect.get(i));
-                totalPrincipal = NumberUtil.add(totalPrincipal, monthLoan.getPrincipal(), collect.get(i));
+                totalRepayment = NumUtil.add(totalRepayment, monthLoan.getRepayment(), collect.get(i));
+                totalPrincipal = NumUtil.add(totalPrincipal, monthLoan.getPrincipal(), collect.get(i));
             } else {
-                totalRepayment = NumberUtil.add(totalRepayment, monthLoan.getRepayment());
-                totalPrincipal = NumberUtil.add(totalPrincipal, monthLoan.getPrincipal());
+                totalRepayment = NumUtil.add(totalRepayment, monthLoan.getRepayment());
+                totalPrincipal = NumUtil.add(totalPrincipal, monthLoan.getPrincipal());
             }
-            totalInterest = NumberUtil.add(totalInterest, monthLoan.getInterest());
+            totalInterest = NumUtil.add(totalInterest, monthLoan.getInterest());
             monthLoan.setTotalRepayment(totalRepayment);
             monthLoan.setTotalPrincipal(totalPrincipal);
             monthLoan.setTotalInterest(totalInterest);
-            monthLoan.setTotalRepaymentAndRemainPrincipal(NumberUtil.add(totalRepayment, monthLoan.getRemainPrincipal()));
+            monthLoan.setTotalRepaymentAndRemainPrincipal(NumUtil.add(totalRepayment, monthLoan.getRemainPrincipal()));
             monthLoan.setDateFormat(DateUtil.parse(data.getFirstPaymentDate()).offset(DateField.MONTH, i).toDateStr());
         }
         totalLoan.setLoanAmount(data.getAmount());

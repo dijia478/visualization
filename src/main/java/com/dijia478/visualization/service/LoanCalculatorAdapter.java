@@ -5,6 +5,7 @@ import com.dijia478.visualization.bean.LoanBO;
 import com.dijia478.visualization.bean.MonthLoan;
 import com.dijia478.visualization.bean.PrepaymentDTO;
 import com.dijia478.visualization.bean.TotalLoan;
+import com.dijia478.visualization.util.NumUtil;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,17 +31,18 @@ public abstract class LoanCalculatorAdapter implements LoanCalculator {
 
     @Override
     public BigDecimal monthRate(BigDecimal loanRate) {
+        // 我也不懂，为什么将下面的NumberUtil换成NumUtil，整个接口性能就差很多
         return NumberUtil.div(NumberUtil.div(loanRate, new BigDecimal("100")), new BigDecimal("12"));
     }
 
     @Override
     public BigDecimal totalLoan(BigDecimal loanAmount) {
-        return NumberUtil.mul(loanAmount, new BigDecimal("10000"));
+        return NumUtil.mul(loanAmount, new BigDecimal("10000"));
     }
 
     @Override
     public BigDecimal totalMonth(BigDecimal year) {
-        return NumberUtil.mul(year, new BigDecimal("12"));
+        return NumUtil.mul(year, new BigDecimal("12"));
     }
 
 }
