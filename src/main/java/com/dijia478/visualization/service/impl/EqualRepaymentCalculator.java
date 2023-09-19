@@ -2,6 +2,7 @@ package com.dijia478.visualization.service.impl;
 
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
@@ -53,6 +54,7 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
         List<MonthLoan> monthLoanList = new ArrayList<>();
         int year = 0;
         int monthInYear = 0;
+        DateTime firstPaymentDate = DateUtil.parse(data.getFirstPaymentDate());
         for (int i = 0; i < totalMonth.intValue(); i++) {
             MonthLoan monthLoan = new MonthLoan();
             monthLoan.setMonth(i + 1);
@@ -83,7 +85,7 @@ public class EqualRepaymentCalculator extends LoanCalculatorAdapter {
             monthLoan.setTotalRepaymentAndRemainPrincipal(NumUtil.add(totalRepayment, remainPrincipal));
             monthLoan.setRemainTotal(remainTotal);
             monthLoan.setRemainInterest(remainInterest);
-            monthLoan.setDateFormat(DateUtil.parse(data.getFirstPaymentDate()).offset(DateField.MONTH, i).toDateStr());
+            monthLoan.setDateFormat(firstPaymentDate.offset(DateField.MONTH, i).toDateStr());
             monthLoanList.add(monthLoan);
         }
         loan.setMonthLoanList(monthLoanList);
