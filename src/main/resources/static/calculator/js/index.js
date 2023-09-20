@@ -1,5 +1,7 @@
 function sendRequest() {
     $('#submit-btn').click(function (e) {
+        $('#loading').show()
+        $('#submit-btn').attr('disabled', true);
         $('#errorMsg').html("");
         $('#container1').html("");
         $('#container2').html("");
@@ -58,6 +60,10 @@ function sendRequest() {
             }
         }).fail(function (xhr, status) {
             $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>请到万户楼台联系管理员！</strong>'+status+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+        }).always(function() {
+            // 请求完成后隐藏遮罩
+            $('#submit-btn').attr('disabled', false);
+            $('#loading').hide();
         });
     });
 }
