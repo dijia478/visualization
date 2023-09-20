@@ -1,6 +1,6 @@
 function sendRequest() {
     $('#submit-btn').click(function (e) {
-        $('#loading').show()
+        $('#loading').show();
         $('#submit-btn').attr('disabled', true);
         $('#errorMsg').html("");
         $('#container1').html("");
