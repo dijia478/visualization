@@ -18,11 +18,16 @@
                 <table class="table table-bordered" id="result-table">
                     <tbody>
                     <tr>
-                        <td rowspan="2" style="vertical-align: middle">工作性价比</td>
-                        <td>0</td>
+                        <td rowspan="2">工作性价比</td>
+                        <td id="resultDesc">很惨</td>
+                        <td rowspan="2">
+                            低于0.8很惨<br>
+                            高于1.5很爽<br>
+                            高于2.0爽到爆
+                        </td>
                     </tr>
                     <tr>
-                        <td>0</td>
+                        <td id="result">0.00</td>
                     </tr>
                     </tbody>
                 </table>
@@ -39,7 +44,7 @@
                     <thead>
                     <tr>
                         <td>影响因子</td>
-                        <td>数值</td>
+                        <td>数值（手动填写）</td>
                         <td>说明</td>
                     </tr>
                     </thead>
@@ -119,7 +124,7 @@
                     </tr>
                     <tr>
                         <td>综合环境系数</td>
-                        <td id="num11">0</td>
+                        <td id="num11">0.00</td>
                         <td>不要改</td>
                     </tr>
                     </tbody>
@@ -170,6 +175,40 @@
             $activeCell.attr('status', '');
             activeCell = null;
         }
+
+        let num1 = Number($('#num1').text());
+        let num2 = Number($('#num2').text());
+        let num3 = Number($('#num3').text());
+        let num4 = Number($('#num4').text());
+        let num5 = Number($('#num5').text());
+        let num6 = Number($('#num6').text());
+        let num7 = Number($('#num7').text());
+        let num8 = Number($('#num8').text());
+        let num9 = Number($('#num9').text());
+        let num10 = Number($('#num10').text());
+        
+        // 综合环境系数
+        let factor = num6 * num7 * num8;
+        $('#num11').html(factor.toFixed(2));
+        // 分母
+        let denominator = (35 * (num2 + num3 - 0.5 * num4) * num5 * num9) * num10;
+        let result;
+        if (denominator === 0) {
+            result = 0;
+        } else {
+            result = num1 * factor / denominator;
+        }
+        if (result < 0.8) {
+            $('#resultDesc').html("很惨");
+        } else if (result >= 0.8 && result < 1.5) {
+            $('#resultDesc').html("一般");
+        } else if (result >= 1.5 && result < 2) {
+            $('#resultDesc').html("很爽");
+        } else if (result >= 2) {
+            $('#resultDesc').html("爽到爆炸");
+        }
+        result = result.toFixed(2);
+        $('#result').html(result);
     });
 
 </script>
