@@ -168,6 +168,41 @@
         activeCell = cell;
     }
 
+    let num5Map = new Map();
+    num5Map.set('专科及以下', 0.8);
+    num5Map.set('普通本科', 1.0);
+    num5Map.set('高级本科', 1.2);
+    num5Map.set('普通硕士', 1.4);
+    num5Map.set('高级硕士', 1.6);
+    num5Map.set('普通博士', 1.8);
+    num5Map.set('高级博士', 2.0);
+
+    let num6Map = new Map();
+    num6Map.set('偏僻地区', 0.8);
+    num6Map.set('工厂户外', 0.9);
+    num6Map.set('普通', 1.0);
+    num6Map.set('体制内', 1.1);
+
+    let num7Map = new Map();
+    num7Map.set('没有', 0.9);
+    num7Map.set('不多不少', 1.0);
+    num7Map.set('很多', 1.1);
+
+    let num8Map = new Map();
+    num8Map.set('SB很多', 0.95);
+    num8Map.set('普通很多', 1.0);
+    num8Map.set('优秀很多', 1.05);
+
+    let num9Map = new Map();
+    num9Map.set('无要求、二级', 1.0);
+    num9Map.set('建造造价监理', 1.05);
+    num9Map.set('建筑岩土结构', 1.1);
+    num9Map.set('主任医师、教授', 1.15);
+
+    let num10Map = new Map();
+    num10Map.set('是', 0.95);
+    num10Map.set('否', 1.0);
+
     function getInsertDiv(cell) {
         let cont = $(cell).html();
         let div;
@@ -175,36 +210,24 @@
             div = '<input class="form-control form-control-sm" value="' + cont + '">';
         } else if (cell.className === 'select') {
             div = '<select class="form-control form-control-sm">'
+            let keys = [];
             if (cell.id === 'num5') {
-                div += `<option ${cont === '0.8' ? 'selected' : ''}>0.8</option>`;
-                div += `<option ${cont === '1.0' ? 'selected' : ''}>1.0</option>`;
-                div += `<option ${cont === '1.2' ? 'selected' : ''}>1.2</option>`;
-                div += `<option ${cont === '1.4' ? 'selected' : ''}>1.4</option>`;
-                div += `<option ${cont === '1.6' ? 'selected' : ''}>1.6</option>`;
-                div += `<option ${cont === '1.8' ? 'selected' : ''}>1.8</option>`;
-                div += `<option ${cont === '2.0' ? 'selected' : ''}>2.0</option>`;
+                keys = num5Map.keys();
             } else if (cell.id === 'num6') {
-                div += `<option ${cont === '0.8' ? 'selected' : ''}>0.8</option>`;
-                div += `<option ${cont === '0.9' ? 'selected' : ''}>0.9</option>`;
-                div += `<option ${cont === '1.0' ? 'selected' : ''}>1.0</option>`;
-                div += `<option ${cont === '1.1' ? 'selected' : ''}>1.1</option>`;
+                keys = num6Map.keys();
             } else if (cell.id === 'num7') {
-                div += `<option ${cont === '0.8' ? 'selected' : ''}>0.8</option>`;
-                div += `<option ${cont === '0.9' ? 'selected' : ''}>0.9</option>`;
-                div += `<option ${cont === '1.0' ? 'selected' : ''}>1.0</option>`;
+                keys = num7Map.keys();
             } else if (cell.id === 'num8') {
-                div += `<option ${cont === '0.95' ? 'selected' : ''}>0.95</option>`;
-                div += `<option ${cont === '1.0' ? 'selected' : ''}>1.0</option>`;
-                div += `<option ${cont === '1.05' ? 'selected' : ''}>1.05</option>`;
+                keys = num8Map.keys();
             } else if (cell.id === 'num9') {
-                div += `<option ${cont === '1.0' ? 'selected' : ''}>1.0</option>`;
-                div += `<option ${cont === '1.05' ? 'selected' : ''}>1.05</option>`;
-                div += `<option ${cont === '1.1' ? 'selected' : ''}>1.1</option>`;
-                div += `<option ${cont === '1.15' ? 'selected' : ''}>1.15</option>`;
+                keys = num9Map.keys();
             } else if (cell.id === 'num10') {
-                div += `<option ${cont === '0.95' ? 'selected' : ''}>0.95</option>`;
-                div += `<option ${cont === '1.0' ? 'selected' : ''}>1.0</option>`;
+                keys = num10Map.keys();
             }
+            for (let key of keys) {
+                div += `<option ${cont === key ? 'selected' : ''}>${key}</option>`;
+            }
+
         }
         return div;
     }
@@ -232,12 +255,12 @@
         let num2 = Number($('#num2').text());
         let num3 = Number($('#num3').text());
         let num4 = Number($('#num4').text());
-        let num5 = Number($('#num5').text());
-        let num6 = Number($('#num6').text());
-        let num7 = Number($('#num7').text());
-        let num8 = Number($('#num8').text());
-        let num9 = Number($('#num9').text());
-        let num10 = Number($('#num10').text());
+        let num5 = Number(num5Map.get($('#num5').text()));
+        let num6 = Number(num6Map.get($('#num6').text()));
+        let num7 = Number(num7Map.get($('#num7').text()));
+        let num8 = Number(num8Map.get($('#num8').text()));
+        let num9 = Number(num9Map.get($('#num9').text()));
+        let num10 = Number(num10Map.get($('#num10').text()));
         
         // 综合环境系数
         let factor = num6 * num7 * num8;
