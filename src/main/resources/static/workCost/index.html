@@ -27,7 +27,7 @@
                     <tr>
                         <td>平均日薪酬</td>
                         <td id="num1" class="input" onclick="cellClicked(this)"></td>
-                        <td>元（每月按22天算）</td>
+                        <td>元（年收入÷365）</td>
                     </tr>
                     <tr>
                         <td>工作时长</td>
@@ -37,7 +37,7 @@
                     <tr>
                         <td>通勤时长</td>
                         <td id="num3" class="input" onclick="cellClicked(this)"></td>
-                        <td>小时</td>
+                        <td>上班通勤+下班通勤</td>
                     </tr>
                     <tr>
                         <td>摸鱼时长</td>
@@ -47,62 +47,71 @@
                     <tr>
                         <td>学历系数</td>
                         <td id="num5" class="select" onclick="cellClicked(this)"></td>
-                        <td>专科及以下0.8<br>
-                            普通本科1.0<br>
-                            985/211本科1.2<br>
-                            普通硕士1.4<br>
-                            985/211硕士1.6<br>
-                            普通博士1.8<br>
-                            985/211博士2.0
+                        <td>专科及以下 0.8<br>
+                            普通本科 1.0<br>
+                            985/211本科 1.2<br>
+                            普通硕士 1.4<br>
+                            985/211硕士 1.6<br>
+                            普通博士 1.8<br>
+                            985/211博士 2.0
                         </td>
                     </tr>
                     <tr>
                         <td>工作环境系数</td>
                         <td id="num6" class="select" onclick="cellClicked(this)"></td>
-                        <td>偏僻郊区工厂户外0.8<br>
-                            市内工厂户外0.9<br>
-                            普通1.0<br>
-                            CBD/体制内1.1
+                        <td>偏僻郊区工厂户外 0.8<br>
+                            市内工厂户外 0.9<br>
+                            普通 1.0<br>
+                            CBD/体制内 1.1
                         </td>
                     </tr>
                     <tr>
                         <td>异性环境系数</td>
                         <td id="num7" class="select" onclick="cellClicked(this)"></td>
-                        <td>没有0.9<br>
-                            不多不少1.0<br>
-                            很多1.1
+                        <td>很少 0.9<br>
+                            不多不少 1.0<br>
+                            很多 1.1
                         </td>
                     </tr>
                     <tr>
                         <td>同事环境系数</td>
                         <td id="num8" class="select" onclick="cellClicked(this)"></td>
-                        <td>SB很多0.95<br>
-                            普通很多1.0<br>
-                            优秀很多1.05
+                        <td>SB很多 0.95<br>
+                            普通很多 1.0<br>
+                            优秀很多 1.05
                         </td>
                     </tr>
                     <tr>
                         <td>职业资格系数</td>
                         <td id="num9" class="select" onclick="cellClicked(this)"></td>
-                        <td>无要求、二级1<br>
-                            建造造价监理1.05<br>
-                            建筑岩土结构1.1<br>
-                            主任医师、教授1.15
+                        <td>无要求、二级 1<br>
+                            建造造价监理 1.05<br>
+                            法考注会岩土结构 1.1<br>
+                            主任医师、教授 1.15
                         </td>
                     </tr>
                     <tr>
                         <td>上班时间系数</td>
                         <td id="num10" class="select" onclick="cellClicked(this)"></td>
-                        <td>8点以前0.7<br>
-                            8点及以后0.8<br>
-                            8点半及以后0.9<br>
-                            9点及以后1.0<br>
-                            10点及以后1.1<br>
+                        <td>8:00以前 0.7<br>
+                            8:00-8:29 0.8<br>
+                            8:30-8:59 0.9<br>
+                            9:00-9:59 1.0<br>
+                            10:00及以后 1.1<br>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>双休系数</td>
+                        <td id="num11" class="select" onclick="cellClicked(this)"></td>
+                        <td>双休 1.0<br>
+                            大小周 0.8<br>
+                            单休 0.7<br>
+                            不休 0.5
                         </td>
                     </tr>
                     <tr>
                         <td>综合环境系数</td>
-                        <td id="num11">0.00</td>
+                        <td id="num12">0.00</td>
                         <td>不要改</td>
                     </tr>
                     </tbody>
@@ -122,11 +131,11 @@
                         <td rowspan="2">工作性价比</td>
                         <td id="resultDesc">很惨</td>
                         <td rowspan="2">
-                            小于1很惨<br>
-                            大于1一般<br>
-                            大于2不错<br>
-                            大于4很爽<br>
-                            大于10爽到爆
+                            小于0.8很惨<br>
+                            大于0.8一般<br>
+                            大于1.5不错<br>
+                            大于2很爽<br>
+                            大于4爽到爆
                         </td>
                     </tr>
                     <tr>
@@ -189,7 +198,7 @@
     num6Map.set('CBD/体制内', 1.1);
 
     let num7Map = new Map();
-    num7Map.set('没有', 0.9);
+    num7Map.set('很少', 0.9);
     num7Map.set('不多不少', 1.0);
     num7Map.set('很多', 1.1);
 
@@ -201,15 +210,21 @@
     let num9Map = new Map();
     num9Map.set('无要求、二级', 1.0);
     num9Map.set('建造造价监理', 1.05);
-    num9Map.set('建筑岩土结构', 1.1);
+    num9Map.set('法考注会岩土结构', 1.1);
     num9Map.set('主任医师、教授', 1.15);
 
     let num10Map = new Map();
-    num10Map.set('8点以前', 0.7);
-    num10Map.set('8点及以后', 0.8);
-    num10Map.set('8点半及以后', 0.9);
-    num10Map.set('9点及以后', 1.0);
-    num10Map.set('10点及以后', 1.1);
+    num10Map.set('8:00以前', 0.7);
+    num10Map.set('8:00-8:29', 0.8);
+    num10Map.set('8:30-8:59', 0.9);
+    num10Map.set('9:00-9:59', 1.0);
+    num10Map.set('10:00及以后', 1.1);
+
+    let num11Map = new Map();
+    num11Map.set('双休', 1.0);
+    num11Map.set('大小周', 0.8);
+    num11Map.set('单休', 0.7);
+    num11Map.set('不休', 0.5);
 
     function getInsertDiv(cell) {
         let cont = $(cell).html();
@@ -231,6 +246,8 @@
                 keys = num9Map.keys();
             } else if (cell.id === 'num10') {
                 keys = num10Map.keys();
+            } else if (cell.id === 'num11') {
+                keys = num11Map.keys();
             }
             for (let key of keys) {
                 div += `<option ${cont === key ? 'selected' : ''}>${key}</option>`;
@@ -269,31 +286,32 @@
         let num8 = Number(num8Map.get($('#num8').text()));
         let num9 = Number(num9Map.get($('#num9').text()));
         let num10 = Number(num10Map.get($('#num10').text()));
-        
+        let num11 = Number(num11Map.get($('#num11').text()));
+
         // 综合环境系数
         let factor = num6 * num7 * num8;
-        $('#num11').html(factor.toFixed(2));
+        $('#num12').html(factor.toFixed(2));
         // 分母
-        let denominator = (35 * (num2 + num3 - 0.5 * num4) * num5 * num9) * num10;
+        let denominator = 35 * (num2 + num3 - 0.5 * num4 + 0.1) * num5 * num9 * num10;
         let result;
         if (denominator === 0) {
             result = 0;
         } else {
-            result = num1 * factor / denominator;
+            result = num1 * factor * num11 / denominator;
         }
         if (result >= 200) {
             $('#resultDesc').html("你是老板");
-        } else if (result >= 40) {
-            $('#resultDesc').html("神！工作");
         } else if (result >= 10) {
-            $('#resultDesc').html("爽到爆！");
+            $('#resultDesc').html("神！工作");
         } else if (result >= 4) {
-            $('#resultDesc').html("很爽");
+            $('#resultDesc').html("爽到爆！");
         } else if (result >= 2) {
+            $('#resultDesc').html("很爽");
+        } else if (result >= 1.5) {
             $('#resultDesc').html("不错");
-        } else if (result >= 1) {
+        } else if (result >= 0.8) {
             $('#resultDesc').html("一般");
-        } else if (result < 1) {
+        } else if (result < 0.8) {
             $('#resultDesc').html("很惨");
         }
         result = result.toFixed(2);
