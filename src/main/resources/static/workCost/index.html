@@ -49,20 +49,20 @@
                         <td id="num5" class="select" onclick="cellClicked(this)"></td>
                         <td>专科及以下0.8<br>
                             普通本科1.0<br>
-                            高级本科1.2<br>
+                            985/211本科1.2<br>
                             普通硕士1.4<br>
-                            高级硕士1.6<br>
+                            985/211硕士1.6<br>
                             普通博士1.8<br>
-                            高级博士2.0
+                            985/211博士2.0
                         </td>
                     </tr>
                     <tr>
                         <td>工作环境系数</td>
                         <td id="num6" class="select" onclick="cellClicked(this)"></td>
-                        <td>偏僻地区0.8<br>
-                            工厂户外0.9<br>
+                        <td>偏僻郊区工厂户外0.8<br>
+                            市内工厂户外0.9<br>
                             普通1.0<br>
-                            体制内1.1
+                            CBD/体制内1.1
                         </td>
                     </tr>
                     <tr>
@@ -91,10 +91,13 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>是否8:30前上班</td>
+                        <td>上班时间系数</td>
                         <td id="num10" class="select" onclick="cellClicked(this)"></td>
-                        <td>是0.95<br>
-                            否1.0<br>
+                        <td>8点以前0.7<br>
+                            8点及以后0.8<br>
+                            8点半及以后0.9<br>
+                            9点及以后1.0<br>
+                            10点及以后1.1<br>
                         </td>
                     </tr>
                     <tr>
@@ -119,9 +122,11 @@
                         <td rowspan="2">工作性价比</td>
                         <td id="resultDesc">很惨</td>
                         <td rowspan="2">
-                            低于0.8很惨<br>
-                            高于1.5很爽<br>
-                            高于2.0爽到爆
+                            小于1很惨<br>
+                            大于1一般<br>
+                            大于2不错<br>
+                            大于4很爽<br>
+                            大于10爽到爆
                         </td>
                     </tr>
                     <tr>
@@ -171,17 +176,17 @@
     let num5Map = new Map();
     num5Map.set('专科及以下', 0.8);
     num5Map.set('普通本科', 1.0);
-    num5Map.set('高级本科', 1.2);
+    num5Map.set('985/211本科', 1.2);
     num5Map.set('普通硕士', 1.4);
-    num5Map.set('高级硕士', 1.6);
+    num5Map.set('985/211硕士', 1.6);
     num5Map.set('普通博士', 1.8);
-    num5Map.set('高级博士', 2.0);
+    num5Map.set('985/211博士', 2.0);
 
     let num6Map = new Map();
-    num6Map.set('偏僻地区', 0.8);
-    num6Map.set('工厂户外', 0.9);
+    num6Map.set('偏僻郊区工厂户外', 0.8);
+    num6Map.set('市内工厂户外', 0.9);
     num6Map.set('普通', 1.0);
-    num6Map.set('体制内', 1.1);
+    num6Map.set('CBD/体制内', 1.1);
 
     let num7Map = new Map();
     num7Map.set('没有', 0.9);
@@ -200,8 +205,11 @@
     num9Map.set('主任医师、教授', 1.15);
 
     let num10Map = new Map();
-    num10Map.set('是', 0.95);
-    num10Map.set('否', 1.0);
+    num10Map.set('8点以前', 0.7);
+    num10Map.set('8点及以后', 0.8);
+    num10Map.set('8点半及以后', 0.9);
+    num10Map.set('9点及以后', 1.0);
+    num10Map.set('10点及以后', 1.1);
 
     function getInsertDiv(cell) {
         let cont = $(cell).html();
@@ -273,14 +281,20 @@
         } else {
             result = num1 * factor / denominator;
         }
-        if (result < 0.8) {
-            $('#resultDesc').html("很惨");
-        } else if (result >= 0.8 && result < 1.5) {
-            $('#resultDesc').html("一般");
-        } else if (result >= 1.5 && result < 2) {
+        if (result >= 200) {
+            $('#resultDesc').html("你是老板");
+        } else if (result >= 40) {
+            $('#resultDesc').html("神！工作");
+        } else if (result >= 10) {
+            $('#resultDesc').html("爽到爆！");
+        } else if (result >= 4) {
             $('#resultDesc').html("很爽");
         } else if (result >= 2) {
-            $('#resultDesc').html("爽到爆炸");
+            $('#resultDesc').html("不错");
+        } else if (result >= 1) {
+            $('#resultDesc').html("一般");
+        } else if (result < 1) {
+            $('#resultDesc').html("很惨");
         }
         result = result.toFixed(2);
         $('#result').html(result);
