@@ -28,22 +28,22 @@
                     <tr>
                         <td>平均日薪酬</td>
                         <td id="num1" class="input" onclick="cellClicked(this)"></td>
-                        <td>元（年收入÷365）</td>
+                        <td>年收入÷365（元）</td>
                     </tr>
                     <tr>
                         <td>工作时长</td>
                         <td id="num2" class="input" onclick="cellClicked(this)"></td>
-                        <td>下班时间-上班时间</td>
+                        <td>下班时间-上班时间（小时）</td>
                     </tr>
                     <tr>
                         <td>通勤时长</td>
                         <td id="num3" class="input" onclick="cellClicked(this)"></td>
-                        <td>上班通勤+下班通勤</td>
+                        <td>上班通勤+下班通勤（小时）</td>
                     </tr>
                     <tr>
                         <td>摸鱼时长</td>
                         <td id="num4" class="input" onclick="cellClicked(this)"></td>
-                        <td>不干活+吃饭+午休</td>
+                        <td>不干活+吃饭+午休（小时）</td>
                     </tr>
                     <tr>
                         <td>学历系数</td>
@@ -85,10 +85,11 @@
                     <tr>
                         <td>职业资格系数</td>
                         <td id="num9" class="select" onclick="cellClicked(this)"></td>
-                        <td>无要求、二级 1<br>
-                            建造造价监理 1.05<br>
-                            法考注会岩土结构 1.1<br>
-                            主任医师、教授 1.15
+                        <td>无要求 1<br>
+                            二级建造教资护士证券 1.05<br>
+                            一级建造法考医师注会 1.1<br>
+                            一级建筑岩土结构 1.15<br>
+                            主任医师、教授 1.2
                         </td>
                     </tr>
                     <tr>
@@ -102,12 +103,15 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>双休系数</td>
+                        <td>休假系数</td>
                         <td id="num11" class="select" onclick="cellClicked(this)"></td>
-                        <td>双休（月休8天） 1.0<br>
+                        <td>有寒暑假 1.3<br>
+                            上四休三（月休12天） 1.2<br>
+                            上二休一（月休10天）1.1<br>
+                            双休（月休8天） 1.0<br>
                             大小周（月休6天） 0.8<br>
                             单休（月休4天） 0.7<br>
-                            月双休（月休2天）0.6
+                            月双休（月休2天）0.6<br>
                             不休（月休0天） 0.5
                         </td>
                     </tr>
@@ -212,10 +216,11 @@
     num8Map.set('优秀很多', 1.05);
 
     let num9Map = new Map();
-    num9Map.set('无要求、二级', 1.0);
-    num9Map.set('建造造价监理', 1.05);
-    num9Map.set('法考注会岩土结构', 1.1);
-    num9Map.set('主任医师、教授', 1.15);
+    num9Map.set('无要求', 1.0);
+    num9Map.set('二级建造教资护士证券', 1.05);
+    num9Map.set('一级建造法考医师注会', 1.1);
+    num9Map.set('一级建筑岩土结构', 1.15);
+    num9Map.set('主任医师、教授', 1.2);
 
     let num10Map = new Map();
     num10Map.set('8:00以前', 0.7);
@@ -225,6 +230,9 @@
     num10Map.set('10:00及以后', 1.1);
 
     let num11Map = new Map();
+    num11Map.set('有寒暑假', 1.3);
+    num11Map.set('上四休三', 1.2);
+    num11Map.set('上二休一', 1.1);
     num11Map.set('双休', 1.0);
     num11Map.set('大小周', 0.8);
     num11Map.set('单休', 0.7);
