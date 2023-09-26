@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="css/index.css">
 </head>
 <body>
-
+<div id="errorMsg"></div>
 <div class="container">
     <div class="row">
         <div class="col-md-12" style="padding:2em 0;">
@@ -134,15 +134,18 @@
                 <table class="table table-bordered" id="result-table">
                     <tbody>
                     <tr>
-                        <td rowspan="2">工作性价比</td>
+                        <td rowspan="3">工作性价比</td>
                         <td id="resultDesc">很惨</td>
-                        <td rowspan="2">
+                        <td rowspan="3">
                             小于0.8很惨<br>
                             大于0.8一般<br>
                             大于1.5不错<br>
                             大于2很爽<br>
                             大于4爽到爆
                         </td>
+                    </tr>
+                    <tr>
+                        <td id="resultPercent"></td>
                     </tr>
                     <tr>
                         <td id="result">0.00</td>
@@ -329,8 +332,21 @@
         }
         result = result.toFixed(2);
         $('#result').html(result);
+        if (result === 'NaN' || result === 0.00) {
+            return;
+        }
+        $.ajax({
+            method: 'GET',
+            url: '/workCost/getPercent?result=' + result,
+            dataType: 'json',
+            contentType: 'application/json;charset=UTF-8'
+        }).done(function (response) {
+            if (response.code == 200) {
+                // 数据提交成功后处理返回结果
+                $('#resultPercent').html('超过' + response.data + '的打工人')
+            }
+        });
     });
-
 </script>
 </body>
 </html>
