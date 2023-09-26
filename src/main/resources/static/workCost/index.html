@@ -104,10 +104,11 @@
                     <tr>
                         <td>双休系数</td>
                         <td id="num11" class="select" onclick="cellClicked(this)"></td>
-                        <td>双休 1.0<br>
-                            大小周 0.8<br>
-                            单休 0.7<br>
-                            不休 0.5
+                        <td>双休（月休8天） 1.0<br>
+                            大小周（月休6天） 0.8<br>
+                            单休（月休4天） 0.7<br>
+                            月双休（月休2天）0.6
+                            不休（月休0天） 0.5
                         </td>
                     </tr>
                     <tr>
@@ -227,6 +228,7 @@
     num11Map.set('双休', 1.0);
     num11Map.set('大小周', 0.8);
     num11Map.set('单休', 0.7);
+    num11Map.set('月双休', 0.6);
     num11Map.set('不休', 0.5);
 
     function getInsertDiv(cell) {
