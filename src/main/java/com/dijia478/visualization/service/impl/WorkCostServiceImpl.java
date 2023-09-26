@@ -34,7 +34,7 @@ public class WorkCostServiceImpl implements WorkCostService {
 
     @Override
     public synchronized String getPercent(String result) throws IOException {
-        if (Double.parseDouble(result) > 200.0) {
+        if (Double.parseDouble(result) > 100.0) {
             // 肯定是胡填的，直接返回
             return "100%";
         }
