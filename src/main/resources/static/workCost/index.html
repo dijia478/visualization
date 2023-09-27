@@ -135,7 +135,11 @@
                 <table class="table table-bordered" id="result-table">
                     <tbody>
                     <tr>
-                        <td rowspan="3">工作性价比</td>
+                        <td rowspan="3">工作性价比<br>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#staticBackdrop">
+                                什么档次
+                            </button>
+                        </td>
                         <td id="resultDesc">很惨</td>
                         <td rowspan="3">
                             小于0.8很惨<br>
@@ -158,14 +162,91 @@
     </div>
 </div>
 
+<div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">告知</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                是否同意将你的结果发送到服务器并保存，参与所有人的排名？
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="disagree">不同意</button>
+                <button type="button" class="btn btn-primary" id="agree">同意</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <img src="../QR_code.png" class="rounded mx-auto d-block" >
 
 
 <script type="text/javascript">
 
+    let result = 0.00;
+    let activeCell = null;
+
     validated();
 
-    let activeCell = null;
+    $('#agree').on('click', function(){
+        document.getElementById("disagree").click();
+
+        let num1 = Number($('#num1').text());
+        let num2 = Number($('#num2').text());
+        let num3 = Number($('#num3').text());
+        let num4 = Number($('#num4').text());
+        let num5 = Number(num5Map.get($('#num5').text()));
+        let num6 = Number(num6Map.get($('#num6').text()));
+        let num7 = Number(num7Map.get($('#num7').text()));
+        let num8 = Number(num8Map.get($('#num8').text()));
+        let num9 = Number(num9Map.get($('#num9').text()));
+        let num10 = Number(num10Map.get($('#num10').text()));
+        let num11 = Number(num11Map.get($('#num11').text()));
+
+        if (result === 'NaN' || result === 0.00) {
+            return;
+        }
+        $.ajax({
+            method: 'GET',
+            url: '/workCost/getPercent?result=' + result,
+            dataType: 'json',
+            contentType: 'application/json;charset=UTF-8'
+        }).done(function (response) {
+            if (response.code == 200) {
+                // 数据提交成功后处理返回结果
+                $('#resultPercent').html(`您已打败<br><span style="color: #f63e3e">${response.data}</span><br>的打工人`)
+            }
+        });
+        $.ajax({
+            method: 'POST',
+            url: '/workCost/save',
+            dataType: 'json',
+            contentType: 'application/json;charset=UTF-8',
+            data: JSON.stringify({
+                num1: num1,
+                num2: num2,
+                num3: num3,
+                num4: num4,
+                num5: num5,
+                num6: num6,
+                num7: num7,
+                num8: num8,
+                num9: num9,
+                num10: num10,
+                num11: num11,
+                result: result
+            }),
+        }).done(function (response) {
+            if (response.code == 602) {
+                // 数据提交失败后处理
+                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
+            }
+        });
+    });
 
     function cellClicked(cell) {
         if (activeCell === cell) {
@@ -345,7 +426,7 @@
         $('#num12').html(factor.toFixed(2));
         // 分母
         let denominator = 35 * (num2 + num3 - 0.5 * num4 + 0.1) * num5 * num9 * num10;
-        let result;
+
         if (denominator === 0) {
             result = 0;
         } else {
@@ -371,42 +452,6 @@
         if (result === 'NaN' || result === 0.00) {
             return;
         }
-        $.ajax({
-            method: 'GET',
-            url: '/workCost/getPercent?result=' + result,
-            dataType: 'json',
-            contentType: 'application/json;charset=UTF-8'
-        }).done(function (response) {
-            if (response.code == 200) {
-                // 数据提交成功后处理返回结果
-                $('#resultPercent').html(`您已打败<br><span style="color: #f63e3e">${response.data}</span><br>的打工人`)
-            }
-        });
-        $.ajax({
-            method: 'POST',
-            url: '/workCost/save',
-            dataType: 'json',
-            contentType: 'application/json;charset=UTF-8',
-            data: JSON.stringify({
-                num1: num1,
-                num2: num2,
-                num3: num3,
-                num4: num4,
-                num5: num5,
-                num6: num6,
-                num7: num7,
-                num8: num8,
-                num9: num9,
-                num10: num10,
-                num11: num11,
-                result: result
-            }),
-        }).done(function (response) {
-            if (response.code == 602) {
-                // 数据提交失败后处理
-                $('#errorMsg').html('<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>输入错误！</strong>'+response.data+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>').show();
-            }
-        });
     });
 </script>
 </body>
