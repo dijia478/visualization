@@ -1,5 +1,7 @@
 package com.dijia478.visualization.service;
 
+import com.dijia478.visualization.bean.WorkCostDataDTO;
+
 import java.io.IOException;
 
 /**
@@ -18,4 +20,5 @@ public interface WorkCostService {
      */
     String getPercent(String result) throws IOException;
 
+    void save(WorkCostDataDTO data) throws IOException;
 }

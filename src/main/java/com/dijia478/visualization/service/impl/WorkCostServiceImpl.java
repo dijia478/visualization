@@ -2,20 +2,24 @@ package com.dijia478.visualization.service.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import com.dijia478.visualization.bean.WorkCostDataDTO;
 import com.dijia478.visualization.service.WorkCostService;
+import com.dijia478.visualization.util.MonitorUtil;
 import com.dijia478.visualization.util.NumUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,37 +31,54 @@ import java.util.stream.Collectors;
 @Service
 public class WorkCostServiceImpl implements WorkCostService {
 
-    private static final String FILE_NAME = "classpath:percent.json";
+    private static final String PERCENT_FILE_NAME = "classpath:percent.json";
+
+    private static final String WORK_COST_DATA_FILE_NAME = "classpath:workCostData.json";
 
     @Autowired
     private ResourceLoader resourceLoader;
 
     @Override
-    public synchronized String getPercent(String result) throws IOException {
-        if (Double.parseDouble(result) > 100.0) {
-            // 肯定是胡填的，直接返回
-            return "100%";
-        }
-        Resource resource = resourceLoader.getResource(FILE_NAME);
-        String content = new String(Files.readAllBytes(resource.getFile().toPath()));
-        JSONArray jsonArray = JSON.parseArray(content);
-        jsonArray.add(result);
+    public String getPercent(String result) throws IOException {
+        synchronized (PERCENT_FILE_NAME) {
+            Resource resource = resourceLoader.getResource(PERCENT_FILE_NAME);
+            String content = new String(Files.readAllBytes(resource.getFile().toPath()));
+            JSONArray jsonArray = JSON.parseArray(content);
+            jsonArray.add(result);
 
-        List<Object> collect = jsonArray.stream().sorted(Comparator.comparingDouble(o -> Double.parseDouble(o.toString())).reversed()).collect(Collectors.toList());
-        try (FileWriter writer = new FileWriter(resource.getFile())) {
-            writer.write(JSON.toJSONString(collect));
-        }
+            List<Object> collect = jsonArray.stream().sorted(Comparator.comparingDouble(o -> Double.parseDouble(o.toString())).reversed()).collect(Collectors.toList());
+            try (FileWriter writer = new FileWriter(resource.getFile())) {
+                writer.write(JSON.toJSONString(collect));
+            }
 
-        String percent = "";
-        int j = 0;
-        for (int i = collect.size() - 1; i >= 0; i--, j++) {
-            if (result.equals(collect.get(i).toString())) {
-                BigDecimal a = new BigDecimal(j * 100);
-                BigDecimal b = new BigDecimal(collect.size());
-                percent = NumUtil.div(a, b).setScale(2, RoundingMode.HALF_UP) + "%";
-                break;
+            String percent = "";
+            int j = 0;
+            for (int i = collect.size() - 1; i >= 0; i--, j++) {
+                if (result.equals(collect.get(i).toString())) {
+                    BigDecimal a = new BigDecimal(j * 100);
+                    BigDecimal b = new BigDecimal(collect.size());
+                    percent = NumUtil.div(a, b).setScale(2, RoundingMode.HALF_UP) + "%";
+                    break;
+                }
+            }
+            return percent;
+        }
+    }
+
+    @Override
+    public synchronized void save(WorkCostDataDTO data) throws IOException {
+        synchronized (WORK_COST_DATA_FILE_NAME) {
+            HttpServletRequest request = ((ServletRequestAttributes)(RequestContextHolder.currentRequestAttributes())).getRequest();
+            String ip = MonitorUtil.getIpAddress(request);
+            Resource resource = resourceLoader.getResource(WORK_COST_DATA_FILE_NAME);
+            String content = new String(Files.readAllBytes(resource.getFile().toPath()));
+            JSONObject jsonObject = JSON.parseObject(content);
+            jsonObject.put(ip, JSON.toJSONString(data));
+            try (FileWriter writer = new FileWriter(resource.getFile())) {
+                writer.write(jsonObject.toJSONString());
             }
         }
-        return percent;
+
     }
+
 }

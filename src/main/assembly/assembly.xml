@@ -12,6 +12,7 @@
                 <include>application.yml</include>
                 <include>log4j2.xml</include>
                 <include>percent.json</include>
+                <include>workCostData.json</include>
             </includes>
         </fileSet>
         <fileSet>
