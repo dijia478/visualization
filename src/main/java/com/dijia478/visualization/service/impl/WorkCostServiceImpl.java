@@ -41,16 +41,19 @@ public class WorkCostServiceImpl implements WorkCostService {
     @Override
     public String getPercent(String result) throws IOException {
         synchronized (PERCENT_FILE_NAME) {
+            // 读取数据
             Resource resource = resourceLoader.getResource(PERCENT_FILE_NAME);
             String content = new String(Files.readAllBytes(resource.getFile().toPath()));
             JSONArray jsonArray = JSON.parseArray(content);
-            jsonArray.add(result);
 
+            // 排名并保存数据
+            jsonArray.add(result);
             List<Object> collect = jsonArray.stream().sorted(Comparator.comparingDouble(o -> Double.parseDouble(o.toString())).reversed()).collect(Collectors.toList());
             try (FileWriter writer = new FileWriter(resource.getFile())) {
                 writer.write(JSON.toJSONString(collect));
             }
 
+            // 计算结果
             String percent = "";
             int j = 0;
             for (int i = collect.size() - 1; i >= 0; i--, j++) {
