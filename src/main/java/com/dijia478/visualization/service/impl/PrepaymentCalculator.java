@@ -145,11 +145,13 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
                 if (beforePrepaymentDTO.getPrepaymentMonth().equals(prepaymentDTO.getPrepaymentMonth())) {
                     beforePrepaymentDTO.setPrepaymentMonth(prepaymentDTO.getPrepaymentMonth());
                     beforePrepaymentDTO.setRepayment(beforePrepaymentDTO.getRepayment() + prepaymentDTO.getRepayment());
-                    // 这里有点问题，默认取后面那个？？不知道，银行应该是精确到了天
-                    beforePrepaymentDTO.setNewRate(prepaymentDTO.getNewRate());
-                    beforePrepaymentDTO.setNewType(prepaymentDTO.getNewType());
-                    beforePrepaymentDTO.setRepaymentType(prepaymentDTO.getRepaymentType());
-                    beforePrepaymentDTO.setLprRate(prepaymentDTO.getLprRate());
+                    // 这里有点问题，如果前一个是Lpr调整的，就取后面那个？？不知道，银行应该是精确到了天
+                    if (Integer.valueOf(1).equals(beforePrepaymentDTO.getLprRate())) {
+                        beforePrepaymentDTO.setNewRate(prepaymentDTO.getNewRate());
+                        beforePrepaymentDTO.setNewType(prepaymentDTO.getNewType());
+                        beforePrepaymentDTO.setRepaymentType(prepaymentDTO.getRepaymentType());
+                        beforePrepaymentDTO.setLprRate(prepaymentDTO.getLprRate());
+                    }
                     continue;
                 }
             }
