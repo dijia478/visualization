@@ -31,6 +31,7 @@ public class LoanUtil {
         FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2022-05-20"), new BigDecimal("4.45"));
         FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2022-08-22"), new BigDecimal("4.30"));
         FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2023-06-20"), new BigDecimal("4.20"));
+        FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2024-02-20"), new BigDecimal("3.95"));
     }
 
     /**
