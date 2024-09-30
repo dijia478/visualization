@@ -44,7 +44,7 @@ public class LoanController {
     @PostMapping("/calculator/prepaymentCalculator")
     public TotalLoan prepaymentCalculator(@RequestBody @Validated StockLoanDTO data) {
         validatedPrepayment(data);
-        LoanUtil.addPrepaymentList(data.getYear(), data.getRate(), data.getType(), data.getFirstPaymentDate(), data.getRateAdjustmentDay(), data.getPrepaymentList());
+        LoanUtil.addPrepaymentList(data.getYear(), data.getRate(), data.getType(), data.getFirstPaymentDate(), data.getRateAdjustmentDay(), data.getFirstHouse(), data.getPrepaymentList());
         LoanBO loanBO = convertParam(data);
         TotalLoan totalLoan = prepaymentCalculator.compute(loanBO);
         setScale(totalLoan, data);
@@ -115,7 +115,6 @@ public class LoanController {
      * @param data
      */
     private void validatedPrepayment(LoanDTO data) {
-        int totalMonth = data.getYear() * 12;
         int amount = data.getAmount();
         List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
         for (PrepaymentDTO prepaymentDTO : prepaymentList) {

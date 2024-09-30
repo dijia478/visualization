@@ -12,6 +12,7 @@ function sendRequest() {
         $('#container7').html("");
 
         let prepayment = $('input[name="prepayment"]:checked').val();
+        let firstHouse = $('input[name="firstHouse"]:checked').val();
         const prepaymentList = [];
         if (prepayment === "1") {
             const prepaymentElements = document.getElementsByName('prepayment-template');
@@ -40,6 +41,7 @@ function sendRequest() {
                 firstPaymentDate: $("#firstPaymentDate").val(),
                 rateAdjustmentDay: $('input[name="rateAdjustmentDay"]:checked').val(),
                 prepayment: prepayment,
+                firstHouse: firstHouse,
                 prepaymentList: prepaymentList,
             }),
         }).done(function (response) {

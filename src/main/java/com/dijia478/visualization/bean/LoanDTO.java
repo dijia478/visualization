@@ -35,6 +35,8 @@ public class LoanDTO {
 
     private Integer prepayment;
 
+    private Integer firstHouse;
+
     @Valid
     private List<PrepaymentDTO> prepaymentList;
 

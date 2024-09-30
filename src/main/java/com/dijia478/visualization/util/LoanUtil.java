@@ -32,6 +32,8 @@ public class LoanUtil {
         FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2022-08-22"), new BigDecimal("4.30"));
         FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2023-06-20"), new BigDecimal("4.20"));
         FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2024-02-20"), new BigDecimal("3.95"));
+        FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2024-07-22"), new BigDecimal("3.85"));
+//        FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2024-12-20"), new BigDecimal("3.35"));
     }
 
     /**
@@ -49,13 +51,14 @@ public class LoanUtil {
     /**
      * 添加lpr变动导致的提前还款计划
      *
-     * @param rate 原始贷款利率
-     * @param type 原始还款方式
-     * @param firstPaymentDate 第一次还贷日
+     * @param rate              原始贷款利率
+     * @param type              原始还款方式
+     * @param firstPaymentDate  第一次还贷日
      * @param rateAdjustmentDay 利率调整日，1：1月1日，2：放贷日
-     * @param prepaymentList 提前还款计划
+     * @param firstHouse        是否首套房
+     * @param prepaymentList    提前还款计划
      */
-    public static void addPrepaymentList(Integer year, Double rate, Integer type, String firstPaymentDate, Integer rateAdjustmentDay, List<PrepaymentDTO> prepaymentList) {
+    public static void addPrepaymentList(Integer year, Double rate, Integer type, String firstPaymentDate, Integer rateAdjustmentDay, Integer firstHouse, List<PrepaymentDTO> prepaymentList) {
         Date loanDate = getLoanDate(firstPaymentDate);
         String monthAndDay = DateUtil.format(loanDate, "MM-dd");
         BigDecimal addPoint = BigDecimal.ZERO;
@@ -96,14 +99,19 @@ public class LoanUtil {
             }
 
             if (DateUtil.betweenMonth(dateTime, rateAdjustmentDate, true) == 0) {
-                if (dateTime.isAfter(DateUtil.parseDate("2023-09-24"))) {
+                if (dateTime.isAfter(DateUtil.parseDate("2023-09-24")) && firstHouse == 1) {
                     if (DateUtil.isIn(loanDate, DateUtil.parseDate("2000-01-01"), DateUtil.parseDate("2022-05-14"))) {
                         // 2019年10月8日（含）-2022年5月14日（含），下限按LPR算
                         addPoint = BigDecimal.ZERO;
-                    } else if (DateUtil.isIn(loanDate, DateUtil.parseDate("2019-10-8"), DateUtil.parseDate("2059-12-31"))) {
+                    } else if (DateUtil.isIn(loanDate, DateUtil.parseDate("2022-05-15"), DateUtil.parseDate("2023-08-31"))) {
                         // 2022年5月15日（含）-2023年8月31日（含），下限按LPR-20个基点算
                         addPoint = new BigDecimal("-0.2");
                     }
+                }
+
+                // 2024年10月31日之后，下限统一按LPR-30个基点算
+                if (dateTime.isAfter(DateUtil.parseDate("2024-10-31"))) {
+                    addPoint = new BigDecimal("-0.3");
                 }
 
                 BigDecimal nowRate = BigDecimal.ZERO;
@@ -133,8 +141,34 @@ public class LoanUtil {
             }
         }
 
-        // 下面的代码如果到2023-9-25之后，需要进行修改，放到上面的循环里。目前先这么写。
+        // 2023年9月25日存量房贷利率调整
+        adjustmentOfOutstandingLoans2023(year, type, rateAdjustmentDay, firstHouse, prepaymentList, loanDate, monthAndDay);
+        // 2024年10月31日存量房贷利率调整
+        adjustmentOfOutstandingLoans2024(year, type, rateAdjustmentDay, firstHouse, prepaymentList, loanDate, monthAndDay);
+    }
+
+    /**
+     * 2023年9月25日存量房贷利率调整
+     *
+     * @param year
+     * @param type
+     * @param rateAdjustmentDay
+     * @param firstHouse
+     * @param prepaymentList
+     * @param loanDate
+     * @param monthAndDay
+     */
+    private static void adjustmentOfOutstandingLoans2023(Integer year, Integer type, Integer rateAdjustmentDay, Integer firstHouse, List<PrepaymentDTO> prepaymentList, Date loanDate, String monthAndDay) {
+        // 2023-9-25之后申请的贷款，不需要下面的逻辑
+        if (DateUtil.parseDate("2023-09-25").isBefore(loanDate)) {
+            return;
+        }
+        // 2023-9-25之前就还完的贷款，不需要下面的逻辑
         if (DateUtil.parseDate("2023-09-25").isAfter(DateUtil.offset(loanDate, DateField.YEAR, year))) {
+            return;
+        }
+        // 非首套房，不需要下面的逻辑
+        if (firstHouse == 0) {
             return;
         }
         String loanYear = "2023";
@@ -157,7 +191,7 @@ public class LoanUtil {
             if (DateUtil.isIn(loanDate, DateUtil.parseDate("2000-01-01"), DateUtil.parseDate("2022-05-14"))) {
                 // 2019年10月8日（含）-2022年5月14日（含），下限按LPR算
                 nowRate = NumberUtil.add(0, entry.getValue());
-            } else if (DateUtil.isIn(loanDate, DateUtil.parseDate("2019-10-8"), DateUtil.parseDate("2059-12-31"))) {
+            } else if (DateUtil.isIn(loanDate, DateUtil.parseDate("2022-05-15"), DateUtil.parseDate("2023-08-31"))) {
                 // 2022年5月15日（含）-2023年8月31日（含），下限按LPR-20个基点算
                 nowRate = NumberUtil.add(-0.2, entry.getValue());
             }
@@ -169,6 +203,63 @@ public class LoanUtil {
             prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2023-09-25"), true) + 1);
         } else {
             prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2023-09-25"), true));
+        }
+        prepaymentDTO.setRepayment(0);
+        prepaymentDTO.setNewRate(nowRate);
+        prepaymentDTO.setNewType(type);
+        prepaymentDTO.setRepaymentType(2);
+        prepaymentDTO.setLprRate(1);
+        prepaymentList.add(prepaymentDTO);
+    }
+
+    /**
+     * 2024年10月31日存量房贷利率调整
+     *
+     * @param year
+     * @param type
+     * @param rateAdjustmentDay
+     * @param firstHouse
+     * @param prepaymentList
+     * @param loanDate
+     * @param monthAndDay
+     */
+    private static void adjustmentOfOutstandingLoans2024(Integer year, Integer type, Integer rateAdjustmentDay, Integer firstHouse, List<PrepaymentDTO> prepaymentList, Date loanDate, String monthAndDay) {
+        // 2024-10-31之后申请的贷款，不需要下面的逻辑
+        if (DateUtil.parseDate("2024-10-31").isBefore(loanDate)) {
+            return;
+        }
+        // 2024-10-31之前就还完的贷款，不需要下面的逻辑
+        if (DateUtil.parseDate("2024-10-31").isAfter(DateUtil.offset(loanDate, DateField.YEAR, year))) {
+            return;
+        }
+        String loanYear = "2024";
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(loanDate);
+        if (calendar.get(Calendar.YEAR) == 2024) {
+            loanYear = "2025";
+        }
+        Date rateAdjustmentDate;
+        if (Integer.valueOf(1).equals(rateAdjustmentDay)) {
+            rateAdjustmentDate = DateUtil.parse(loanYear + "-01-01");
+        } else {
+            rateAdjustmentDate = DateUtil.parse(loanYear + "-" + monthAndDay);
+        }
+        BigDecimal nowRate = BigDecimal.ZERO;
+        for (Map.Entry<Date, BigDecimal> entry : FIVE_YEAR_LPR_MAP.entrySet()) {
+            if (!entry.getKey().before(rateAdjustmentDate)) {
+                continue;
+            }
+
+            // 下限按LPR-30个基点算
+            nowRate = NumberUtil.add(-0.3, entry.getValue());
+            break;
+        }
+
+        PrepaymentDTO prepaymentDTO = new PrepaymentDTO();
+        if (DateUtil.dayOfMonth(loanDate) <= 31) {
+            prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2024-10-31"), true) + 1);
+        } else {
+            prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2024-10-31"), true));
         }
         prepaymentDTO.setRepayment(0);
         prepaymentDTO.setNewRate(nowRate);

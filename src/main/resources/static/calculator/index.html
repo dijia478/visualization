@@ -55,9 +55,9 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="rate" class="col-sm col-form-label">贷款利率</label>
+                <label for="rate" class="col-sm col-form-label">初始贷款利率</label>
                 <div class="input-group mb-3 col-sm-10">
-                    <input type="text" class="form-control" id="rate" name="rate" placeholder="例如：4.2，即年化利率4.2%" required>
+                    <input type="text" class="form-control" id="rate" name="rate" placeholder="例如：4.2，即第一次发放贷款时年化利率4.2%" required>
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
                     </div>
@@ -93,6 +93,19 @@
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="rateAdjustmentDay" id="rateAdjustmentDay2" value="2"/>
                         <label class="form-check-label" for="rateAdjustmentDay2">每年放贷日</label>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="form-group row">
+                <legend class="col-form-label col-sm float-sm-left pt-0">是否首套房</legend>
+                <div class="col-sm-10">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="firstHouse" id="firstHouse1" value="0">
+                        <label class="form-check-label" for="firstHouse1">否</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="firstHouse" id="firstHouse2" value="1" checked>
+                        <label class="form-check-label" for="firstHouse2">是</label>
                     </div>
                 </div>
             </fieldset>
