@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蛇年上班倒计时</title>
+    <style>
+        body::before {
+            content: "";
+            position: fixed; /* 使伪元素覆盖整个视口 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('a.jpg'); /* 背景图片 */
+            background-size: cover; /* 背景图铺满页面 */
+            filter: brightness(40%); /* 减少亮度来使背景图片变暗 */
+            z-index: -1; /* 确保背景在文本之下 */
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            /*background-color: #f0f0f0;*/
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .countdown {
+            text-align: center;
+            font-size: 36px;
+            /*font-weight: bold;*/
+            color: #ffffff;
+            position: relative;
+        }
+
+        #lunar-countdown {
+            color: #ffffff;
+        }
+
+        #countdown-display,#countdown-display1 {
+            font-weight: bold;
+        }
+
+        .countdown span {
+            margin: 0 10px;
+            display: inline-block;
+            transform-origin: bottom center;
+        }
+
+        .rotate {
+            animation: rotateAndFall 1s ease-in-out;
+        }
+
+        p {
+            font-size: 18px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .additional-timer {
+            font-size: 24px;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        .lunar-info {
+            font-size: 20px;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        /* 响应式设计：调整字体大小和布局 */
+        @media screen and (max-width: 1080px) {
+            .countdown {
+                font-size: 26px;
+            }
+
+            #a {
+                font-size: 18px;
+            }
+
+            #b {
+                font-size: 14px;
+            }
+
+            #lunar-countdown {
+                font-size: 14px;
+            }
+
+            #lunar-date {
+                color: #9f9f9f;
+                font-size: 14px;
+            }
+        }
+
+
+        @keyframes rotateAndFall {
+            0% {
+                transform: rotate(0deg); /* 初始状态，旋转0度 */
+                /*transform: translateY(0); !* 初始位置 *!*/
+                opacity: 1;
+            }
+            50% {
+                transform: rotate(180deg); /* 顺时针旋转180度 */
+                opacity: 1;
+            }
+            100% {
+                transform: rotate(170deg) translateY(-10px) translateX(-5px); /* 旋转180度后向下掉落 */
+                opacity: 0; /* 完全透明 */
+            }
+        }
+    </style>
+    <script type="text/javascript" src="js/lunar.js"></script>
+</head>
+<body>
+<div class="countdown">
+    <p id="z">距离2025蛇年春节还有</p>
+    <div id="countdown-display1">
+        <span id="days1"></span>天<span id="hours1"></span>时<span id="minutes1"></span>分<span id="seconds1" class="rotate"></span>秒
+    </div>
+    <br>
+
+    <p id="a">距离2025蛇年开始上班还有</p>
+        <div id="countdown-display">
+            <span id="days"></span>天<span id="hours"></span>时<span id="minutes"></span>分<span id="seconds" class="rotate"></span>秒
+        </div>
+    <br>
+
+    <div class="additional-timer">
+        <p id="lunar-countdown"></p>
+    </div>
+
+    <div class="lunar-info">
+        <p id="lunar-date"></p>
+    </div>
+    <br>
+    <img src="../QR_code.png" class="rounded mx-auto d-block" style="width:30%">
+</div>
+
+<script>
+    let lastDays, lastHours, lastMinutes, lastSeconds;
+    let lastDays1, lastHours1, lastMinutes1, lastSeconds1;
+    let firstLoad1 = {
+        days1: true,
+        hours1: true,
+        minutes1: true,
+        seconds1: true
+    };
+    let firstLoad = {
+        days: true,
+        hours: true,
+        minutes: true,
+        seconds: true
+    }; // 每个元素的第一次加载标记
+
+    function updateCountdown1() {
+        const targetDate = new Date('2025-01-29T00:00:00'); // 设定目标时间
+        const now = new Date();
+        const timeLeft = targetDate - now;
+
+        if (timeLeft <= 0) {
+            document.getElementById("countdown-display1").innerHTML = "新年到！";
+            return;
+        }
+
+        const days1 = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        const hours1 = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes1 = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds1 = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+        // 只有在数字发生变化时才触发旋转和掉落效果
+        if (days1 !== lastDays1) {
+            document.getElementById("days1").textContent = days1;
+            updateRotationEffect("days1");
+        }
+        if (hours1 !== lastHours1) {
+            document.getElementById("hours1").textContent = hours1;
+            updateRotationEffect("hours1");
+        }
+        if (minutes1 !== lastMinutes1) {
+            document.getElementById("minutes1").textContent = minutes1;
+            updateRotationEffect("minutes1");
+        }
+        if (seconds1 !== lastSeconds1) {
+            document.getElementById("seconds1").textContent = seconds1;
+            updateRotationEffect("seconds1");
+        }
+
+        lastDays1 = days1;
+        lastHours1 = hours1;
+        lastMinutes1 = minutes1;
+        lastSeconds1 = seconds1;
+    }
+
+    function updateCountdown() {
+        const targetDate = new Date('2025-02-05T00:00:00'); // 设定目标时间
+        const now = new Date();
+        const timeLeft = targetDate - now;
+
+        if (timeLeft <= 0) {
+            document.getElementById("countdown-display").innerHTML = "上班时间到！";
+            return;
+        }
+
+        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+        // 只有在数字发生变化时才触发旋转和掉落效果
+        if (days !== lastDays) {
+            document.getElementById("days").textContent = days;
+            updateRotationEffect("days");
+        }
+        if (hours !== lastHours) {
+            document.getElementById("hours").textContent = hours;
+            updateRotationEffect("hours");
+        }
+        if (minutes !== lastMinutes) {
+            document.getElementById("minutes").textContent = minutes;
+            updateRotationEffect("minutes");
+        }
+        if (seconds !== lastSeconds) {
+            document.getElementById("seconds").textContent = seconds;
+            updateRotationEffect("seconds");
+        }
+
+        lastDays = days;
+        lastHours = hours;
+        lastMinutes = minutes;
+        lastSeconds = seconds;
+    }
+
+    function updateLunarCountdown() {
+        const lunarTargetDate = new Date('2024-02-18T00:00:00'); // 设定2024年春节结束的时间
+        const now = new Date();
+        const timeLeft = now - lunarTargetDate;
+
+        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+        document.getElementById("lunar-countdown").innerHTML =
+            `距离2024龙年开始上班已经 ${days}天${hours}时${minutes}分${seconds}秒`;
+    }
+
+
+
+    function updateLunarDate() {
+        const currentDate = new Date();
+        var lunar = Lunar.fromDate(currentDate);
+
+        // 获取阳历的日期
+        const solarDateStr = currentDate.toLocaleString('zh-CN', { weekday: 'long' });
+
+        const formattedDate = `${currentDate.getFullYear()}年${currentDate.getMonth() + 1}月${currentDate.getDate()}日 ${solarDateStr} ${formatTime(currentDate)}`;
+
+        document.getElementById("lunar-date").innerHTML =
+            `${formattedDate} 农历${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
+    }
+
+    const formatTime = (date) => {
+        const HH = String(date.getHours()).padStart(2, '0');
+        const mm = String(date.getMinutes()).padStart(2, '0');
+        const ss = String(date.getSeconds()).padStart(2, '0');
+
+        return `${HH}:${mm}:${ss}`;
+    }
+
+    // 更新旋转效果的函数
+    function updateRotationEffect(elementId) {
+        const element = document.getElementById(elementId);
+        // 如果是第一次加载该元素，不执行动画
+        if (firstLoad[elementId]) {
+            firstLoad[elementId] = false; // 设置标记为false，之后的更新都将触发动画
+            return;
+        }
+        if (firstLoad1[elementId]) {
+            firstLoad1[elementId] = false;
+            return;
+        }
+
+        element.classList.remove("rotate");
+        void element.offsetWidth; // 强制重绘
+        element.classList.add("rotate");
+    }
+
+    setInterval(updateCountdown1, 1000);
+    setInterval(updateCountdown, 1000);
+    setInterval(updateLunarCountdown, 1000);
+    setInterval(updateLunarDate, 1000);
+    updateCountdown1();
+    updateCountdown();
+    updateLunarCountdown();
+    updateLunarDate();
+</script>
+</body>
+</html>

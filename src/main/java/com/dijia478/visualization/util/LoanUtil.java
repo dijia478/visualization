@@ -33,6 +33,8 @@ public class LoanUtil {
         FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2023-06-20"), new BigDecimal("4.20"));
         FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2024-02-20"), new BigDecimal("3.95"));
         FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2024-07-22"), new BigDecimal("3.85"));
+        FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2024-10-21"), new BigDecimal("3.60"));
+        FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2025-05-20"), new BigDecimal("3.50"));
 //        FIVE_YEAR_LPR_MAP.put(DateUtil.parse("2024-12-20"), new BigDecimal("3.35"));
     }
 
@@ -110,7 +112,7 @@ public class LoanUtil {
                 }
 
                 // 2024年10月31日之后，下限统一按LPR-30个基点算
-                if (dateTime.isAfter(DateUtil.parseDate("2024-10-31"))) {
+                if (dateTime.isAfter(DateUtil.parseDate("2024-10-25"))) {
                     addPoint = new BigDecimal("-0.3");
                 }
 
@@ -143,7 +145,7 @@ public class LoanUtil {
 
         // 2023年9月25日存量房贷利率调整
         adjustmentOfOutstandingLoans2023(year, type, rateAdjustmentDay, firstHouse, prepaymentList, loanDate, monthAndDay);
-        // 2024年10月31日存量房贷利率调整
+        // 2024年10月25日存量房贷利率调整
         adjustmentOfOutstandingLoans2024(year, type, rateAdjustmentDay, firstHouse, prepaymentList, loanDate, monthAndDay);
     }
 
@@ -224,12 +226,12 @@ public class LoanUtil {
      * @param monthAndDay
      */
     private static void adjustmentOfOutstandingLoans2024(Integer year, Integer type, Integer rateAdjustmentDay, Integer firstHouse, List<PrepaymentDTO> prepaymentList, Date loanDate, String monthAndDay) {
-        // 2024-10-31之后申请的贷款，不需要下面的逻辑
-        if (DateUtil.parseDate("2024-10-31").isBefore(loanDate)) {
+        // 2024-10-25之后申请的贷款，不需要下面的逻辑
+        if (DateUtil.parseDate("2024-10-25").isBefore(loanDate)) {
             return;
         }
-        // 2024-10-31之前就还完的贷款，不需要下面的逻辑
-        if (DateUtil.parseDate("2024-10-31").isAfter(DateUtil.offset(loanDate, DateField.YEAR, year))) {
+        // 2024-10-25之前就还完的贷款，不需要下面的逻辑
+        if (DateUtil.parseDate("2024-10-25").isAfter(DateUtil.offset(loanDate, DateField.YEAR, year))) {
             return;
         }
         String loanYear = "2024";
@@ -256,10 +258,10 @@ public class LoanUtil {
         }
 
         PrepaymentDTO prepaymentDTO = new PrepaymentDTO();
-        if (DateUtil.dayOfMonth(loanDate) <= 31) {
-            prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2024-10-31"), true) + 1);
+        if (DateUtil.dayOfMonth(loanDate) <= 25) {
+            prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2024-10-25"), true) + 1);
         } else {
-            prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2024-10-31"), true));
+            prepaymentDTO.setPrepaymentMonth((int)DateUtil.betweenMonth(loanDate, DateUtil.parseDate("2024-10-25"), true));
         }
         prepaymentDTO.setRepayment(0);
         prepaymentDTO.setNewRate(nowRate);
