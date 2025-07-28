@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北京人口流出弧线</title>
+    <style>
+        html,
+        body,
+        #map {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .demo-title {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            z-index: 1;
+        }
+
+        h1 {
+            margin: 0;
+            color: rgb(180, 180, 190);
+        }
+
+        h3 {
+            font-weight: normal;
+            margin-top: 5px;
+            color: rgb(150, 150, 150);
+        }
+    </style>
+</head>
+
+<body>
+<div class="demo-title">
+    <h1>弧线飞线--北京人口流出</h1>
+    <h3>使用弧度飞线链接两地点位置，脉冲效果表达人口数据流向</h3>
+</div>
+<div id="map"></div>
+<script src="https://webapi.amap.com/maps?v=2.0&key=92aaab11fb714a4e03126111e082c756&plugin=AMap.Scale,AMap.ToolBar"></script>
+<script src="https://webapi.amap.com/loca?v=2.0.0&key=92aaab11fb714a4e03126111e082c756"></script>
+
+<script>
+    var map = new AMap.Map('map', {
+        zoom: 12,
+        viewMode: '3D',
+        pitch: 48,
+        center: [108.947039, 34.259445],
+        mapStyle: 'amap://styles/dark',
+    });
+
+    var loca = new Loca.Container({
+        map,
+    });
+
+    // 呼吸点
+    var scatter = new Loca.ScatterLayer({
+        loca,
+        zIndex: 10,
+        opacity: 0.6,
+        visible: true,
+        zooms: [2, 22],
+    });
+
+    var pointGeo = new Loca.GeoJSONSource({
+        data: {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [108.916004, 34.243297]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [108.936045, 34.224209]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [108.882787, 34.185522]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [108.883817, 34.22389]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [108.884032, 34.230915]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [109.040158, 34.219525]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [108.958447, 34.262843]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [108.953941, 34.266212]
+                    }
+                }
+            ]
+        }
+    });
+    scatter.setSource(pointGeo);
+    scatter.setStyle({
+        unit: 'px',
+        size: [40, 40],
+        borderWidth: 0,
+        texture: 'https://a.amap.com/Loca/static/loca-v2/demos/images/breath_red.png',
+        duration: 1000,
+        animate: true,
+    });
+    loca.add(scatter);
+
+    // 弧线
+    var pulseLink = new Loca.PulseLinkLayer({
+        // loca,
+        zIndex: 10,
+        opacity: 1,
+        visible: true,
+        zooms: [2, 22],
+        depth: true,
+    });
+
+    var geo = new Loca.GeoJSONSource({
+        data: {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [108.91536, 34.20902],
+                            [108.916004, 34.243297]
+                        ]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [108.915618, 34.186019],
+                            [108.936045, 34.224209]
+                        ]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [108.871844, 34.174303],
+                            [108.882787, 34.185522]
+                        ]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [108.978274, 34.149304],
+                            [108.883817, 34.22389]
+                        ]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [108.907678, 34.161556],
+                            [108.884032, 34.230915]
+                        ]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [108.993209, 34.28217],
+                            [109.040158, 34.219525]
+                        ]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [108.937376, 34.285326],
+                            [108.958447, 34.262843]
+                        ]
+                    }
+                },
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [108.883302, 34.247838],
+                            [108.953941, 34.266212]
+                        ]
+                    }
+                }
+            ]
+        }
+    });
+
+    pulseLink.setSource(geo);
+    pulseLink.setStyle({
+        unit: 'px',
+        dash: [40, 0, 40, 0],
+        lineWidth: function () {
+            return [2, 2];
+        },
+        height: function (index, feat) {
+            return feat.distance / 3 + 10;
+        },
+        // altitude: 1000,
+        smoothSteps: 30,
+        speed: function (index, prop) {
+            return 10 + Math.random() * 50;
+        },
+        flowLength: 10,
+        lineColors: function (index, feat) {
+            return ['rgb(255,228,105)', 'rgb(255,164,105)', 'rgba(1, 34, 249,1)'];
+        },
+        maxHeightScale: 0.3, // 弧顶位置比例
+        headColor: 'rgba(255, 255, 0, 1)',
+        trailColor: 'rgba(255, 255,0,0)',
+    });
+    loca.add(pulseLink);
+    loca.animate.start();
+
+    var dat = new Loca.Dat();
+    dat.addLayer(pulseLink);
+
+
+</script>
+</body>
+
+</html>

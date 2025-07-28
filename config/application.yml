@@ -23,3 +23,8 @@ management:
   endpoint:
     shutdown:
       enabled: true
+
+app:
+  routes:
+    file:
+      path: routes.json
