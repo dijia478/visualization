@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蛇年上班倒计时</title>
+    <title>马年上班倒计时</title>
     <style>
         body::before {
             content: "";
@@ -119,13 +119,13 @@
 </head>
 <body>
 <div class="countdown">
-    <p id="z">距离2025蛇年春节还有</p>
+    <p id="z">距离2026马年春节还有</p>
     <div id="countdown-display1">
         <span id="days1"></span>天<span id="hours1"></span>时<span id="minutes1"></span>分<span id="seconds1" class="rotate"></span>秒
     </div>
     <br>
 
-    <p id="a">距离2025蛇年开始上班还有</p>
+    <p id="a">距离2026马年开始上班还有</p>
         <div id="countdown-display">
             <span id="days"></span>天<span id="hours"></span>时<span id="minutes"></span>分<span id="seconds" class="rotate"></span>秒
         </div>
@@ -159,7 +159,7 @@
     }; // 每个元素的第一次加载标记
 
     function updateCountdown1() {
-        const targetDate = new Date('2025-01-29T00:00:00'); // 设定目标时间
+        const targetDate = new Date('2026-02-17T00:00:00'); // 设定目标时间
         const now = new Date();
         const timeLeft = targetDate - now;
 
@@ -198,7 +198,7 @@
     }
 
     function updateCountdown() {
-        const targetDate = new Date('2025-02-05T00:00:00'); // 设定目标时间
+        const targetDate = new Date('2026-02-24T00:00:00'); // 设定目标时间
         const now = new Date();
         const timeLeft = targetDate - now;
 
@@ -237,7 +237,7 @@
     }
 
     function updateLunarCountdown() {
-        const lunarTargetDate = new Date('2024-02-18T00:00:00'); // 设定2024年春节结束的时间
+        const lunarTargetDate = new Date('2025-02-05T00:00:00'); // 设定2024年春节结束的时间
         const now = new Date();
         const timeLeft = now - lunarTargetDate;
 
@@ -247,7 +247,7 @@
         const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
         document.getElementById("lunar-countdown").innerHTML =
-            `距离2024龙年开始上班已经 ${days}天${hours}时${minutes}分${seconds}秒`;
+            `距离2025蛇年开始上班已经 ${days}天${hours}时${minutes}分${seconds}秒`;
     }
 
 
