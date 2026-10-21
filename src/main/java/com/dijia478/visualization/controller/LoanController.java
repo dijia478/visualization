@@ -44,6 +44,8 @@ public class LoanController {
         totalLoan.setAppliedPrepayments(applied);
         totalLoan.setRateChanges(prepared.getPreview().getRateChanges().stream()
                 .filter(change -> change.getEffectiveMonth() <= totalLoan.getMonthLoanList().size())
+                .filter(change -> totalLoan.getPayoffDate() == null
+                        || change.getEffectiveDate().compareTo(totalLoan.getPayoffDate()) <= 0)
                 .collect(Collectors.toList()));
         totalLoan.setLprUpdatedAt(prepared.getPreview().getLprUpdatedAt());
         totalLoan.setWarnings(prepared.getPreview().getWarnings());
@@ -81,7 +83,10 @@ public class LoanController {
         totalLoan.setTotalRepayment(totalLoan.getTotalRepayment().setScale(2, RoundingMode.HALF_UP));
         LocalDate first = LoanUtil.parseDate(data.getFirstPaymentDate());
         for (int i = 0; i < totalLoan.getMonthLoanList().size(); i++) {
-            totalLoan.getMonthLoanList().get(i).setDateFormat(first.plusMonths(i).toString());
+            MonthLoan row = totalLoan.getMonthLoanList().get(i);
+            if (row.getDateFormat() == null) {
+                row.setDateFormat(first.plusMonths(i).toString());
+            }
         }
     }
 

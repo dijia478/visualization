@@ -302,13 +302,16 @@
                         event: "rate",
                     });
                 });
-            const entry = { month: row.month + "（" + row.dateFormat + "）" };
+            const settlement = row.dateFormat === data.payoffDate && Number(row.principal) === 0;
+            const entry = {
+                month: settlement ? "结清利息 · " + row.dateFormat : row.month + "（" + row.dateFormat + "）",
+            };
             columns.slice(1).forEach((key) => {
                 if (key === "annualRate")
                     entry[key] = Number(row.annualRate).toFixed(3) + "%";
                 else if (key === "interestBasis")
                     entry[key] =
-                        row.interestSegments?.length > 1
+                        row.interestSegments?.length && (row.interestSegments.length > 1 || settlement)
                             ? row.interestSegments
                                   .map(
                                       (segment) =>

@@ -129,6 +129,33 @@ public abstract class LoanCalculatorAdapter implements LoanCalculator {
                     ? referencePayment.subtract(rawInterest(remaining, event.getNewRate(), event.getInterestSegments())
                             .add(previous.getInterestRemainder()).setScale(2, RoundingMode.DOWN)) : null;
             rows.addAll(schedule(next, payment, principal).getMonthLoanList());
+        } else {
+            // 本金已清仍需结算上个还款日至结清日的利息；独立记账，不能改写已还月供。
+            BigDecimal remainder = previous.getInterestRemainder();
+            BigDecimal interest = BigDecimal.ZERO;
+            List<InterestSegment> details = new ArrayList<>();
+            for (InterestSegment segment : event.getSettlementInterestSegments()) {
+                BigDecimal accrued = rawSegmentInterest(BigDecimal.ZERO, segment).add(remainder);
+                InterestSegment detail = new InterestSegment();
+                detail.setDays(segment.getDays());
+                detail.setAnnualRate(segment.getAnnualRate());
+                detail.setPrincipalOffset(segment.getPrincipalOffset());
+                detail.setInterest(accrued.setScale(2, RoundingMode.DOWN));
+                remainder = accrued.subtract(detail.getInterest());
+                interest = interest.add(detail.getInterest());
+                details.add(detail);
+            }
+            if (interest.signum() > 0) {
+                MonthLoan closing = new MonthLoan();
+                closing.setDateFormat(event.getPrepaymentDate());
+                closing.setPrincipal(BigDecimal.ZERO);
+                closing.setInterest(interest);
+                closing.setRepayment(interest);
+                closing.setAnnualRate(event.getNewRate());
+                closing.setInterestRemainder(remainder);
+                closing.setInterestSegments(details);
+                rows.add(closing);
+            }
         }
         previous.setExtraRepayment(previous.getExtraRepayment().add(extra));
         TotalLoan result = new TotalLoan();
@@ -136,6 +163,9 @@ public abstract class LoanCalculatorAdapter implements LoanCalculator {
         result.setLoanRate(event.getNewRate());
         result.setType(event.getNewType());
         result.setMonthLoanList(rows);
+        if (remaining.signum() == 0) {
+            result.setPayoffDate(event.getPrepaymentDate());
+        }
         summarize(result);
         return result;
     }

@@ -47,6 +47,9 @@ public class TotalLoan {
     /** 保持用户输入顺序的已应用提前还款计划，金额单位为元 */
     private List<AppliedPrepayment> appliedPrepayments;
 
+    /** 实际提前结清日；正常按期还清时为空。 */
+    private String payoffDate;
+
     /** 离线LPR数据核验日期 */
     private String lprUpdatedAt;
 

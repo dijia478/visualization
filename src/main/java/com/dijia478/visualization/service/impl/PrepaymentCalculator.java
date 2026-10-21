@@ -33,7 +33,8 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         List<Integer> rateMonths = new ArrayList<>();
         List<BigDecimal> rates = new ArrayList<>();
         for (PrepaymentDTO event : events) {
-            if (Integer.valueOf(1).equals(event.getLprRate()) && event.getPrepaymentMonth() <= actual.getMonthLoanList().size()) {
+            if (Integer.valueOf(1).equals(event.getLprRate()) && event.getPrepaymentMonth() <= actual.getMonthLoanList().size()
+                    && (actual.getPayoffDate() == null || event.getPrepaymentDate().compareTo(actual.getPayoffDate()) <= 0)) {
                 rateMonths.add(event.getPrepaymentMonth());
                 rates.add(event.getNewRate());
             }
@@ -58,6 +59,12 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
                 event.setRepayment(0);
                 event.setRepaymentType(2);
                 event.setInterestSegments(withoutPrepaymentOffsets(event.getInterestSegments()));
+            }
+            if (result.getPayoffDate() != null) {
+                if (event.getRepayment() > 0) {
+                    throw new LoanException(ResultEnum.PREPAYMENT_MONTH_TOO_BIG);
+                }
+                continue;
             }
             int paid = event.getPrepaymentMonth() - 1;
             if (paid >= result.getMonthLoanList().size() && event.getRepayment() == 0) {
@@ -86,6 +93,7 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         copy.setNewType(source.getNewType());
         copy.setLprRate(source.getLprRate());
         copy.setInterestSegments(source.getInterestSegments());
+        copy.setSettlementInterestSegments(source.getSettlementInterestSegments());
         copy.setPaymentDeferred(source.isPaymentDeferred());
         return copy;
     }

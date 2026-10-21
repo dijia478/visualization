@@ -228,13 +228,18 @@ public class LoanUtil {
                 // 同一期逐笔重建计划，只能加回截至本事件已经扣除的预还本金。
                 // 利率变化同样取当前时间线快照，后续同日用户输入按排序依次覆盖。
                 resolved.setInterestSegments(interestSegments(first, loanDate, effectiveMonth, originalRate,
-                        rateChanges, appliedPrepayments));
+                        rateChanges, appliedPrepayments, null));
+            }
+            if (event.kind == 2 && event.input.getRepayment() > 0) {
+                // 建行住房借款合同第七条：提前还本按实际用款天数计息，不能补足到下一整期。
+                resolved.setSettlementInterestSegments(interestSegments(first, loanDate, effectiveMonth, originalRate,
+                        rateChanges, appliedPrepayments, event.date));
             }
             prepared.events.add(resolved);
         }
         List<String> warnings = new ArrayList<>();
         if ("SPLIT_30_360".equals(interestMode)) {
-            prepared.firstInterestSegments = interestSegments(first, loanDate, 1, originalRate, rateChanges, inputs);
+            prepared.firstInterestSegments = interestSegments(first, loanDate, 1, originalRate, rateChanges, inputs, null);
             warnings.add("重定价当期按合同每月30天折算分段，日利率=年利率÷360；新利率段按调整日至还款日的日数计，旧段补足30天。未满一分的利息跨段、跨期结转，月供向上取分；该口径已与一组建行完整账单核对，其他合同仍需验证。");
             warnings.add("提前还款当期按日期分割旧、新本金；实际提前还本重建计划后，月供及后续重定价计入首期额外利息现值，不增加账面本金。此计划口径由建行样本账单推导，首尾非整月及其他银行合同仍需核对。");
         } else {
@@ -272,8 +277,8 @@ public class LoanUtil {
 
     private static List<InterestSegment> interestSegments(LocalDate first, LocalDate loanDate, int month,
                                                          BigDecimal originalRate, List<RateChange> changes,
-                                                         List<PrepaymentDTO> prepayments) {
-        LocalDate due = first.plusMonths(month - 1L);
+                                                         List<PrepaymentDTO> prepayments, LocalDate settlementDate) {
+        LocalDate due = settlementDate == null ? first.plusMonths(month - 1L) : settlementDate;
         LocalDate previousDue = month == 1 ? loanDate : first.plusMonths(month - 2L);
         SortedSet<LocalDate> boundaries = new TreeSet<>();
         for (RateChange change : changes) {
@@ -284,13 +289,14 @@ public class LoanUtil {
         List<PrepaymentDTO> inPeriod = new ArrayList<>();
         for (PrepaymentDTO prepayment : prepayments) {
             LocalDate date = parseDate(prepayment.getPrepaymentDate());
-            if (prepayment.getRepayment() > 0 && date.isAfter(previousDue) && date.isBefore(due)) {
+            if (prepayment.getRepayment() > 0 && date.isAfter(previousDue)
+                    && (date.isBefore(due) || settlementDate != null && date.equals(due))) {
                 inPeriod.add(prepayment);
                 boundaries.add(date);
             }
         }
         List<InterestSegment> segments = new ArrayList<>();
-        int remainingDays = 30;
+        int remainingDays = settlementDate == null ? 30 : (int) ChronoUnit.DAYS.between(previousDue, due);
         LocalDate start = previousDue;
         for (LocalDate boundary : boundaries) {
             int newDays = Math.min(remainingDays, (int) ChronoUnit.DAYS.between(boundary, due));

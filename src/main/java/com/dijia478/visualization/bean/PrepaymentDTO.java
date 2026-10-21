@@ -7,6 +7,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Collections;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -51,6 +52,10 @@ public class PrepaymentDTO {
 
     @JsonIgnore
     private List<InterestSegment> interestSegments;
+
+    /** 截至提前还款日的实际日数分段，仅在全部结清时使用。 */
+    @JsonIgnore
+    private List<InterestSegment> settlementInterestSegments = Collections.emptyList();
 
     /** 利率已生效，但已出账的首期扣款金额保持原计划。 */
     @JsonIgnore
