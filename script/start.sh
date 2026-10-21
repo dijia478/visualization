@@ -1,52 +1,109 @@
-#!/bin/bash
-set -eu
+#!/bin/bash 
 
-BASE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# 脚本所在的路径
+BASE_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+
+# 配置文件所在的路径
+CONFIG_DIR="${BASE_DIR}/config"
+
+# 软件包名
 PACKAGE_NAME=visualization-0.0.1-SNAPSHOT.jar
-PID_FILE="${BASE_DIR}/logs/visualization.pid"
-START_LOG="${BASE_DIR}/logs/startup.log"
 
-if ! command -v java >/dev/null 2>&1; then
-    echo "Java is required. Install JRE/JDK 8 before starting."
-    exit 1
-fi
-if [ ! -f "${BASE_DIR}/lib/${PACKAGE_NAME}" ]; then
-    echo "Application package not found. Run start.sh from the extracted release directory."
-    exit 1
-fi
+# 在启动进程多少秒后检查进程状态
+SLEEP_TIME=5
 
-mkdir -p "${BASE_DIR}/logs"
-if [ -f "${PID_FILE}" ]; then
-    pid=$(cat "${PID_FILE}")
-    command_line=$(ps -ww -p "${pid}" -o args= 2>/dev/null || true)
-    case "${command_line}" in
-        *"${BASE_DIR}/lib/${PACKAGE_NAME}"*)
-            echo "Application is already running with PID ${pid}."
-            exit 0
-            ;;
-    esac
-    rm -f "${PID_FILE}"
-fi
+# 本地保留的最大GC归档日志文件个数
+MAX_GC_LOG=3
 
-# Resolve logging and file-backed data paths relative to this release.
-cd "${BASE_DIR}"
-nohup java -Xms512m -Xmx512m -XX:+UseG1GC \
-    -Djava.awt.headless=true -Dfile.encoding=UTF-8 \
-    "-Dloader.path=${BASE_DIR}/config,${BASE_DIR}/lib" \
-    -jar "${BASE_DIR}/lib/${PACKAGE_NAME}" \
-    "--spring.config.location=file:${BASE_DIR}/config/application.yml" \
-    >"${START_LOG}" 2>&1 < /dev/null &
-pid=$!
-echo "${pid}" > "${PID_FILE}"
+# 本地保留的最大归档进程日志文件个数
+MAX_PROCESS_LOG=3
 
-sleep 5
-if kill -0 "${pid}" 2>/dev/null; then
-    echo "Application started with PID ${pid}."
-    echo "Calculator: http://localhost:8080/calculator/index.html (default configuration)"
-    echo "Startup log: ${START_LOG}"
-else
-    rm -f "${PID_FILE}"
-    echo "Application failed to start. See ${START_LOG}."
-    tail -n 30 "${START_LOG}"
-    exit 1
-fi
+# 日志文件前缀
+PROCESS_LOG_PREFIX=visualization
+
+# JVM内存参数
+JAVA_OPTS=" -Xms512m -Xmx512m -Xmn256m -Xss256k -XX:PermSize=64m -XX:MaxPermSize=128m "
+
+function set_java_opts() {
+    JAVA_OPTS=" -server ${JAVA_OPTS} \
+    -XX:+DisableExplicitGC \
+    -XX:+UseG1GC \
+    -XX:+CMSParallelRemarkEnabled \
+    -XX:+UseCMSCompactAtFullCollection \
+    -XX:LargePageSizeInBytes=64m \
+    -XX:+UseFastAccessorMethods \
+    -XX:+UseCMSInitiatingOccupancyOnly \
+    -XX:+PrintGCDateStamps \
+    -XX:+PrintGCDetails -Xloggc:${BASE_DIR}/logs/gc.log \
+    -Djava.awt.headless=true \
+    -Djava.net.preferIPv4Stack=true \
+    -Dfile.encoding=UTF-8"
+}
+
+function start_process() {
+    local pid=$(ps -ef | grep -i "${PACKAGE_NAME}" | grep -v grep | awk '{ print $2 }')
+    if [ "x${pid}" != "x" ] 
+    then 
+        echo "process has already been started with pid ${pid}"
+        exit 1
+    else
+        nohup java ${JAVA_OPTS} -Xbootclasspath/a:"${CONFIG_DIR}" -Dloader.path="${BASE_DIR}/lib" -jar "${BASE_DIR}/lib/${PACKAGE_NAME}" &>/dev/null &
+    fi 
+}
+
+function archive_gc_logs() {
+    if [ ! -d "${BASE_DIR}/logs" ]
+    then 
+        mkdir -p "${BASE_DIR}/logs"
+    fi 
+
+    if [ -f "${BASE_DIR}/logs/gc.log" ] 
+    then 
+        local time=$(date +%Y%m%d%H%M%S)
+        cd ${BASE_DIR}/logs &>/dev/null
+        tar -czvf "gc.log.${time}.tar.gz" gc.log
+        echo -n "" > "${BASE_DIR}/logs/gc.log"
+        cd - &>/dev/null
+    fi
+}
+
+function delete_old_logs() {
+    cd ${BASE_DIR}/logs &>/dev/null
+    ls -t gc.log*.tar.gz | awk 'NR > '"${MAX_GC_LOG}"' { print }' | xargs -I '{}' rm -f '{}'
+    ls -t "${PROCESS_LOG_PREFIX}".log.*.gz | awk 'NR > '"${MAX_PROCESS_LOG}"' { print }' | xargs -I '{}' rm -f '{}'
+    ls -t "${PROCESS_LOG_PREFIX}-error".log.*.gz | awk 'NR > '"${MAX_PROCESS_LOG}"' { print }' | xargs -I '{}' rm -f '{}'
+}
+
+function check_process() {
+    local pid=$(ps -ef | grep -i "${PACKAGE_NAME}" | grep -v grep | awk '{ print $2 }')
+    if [ "x${pid}" != "x" ] 
+    then 
+        echo "start process sucessfully."
+    else
+        echo "start process failed."
+    fi 
+}
+
+
+set_java_opts
+
+archive_gc_logs
+
+start_process
+
+sleep "${SLEEP_TIME}"
+
+check_process
+
+
+
+
+
+
+
+
+
+
+
+
+
