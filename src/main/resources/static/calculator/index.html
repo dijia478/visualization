@@ -9,7 +9,7 @@
             rel="icon"
             href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23153f38'/%3E%3Cpath d='M16 31L32 17L48 31V48H16ZM27 48V34H37V48' fill='none' stroke='%23fff' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E"
         />
-        <link rel="stylesheet" href="css/index.css?v=20261021-savings-hero-1" />
+        <link rel="stylesheet" href="css/index.css?v=20261021-savings-arrow-2" />
         <script defer src="js/g2plot/dist/g2plot.min.js"></script>
         <script defer src="js/s2/dist/index.min.js"></script>
         <script defer src="js/charts.js?v=20261021-mobile-3"></script>
@@ -315,14 +315,16 @@
                                 <span class="savings-unit">元</span>
                             </p>
                             <div class="savings-comparison">
-                                <div>
+                                <div class="savings-comparison-values">
                                     <span>不提前还款 · 总利息</span>
                                     <strong id="baseline-interest">—</strong>
                                 </div>
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M4 12h15m-6-6 6 6-6 6" />
-                                </svg>
-                                <div>
+                                <div class="savings-comparison-arrow" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M3 12h18m-7-7 7 7-7 7" />
+                                    </svg>
+                                </div>
+                                <div class="savings-comparison-values">
                                     <span>当前方案 · 总利息</span>
                                     <strong id="planned-interest">—</strong>
                                 </div>

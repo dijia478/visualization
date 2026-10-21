@@ -759,30 +759,51 @@ select {
     font-size: 14px;
 }
 .savings-comparison {
+    --comparison-arrow-size: clamp(44px, 10vw, 56px);
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) var(--comparison-arrow-size) minmax(0, 1fr);
     align-items: center;
-    gap: 10px;
+    text-align: center;
+    gap: 6px 12px;
     padding-top: 18px;
     border-top: 1px solid #ffffff26;
 }
+.savings-comparison-values {
+    display: contents;
+}
+.savings-comparison-values:first-child > * {
+    grid-column: 1;
+}
+.savings-comparison-values:last-child > * {
+    grid-column: 3;
+}
 .savings-comparison span {
+    grid-row: 1;
     display: block;
     color: #c8d9d0;
     font-size: 12px;
 }
 .savings-card .savings-comparison strong {
-    margin: 5px 0 0;
+    grid-row: 2;
+    margin: 0;
     color: #f8f6ee;
     font-size: 20px;
     font-weight: 550;
 }
+.savings-comparison-arrow {
+    grid-area: 2 / 2;
+    display: grid;
+    place-items: center;
+    place-self: center;
+    width: var(--comparison-arrow-size);
+    height: var(--comparison-arrow-size);
+}
 .savings-comparison svg {
-    width: 20px;
-    height: 20px;
+    width: 76%;
+    height: 76%;
     fill: none;
     stroke: #f2d798;
-    stroke-width: 1.5;
+    stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
