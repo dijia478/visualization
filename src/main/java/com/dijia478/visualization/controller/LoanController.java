@@ -1,12 +1,10 @@
 package com.dijia478.visualization.controller;
 
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,114 +12,87 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-/**
- * @author dijia478
- * @date 2023/8/4
- */
 @RestController
 public class LoanController {
 
-    /** 等额本息计算器 */
-    @Resource(name = "equalRepaymentCalculator")
-    private LoanCalculator equalRepaymentCalculator;
-
-    /** 等额本金计算器 */
-    @Resource(name = "equalPrincipalCalculator")
-    private LoanCalculator equalPrincipalCalculator;
-
-    /** 提前还款计算器 */
     @Resource(name = "prepaymentCalculator")
     private LoanCalculator prepaymentCalculator;
 
-    /**
-     * 提前还款计算接口
-     *
-     * @param data
-     * @return
-     */
+    /** 默认利率与计算器共享随程序携带的最新已核验LPR，不依赖外部网络。 */
+    @GetMapping("/calculator/defaults")
+    public Map<String, Object> defaults() {
+        Map<String, Object> defaults = new LinkedHashMap<>();
+        defaults.put("annualRate", LoanUtil.getLatestLprRate());
+        defaults.put("lprUpdatedAt", LoanUtil.LPR_UPDATED_AT);
+        return defaults;
+    }
+
     @PostMapping("/calculator/prepaymentCalculator")
     public TotalLoan prepaymentCalculator(@RequestBody @Validated StockLoanDTO data) {
         validatedPrepayment(data);
-        LoanUtil.addPrepaymentList(data.getYear(), data.getRate(), data.getType(), data.getFirstPaymentDate(), data.getRateAdjustmentDay(), data.getFirstHouse(), data.getPrepaymentList());
-        LoanBO loanBO = convertParam(data);
-        TotalLoan totalLoan = prepaymentCalculator.compute(loanBO);
+        LoanUtil.PreparedLoan prepared = LoanUtil.prepare(data);
+        TotalLoan totalLoan = prepaymentCalculator.compute(convertParam(data, prepared));
         setScale(totalLoan, data);
+        List<AppliedPrepayment> applied = new ArrayList<>(prepared.getPreview().getPrepaymentRates());
+        totalLoan.setAppliedPrepayments(applied);
+        totalLoan.setRateChanges(prepared.getPreview().getRateChanges().stream()
+                .filter(change -> change.getEffectiveMonth() <= totalLoan.getMonthLoanList().size())
+                .collect(Collectors.toList()));
+        totalLoan.setLprUpdatedAt(prepared.getPreview().getLprUpdatedAt());
+        totalLoan.setWarnings(prepared.getPreview().getWarnings());
         return totalLoan;
     }
 
-    /**
-     * 参数转换
-     *
-     * @param data
-     * @return
-     */
+    @PostMapping("/calculator/ratePreview")
+    public RatePreview ratePreview(@RequestBody @Validated StockLoanDTO data) {
+        validatedPrepayment(data);
+        return LoanUtil.prepare(data).getPreview();
+    }
+
     public LoanBO convertParam(StockLoanDTO data) {
-        List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
-        if (prepaymentList != null) {
-            for (PrepaymentDTO prepaymentDTO : prepaymentList) {
-                if (prepaymentDTO.getPrepaymentMonth() == null) {
-                    long month = DateUtil.betweenMonth(DateUtil.parseDate(data.getFirstPaymentDate()), DateUtil.parseDate(prepaymentDTO.getPrepaymentDate()), false) + 2;
-                    prepaymentDTO.setPrepaymentMonth(Integer.valueOf(String.valueOf(month)));
-                }
-                // 第1次提前还款时lpr就变了
-                if (prepaymentDTO.getPrepaymentMonth() < 2) {
-                    data.setRate(prepaymentDTO.getNewRate().doubleValue());
-                }
-            }
-        }
+        return convertParam(data, LoanUtil.prepare(data));
+    }
+
+    private LoanBO convertParam(StockLoanDTO data, LoanUtil.PreparedLoan prepared) {
         return LoanBO.builder()
-                .amount(prepaymentCalculator.totalLoan(new BigDecimal(data.getAmount().toString())))
-                .month(prepaymentCalculator.totalMonth(new BigDecimal(data.getYear().toString())))
-                .rate(new BigDecimal(data.getRate().toString()))
+                .amount(BigDecimal.valueOf(data.getAmount()).movePointRight(4))
+                .month(BigDecimal.valueOf(data.getYear() * 12L))
+                .rate(prepared.getInitialRate())
                 .type(data.getType())
                 .firstPaymentDate(data.getFirstPaymentDate())
-                .prepaymentList(prepaymentList)
+                .prepaymentList(prepared.getEvents())
+                .firstInterestSegments(prepared.getFirstInterestSegments())
                 .build();
     }
 
-    /**
-     * 对最终结果进行四舍五入保留两位小数，用于给前端展示
-     *
-     * @param totalLoan
-     * @param data
-     */
+    /** 金额按分展示；每一期独立从原始还款日偏移，保留月末还款日。 */
     public void setScale(TotalLoan totalLoan, StockLoanDTO data) {
         if (totalLoan.getOriginalTotalInterest() != null) {
             totalLoan.setOriginalTotalInterest(totalLoan.getOriginalTotalInterest().setScale(2, RoundingMode.HALF_UP));
         }
         totalLoan.setTotalInterest(totalLoan.getTotalInterest().setScale(2, RoundingMode.HALF_UP));
         totalLoan.setTotalRepayment(totalLoan.getTotalRepayment().setScale(2, RoundingMode.HALF_UP));
-        DateTime loanDate = LoanUtil.getLoanDate(data.getFirstPaymentDate());
-        for (MonthLoan monthLoan : totalLoan.getMonthLoanList()) {
-            monthLoan.setRepayment(monthLoan.getRepayment().setScale(2, RoundingMode.HALF_UP));
-            monthLoan.setPrincipal(monthLoan.getPrincipal().setScale(2, RoundingMode.HALF_UP));
-            monthLoan.setInterest(monthLoan.getInterest().setScale(2, RoundingMode.HALF_UP));
-            monthLoan.setRemainTotal(monthLoan.getRemainTotal().setScale(2, RoundingMode.HALF_UP));
-            monthLoan.setRemainInterest(monthLoan.getRemainInterest().setScale(2, RoundingMode.HALF_UP));
-            monthLoan.setRemainPrincipal(monthLoan.getRemainPrincipal().setScale(2, RoundingMode.HALF_UP));
-            monthLoan.setTotalRepayment(monthLoan.getTotalRepayment().setScale(2, RoundingMode.HALF_UP));
-            monthLoan.setTotalPrincipal(monthLoan.getTotalPrincipal().setScale(2, RoundingMode.HALF_UP));
-            monthLoan.setTotalInterest(monthLoan.getTotalInterest().setScale(2, RoundingMode.HALF_UP));
-            monthLoan.setTotalRepaymentAndRemainPrincipal(monthLoan.getTotalRepaymentAndRemainPrincipal().setScale(2, RoundingMode.HALF_UP));
-            monthLoan.setDateFormat(loanDate.offset(DateField.MONTH, 1).toDateStr());
+        LocalDate first = LoanUtil.parseDate(data.getFirstPaymentDate());
+        for (int i = 0; i < totalLoan.getMonthLoanList().size(); i++) {
+            totalLoan.getMonthLoanList().get(i).setDateFormat(first.plusMonths(i).toString());
         }
     }
 
-    /**
-     * 参数校验
-     *
-     * @param data
-     */
     private void validatedPrepayment(LoanDTO data) {
-        int amount = data.getAmount();
-        List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
-        for (PrepaymentDTO prepaymentDTO : prepaymentList) {
-            if (prepaymentDTO.getRepayment() > amount) {
+        if (data.getPrepaymentList() == null) {
+            return;
+        }
+        for (PrepaymentDTO event : data.getPrepaymentList()) {
+            if (event.getRepayment() > data.getAmount()) {
                 throw new LoanException(ResultEnum.REPAYMENT_TOO_BIG);
             }
         }
     }
-
 }

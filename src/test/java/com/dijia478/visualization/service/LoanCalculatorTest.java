@@ -32,6 +32,7 @@ class LoanCalculatorTest {
         data.setRate(4.0);
         data.setType(1);
         data.setFirstPaymentDate("2021-05-15");
+        data.setRateAdjustmentDay(1);
         LoanBO loanBO = loanController.convertParam(data);
         TotalLoan compute = equalRepaymentCalculator.compute(loanBO);
         loanController.setScale(compute, data);
@@ -45,6 +46,7 @@ class LoanCalculatorTest {
         data.setRate(4.0);
         data.setType(2);
         data.setFirstPaymentDate("2021-05-15");
+        data.setRateAdjustmentDay(1);
         LoanBO loanBO = loanController.convertParam(data);
         TotalLoan compute = equalPrincipalCalculator.compute(loanBO);
         loanController.setScale(compute, data);

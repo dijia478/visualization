@@ -1,8 +1,10 @@
 package com.dijia478.visualization.bean;
 
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 月还贷情况
@@ -57,5 +59,22 @@ public class MonthLoan {
 
     /** 年里的第几月 */
     private Integer monthInYear;
+
+    /** 当期月供支付后额外归还的本金（元） */
+    private BigDecimal extraRepayment = BigDecimal.ZERO;
+
+    /** 当期采用的执行年利率（百分数） */
+    private BigDecimal annualRate;
+
+    /** 跨利率调整日的当期分段明细 */
+    private List<InterestSegment> interestSegments;
+
+    /** 分以下利息连续结转，调息和提前还款不能清零。 */
+    @JsonIgnore
+    private BigDecimal interestRemainder = BigDecimal.ZERO;
+
+    /** 提前还本重建后的计划在后续重定价时继续考虑首期应计息。 */
+    @JsonIgnore
+    private boolean adjustPaymentForFirstInterest;
 
 }

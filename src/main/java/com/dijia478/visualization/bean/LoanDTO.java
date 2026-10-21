@@ -31,6 +31,8 @@ public class LoanDTO {
     private Double rate;
 
     @NotNull(message = "还款方式不能为空")
+    @Min(value = 1, message = "还款方式必须为1或2")
+    @Max(value = 2, message = "还款方式必须为1或2")
     private Integer type;
 
     private Integer prepayment;

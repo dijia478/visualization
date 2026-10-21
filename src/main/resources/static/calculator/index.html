@@ -1,229 +1,684 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="utf-8">
-    <title>公众号：万户楼台</title>
-    <link rel="icon" href="data:image/ico;base64,aWNv">
-    <script type="text/javascript" src="./js/g2plot/dist/g2plot.min.js"></script>
-    <script src="./js/s2/dist/index.min.js"></script>
-
-    <link href="css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
-    <script src="js/jquery.min.js" type="application/javascript"></script>
-    <script src="js/bootstrap.bundle.min.js" type="application/javascript"></script>
-    <script src="js/lodash.min.js" type="application/javascript"></script>
-    <script src="js/big.min.js" type="application/javascript"></script>
-
-    <script type="text/javascript" src="js/index.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/index.css">
-
-    <link rel="stylesheet" href="css/datepicker.css">
-
-    <script>
-        const {Line} = G2Plot;
-        const {Bar} = G2Plot;
-        const {Pie, G2, measureTextWidth} = G2Plot;
-        const {TableSheet} = S2;
-    </script>
-</head>
-<body>
-<div id="loading" style="display:none;">
-    <div class="spinner-border text-primary" role="status">
-        <span class="sr-only">Loading...</span>
-    </div>
-</div>
-<div>
-    <div id="errorMsg"></div>
-
-    <div class="bs-form">
-        <form id="form1">
-            <div class="form-group row">
-                <label for="amount" class="col-sm col-form-label">贷款金额</label>
-                <div class="input-group mb-3 col-sm-10">
-                    <input type="text" class="form-control" id="amount" name="amount" placeholder="例如：100，即贷款100万元" required>
-                    <div class="input-group-append">
-                        <span class="input-group-text">万元</span>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#153f38" />
+        <title>万户楼台 · 房贷与提前还款计算器</title>
+        <link
+            rel="icon"
+            href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23153f38'/%3E%3Cpath d='M16 31L32 17L48 31V48H16ZM27 48V34H37V48' fill='none' stroke='%23fff' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E"
+        />
+        <link rel="stylesheet" href="css/index.css?v=20261021-savings-hero-1" />
+        <script defer src="js/g2plot/dist/g2plot.min.js"></script>
+        <script defer src="js/s2/dist/index.min.js"></script>
+        <script defer src="js/charts.js?v=20261021-mobile-3"></script>
+        <script defer src="js/date-picker.js?v=20261021-defaults-1"></script>
+        <script defer src="js/index.js?v=20261021-defaults-1"></script>
+    </head>
+    <body>
+        <a class="skip-link" href="#form1">跳到贷款方案</a>
+        <header class="site-header">
+            <a class="brand" href="#"
+                ><span class="brand-mark" aria-hidden="true"
+                    ><svg viewBox="0 0 32 32">
+                        <path
+                            d="m5 15 11-9 11 9v12H5ZM12 27V17h8v10"
+                        /></svg></span
+                ><span>万户楼台<small>把未来，算清楚</small></span></a
+            >
+        </header>
+        <main id="workspace" class="page-shell">
+            <section class="page-heading">
+                <div>
+                    <h1>房贷月供计算器</h1>
+                    <p>算清每期月供，安排提前还款。</p>
+                </div>
+            </section>
+            <div class="workspace">
+                <aside class="plan-panel">
+                    <form id="form1" novalidate>
+                        <div class="panel-heading">
+                            <div>
+                                <span class="section-index">01</span>
+                                <h2>贷款信息</h2>
+                            </div>
+                            <span class="small-tag">人民币</span>
+                        </div>
+                        <div
+                            id="errorMsg"
+                            class="error-summary"
+                            role="alert"
+                            tabindex="-1"
+                            hidden
+                        ></div>
+                        <div class="form-section">
+                            <div class="field">
+                                <label for="amount">贷款本金</label>
+                                <div class="input-unit input-large">
+                                    <input
+                                        id="amount"
+                                        name="amount"
+                                        type="number"
+                                        inputmode="numeric"
+                                        min="1"
+                                        step="1"
+                                        value="100"
+                                        required
+                                    /><span>万元</span>
+                                </div>
+                            </div>
+                            <div class="field-grid">
+                                <div class="field">
+                                    <label for="year">贷款期限</label>
+                                    <div class="input-unit">
+                                        <input
+                                            id="year"
+                                            name="year"
+                                            type="number"
+                                            inputmode="numeric"
+                                            min="1"
+                                            max="30"
+                                            step="1"
+                                            value="30"
+                                            required
+                                        /><span>年</span>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label for="rate">初始年利率</label>
+                                    <div class="input-unit">
+                                        <input
+                                            id="rate"
+                                            name="rate"
+                                            type="number"
+                                            inputmode="decimal"
+                                            min="0"
+                                            max="30"
+                                            step="0.001"
+                                            placeholder="读取中…"
+                                            required
+                                        /><span>%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <fieldset class="field">
+                                <legend>还款方式</legend>
+                                <div class="segmented">
+                                    <label
+                                        ><input
+                                            type="radio"
+                                            name="type"
+                                            value="1"
+                                            checked
+                                        /><span
+                                            >等额本息<small
+                                                >每月还款较稳定</small
+                                            ></span
+                                        ></label
+                                    ><label
+                                        ><input
+                                            type="radio"
+                                            name="type"
+                                            value="2"
+                                        /><span
+                                            >等额本金<small
+                                                >每月还款递减</small
+                                            ></span
+                                        ></label
+                                    >
+                                </div>
+                            </fieldset>
+                            <div class="field">
+                                <label for="firstPaymentDate"
+                                    >第一次还款日</label
+                                ><input
+                                    id="firstPaymentDate"
+                                    name="firstPaymentDate"
+                                    type="date"
+                                    min="2000-01-01"
+                                    max="2059-12-31"
+                                    required
+                                />
+                            </div>
+                            <div class="field">
+                                <label for="rateMode">利率方式</label
+                                ><select id="rateMode" name="rateMode">
+                                    <option value="LPR">随 LPR 调整</option>
+                                    <option value="FIXED">固定利率</option>
+                                </select>
+                            </div>
+                            <div id="floating-fields">
+                                <div class="field-grid">
+                                    <div class="field">
+                                        <label for="rateAdjustmentDay"
+                                            >重定价日</label
+                                        ><select
+                                            id="rateAdjustmentDay"
+                                            name="rateAdjustmentDay"
+                                        >
+                                            <option value="1">1 月 1 日</option>
+                                            <option value="2">
+                                                放贷日对应日
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="repricingMonths"
+                                            >重定价周期</label
+                                        ><select
+                                            id="repricingMonths"
+                                            name="repricingMonths"
+                                        >
+                                            <option value="12">
+                                                每 12 个月
+                                            </option>
+                                            <option value="6">每 6 个月</option>
+                                            <option value="3">每 3 个月</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <p class="field-hint">
+                                    LPR 每月公布，贷款只在约定的调整日重定价。
+                                </p>
+                            </div>
+                        </div>
+                        <div class="prepay-section">
+                            <div class="section-heading">
+                                <div>
+                                    <span class="section-index">02</span>
+                                    <h2>提前还款计划</h2>
+                                </div>
+                                <label class="switch"
+                                    ><input
+                                        id="prepayment-enabled"
+                                        type="checkbox"
+                                        aria-label="启用提前还款" /><span
+                                        aria-hidden="true"
+                                    ></span
+                                ></label>
+                            </div>
+                            <p class="field-hint" id="prepay-intro">
+                                加入一笔计划，看看能省多少利息。
+                            </p>
+                            <div id="prepayment-list" hidden></div>
+                            <button
+                                id="addPrepaymentBtn"
+                                type="button"
+                                class="add-button"
+                                hidden
+                            >
+                                <span aria-hidden="true">＋</span>
+                                添加一笔提前还款
+                            </button>
+                        </div>
+                        <div class="form-actions">
+                            <button
+                                id="submit-btn"
+                                class="primary-button"
+                                type="submit"
+                            >
+                                <span class="button-label">计算还款方案</span
+                                ><span class="button-arrow" aria-hidden="true"
+                                    >→</span
+                                >
+                            </button>
+                        </div>
+                    </form>
+                </aside>
+                <section
+                    class="results-panel"
+                    aria-labelledby="results-title"
+                    aria-busy="false"
+                >
+                    <div class="results-heading">
+                        <h2 id="results-title" tabindex="-1">还款总览</h2>
+                        <span
+                            id="result-status"
+                            class="result-status"
+                            role="status"
+                            aria-live="polite"
+                            >正在计算示例方案…</span
+                        >
+                    </div>
+                    <div class="overview-card">
+                        <div class="overview-primary">
+                            <span id="payment-caption">当前月供</span>
+                            <p class="payment-value">
+                                <small>¥</small
+                                ><strong id="monthly-payment">—</strong>
+                            </p>
+                            <p id="loan-summary">
+                                填写贷款条件，即可生成还款方案
+                            </p>
+                        </div>
+                        <div class="overview-divider"></div>
+                        <div class="overview-secondary">
+                            <span>预计还清时间</span
+                            ><strong id="payoff-date">—</strong>
+                            <p id="duration-summary">按当前方案估算</p>
+                        </div>
+                        <svg
+                            class="overview-art"
+                            viewBox="0 0 240 180"
+                            aria-hidden="true"
+                        >
+                            <path
+                                d="M10 150 78 80 129 115 232 15M10 170 78 100 129 135 232 35M65 180V112M114 180v-58M165 180V92M216 180V44"
+                            />
+                        </svg>
+                    </div>
+                    <div class="metric-grid">
+                        <article class="metric-card">
+                            <span>总还款</span
+                            ><strong id="total-payment">—</strong
+                            ><small>全期本金 + 利息，含提前还款</small>
+                        </article>
+                        <article class="metric-card">
+                            <span>总利息</span
+                            ><strong id="total-interest">—</strong
+                            ><small id="interest-ratio">占总还款 —</small>
+                        </article>
+                        <article class="metric-card">
+                            <span>累计已还总额</span
+                            ><strong id="paid-payment">—</strong
+                            ><small id="paid-payment-note">含已到日期的提前还款</small>
+                        </article>
+                        <article class="metric-card">
+                            <span>累计已还利息</span
+                            ><strong id="paid-interest">—</strong
+                            ><small id="paid-interest-note">按还款计划测算</small>
+                        </article>
+                        <article class="metric-card">
+                            <span>累计已还本金</span
+                            ><strong id="paid-principal">—</strong
+                            ><small id="paid-principal-note">含已到日期的提前还款</small>
+                        </article>
+                        <article class="metric-card">
+                            <span>当前剩余本金</span
+                            ><strong id="remaining-principal">—</strong
+                            ><small id="remaining-principal-note">按还款计划测算</small>
+                        </article>
+                        <article
+                            id="savings-card"
+                            class="metric-card savings-card"
+                            aria-labelledby="savings-title"
+                            data-state="neutral"
+                        >
+                            <div class="savings-heading">
+                                <h3 id="savings-title">预计少付利息</h3>
+                                <span id="savings-change" class="savings-change">提前还款对比</span>
+                            </div>
+                            <p class="savings-amount">
+                                <span class="savings-currency">¥</span>
+                                <strong id="saved-interest">—</strong>
+                                <span class="savings-unit">元</span>
+                            </p>
+                            <div class="savings-comparison">
+                                <div>
+                                    <span>不提前还款 · 总利息</span>
+                                    <strong id="baseline-interest">—</strong>
+                                </div>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M4 12h15m-6-6 6 6-6 6" />
+                                </svg>
+                                <div>
+                                    <span>当前方案 · 总利息</span>
+                                    <strong id="planned-interest">—</strong>
+                                </div>
+                            </div>
+                            <p id="savings-note" class="savings-note">按相同利率与还款方式比较全期利息</p>
+                        </article>
+                    </div>
+                    <article class="chart-card schedule-card">
+                        <div class="card-heading">
+                            <div>
+                                <h3>每期还款明细</h3>
+                            </div>
+                            <button
+                                type="button"
+                                id="download-btn"
+                                class="secondary-button"
+                                disabled
+                            >
+                                导出 CSV <span aria-hidden="true">↓</span>
+                            </button>
+                        </div>
+                        <div class="table-toolbar">
+                            <span id="schedule-count">— 期还款计划</span
+                            ><button
+                                type="button"
+                                id="table-mode"
+                                class="text-button"
+                                aria-pressed="false"
+                            >
+                                切换为文本表格
+                            </button>
+                        </div>
+                        <div
+                            id="schedule-table"
+                            aria-label="支持框选复制的还款明细"
+                        ></div>
+                        <div
+                            id="accessible-table"
+                            class="table-scroll"
+                            tabindex="0"
+                            role="region"
+                            aria-label="还款明细文本表格，可横向滚动"
+                            hidden
+                        ></div>
+                        <p class="chart-footnote">
+                            左右滑动可查看更多列，也可切换交互表格框选复制。提前还款与调息单独标记；期后提前还款计入该期累计金额与余额。
+                        </p>
+                    </article>
+                    <article class="chart-card trend-card">
+                        <div class="card-heading">
+                            <div>
+                                <h3>还款走势</h3>
+                            </div>
+                            <span class="chart-unit">单位：元</span>
+                        </div>
+                        <div
+                            class="chart-tabs"
+                            role="tablist"
+                            aria-label="还款走势"
+                        >
+                            <button
+                                type="button"
+                                role="tab"
+                                id="tab-monthly"
+                                aria-controls="trend-chart"
+                                aria-selected="true"
+                                data-trend="monthly"
+                            >
+                                每月月供</button
+                            ><button
+                                type="button"
+                                role="tab"
+                                id="tab-remaining"
+                                aria-controls="trend-chart"
+                                aria-selected="false"
+                                tabindex="-1"
+                                data-trend="remaining"
+                            >
+                                剩余贷款</button
+                            ><button
+                                type="button"
+                                role="tab"
+                                id="tab-cumulative"
+                                aria-controls="trend-chart"
+                                aria-selected="false"
+                                tabindex="-1"
+                                data-trend="cumulative"
+                            >
+                                累计还款
+                            </button>
+                        </div>
+                        <div
+                            id="trend-chart"
+                            class="chart-host"
+                            role="tabpanel"
+                            aria-labelledby="tab-monthly"
+                        ></div>
+                        <p class="chart-footnote">
+                            点按图表查看金额，也可在下方明细中逐期核对。
+                        </p>
+                    </article>
+                    <div class="chart-pair">
+                        <article class="chart-card">
+                            <div class="card-heading"><h3>本金与利息</h3></div>
+                            <div
+                                id="composition-chart"
+                                class="donut-host"
+                                role="img"
+                                aria-label="本金与利息构成，数值见还款总览"
+                            ></div>
+                        </article>
+                        <article class="chart-card">
+                            <div class="card-heading">
+                                <h3>提前还款总利息对比</h3>
+                            </div>
+                            <div
+                                id="comparison-chart"
+                                class="donut-host"
+                                role="img"
+                                aria-label="原计划与当前方案利息对比，数值见还款总览"
+                            ></div>
+                        </article>
+                    </div>
+                    <details class="chart-card monthly-breakdown">
+                        <summary>
+                            每期本息构成 <span>查看本金和利息</span>
+                        </summary>
+                        <div
+                            id="breakdown-chart"
+                            class="chart-host"
+                            role="img"
+                            aria-label="每期本金与利息堆叠图"
+                        ></div>
+                    </details>
+                </section>
+            </div>
+        </main>
+        <footer class="site-footer">
+            <span>万户楼台 <span class="footer-divider">/</span> 房贷计算器</span>
+            <figure class="contact">
+                <img
+                    src="../QR_code.png"
+                    width="160"
+                    height="160"
+                    alt="万户楼台公众号二维码"
+                />
+                <figcaption>扫码关注 · 联系与反馈</figcaption>
+            </figure>
+            <span>让每一个决定，都更从容。</span>
+        </footer>
+        <dialog
+            id="date-picker-dialog"
+            class="date-picker-dialog"
+            aria-labelledby="date-picker-title"
+            aria-describedby="date-picker-help"
+        >
+            <div class="date-picker-sheet">
+                <header class="date-picker-header">
+                    <div>
+                        <span id="date-picker-title">选择日期</span>
+                        <strong id="date-picker-context"></strong>
+                    </div>
+                    <button
+                        type="button"
+                        class="date-picker-close"
+                        data-date-picker-close
+                        aria-label="关闭日期选择器"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m7 7 10 10M17 7 7 17" />
+                        </svg>
+                    </button>
+                </header>
+                <p id="date-picker-help" class="date-picker-help">
+                    选择年份、月份和日期后确认
+                </p>
+                <div class="date-picker-navigation">
+                    <button
+                        type="button"
+                        id="date-picker-previous"
+                        class="date-picker-nav-button"
+                        aria-label="上个月"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m14.5 6-6 6 6 6" />
+                        </svg>
+                    </button>
+                    <button
+                        type="button"
+                        id="date-picker-year"
+                        class="date-picker-year-button"
+                        aria-label="选择年份"
+                        aria-haspopup="listbox"
+                        aria-controls="date-picker-years"
+                        aria-expanded="false"
+                    >
+                        <span></span>
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="m6 8 4 4 4-4" />
+                        </svg>
+                    </button>
+                    <button
+                        type="button"
+                        id="date-picker-month"
+                        class="date-picker-month-button"
+                        aria-label="选择月份"
+                        aria-haspopup="listbox"
+                        aria-controls="date-picker-months"
+                        aria-expanded="false"
+                    >
+                        <span></span>
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="m6 8 4 4 4-4" />
+                        </svg>
+                    </button>
+                    <button
+                        type="button"
+                        id="date-picker-next"
+                        class="date-picker-nav-button"
+                        aria-label="下个月"
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m9.5 6 6 6-6 6" />
+                        </svg>
+                    </button>
+                </div>
+                <div
+                    id="date-picker-years"
+                    class="date-picker-years"
+                    role="listbox"
+                    aria-label="选择年份"
+                    hidden
+                ></div>
+                <div
+                    id="date-picker-months"
+                    class="date-picker-months"
+                    role="listbox"
+                    aria-label="选择月份"
+                    hidden
+                ></div>
+                <div id="date-picker-calendar">
+                    <div class="date-picker-weekdays" aria-hidden="true">
+                        <span>日</span><span>一</span><span>二</span
+                        ><span>三</span><span>四</span><span>五</span
+                        ><span>六</span>
+                    </div>
+                    <div
+                        id="date-picker-grid"
+                        class="date-picker-grid"
+                        role="group"
+                        aria-label="选择日期"
+                    ></div>
+                </div>
+                <footer class="date-picker-actions">
+                    <button
+                        type="button"
+                        id="date-picker-today"
+                        class="date-picker-today"
+                    >
+                        今天
+                    </button>
+                    <div>
+                        <button
+                            type="button"
+                            class="date-picker-cancel"
+                            data-date-picker-close
+                        >
+                            取消</button
+                        ><button
+                            type="button"
+                            id="date-picker-confirm"
+                            class="date-picker-confirm"
+                        >
+                            确定
+                        </button>
+                    </div>
+                </footer>
+            </div>
+        </dialog>
+        <template id="prepayment-template"
+            ><article class="prepayment-card">
+                <div class="prepayment-heading">
+                    <h3>提前还款 <span class="plan-number"></span></h3>
+                    <button
+                        type="button"
+                        class="remove-plan"
+                        aria-label="删除这笔提前还款"
+                    >
+                        删除
+                    </button>
+                </div>
+                <div class="field-grid">
+                    <div class="field">
+                        <label data-for="prepaymentDate">还款日期</label
+                        ><input
+                            name="prepaymentDate"
+                            type="date"
+                            min="2000-01-01"
+                            max="2059-12-31"
+                            required
+                        />
+                    </div>
+                    <div class="field">
+                        <label data-for="repayment">提前还款额</label>
+                        <div class="input-unit">
+                            <input
+                                name="repayment"
+                                type="number"
+                                inputmode="numeric"
+                                min="0"
+                                step="1"
+                                required
+                            /><span>万元</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="form-group row">
-                <label for="year" class="col-sm col-form-label">贷款期限</label>
-                <div class="input-group mb-3 col-sm-10">
-                    <input type="text" class="form-control" id="year" name="year" placeholder="例如：30，即分30年（360期）还清" required>
-                    <div class="input-group-append">
-                        <span class="input-group-text">年</span>
+                <div class="field">
+                    <label data-for="rateSource">执行年利率</label>
+                    <div class="rate-controls">
+                        <select name="rateSource">
+                            <option value="auto">自动计算</option>
+                            <option value="manual">手动填写</option>
+                        </select>
+                        <div class="input-unit">
+                            <input
+                                name="newRate"
+                                type="number"
+                                min="0"
+                                max="30"
+                                step="0.001"
+                                inputmode="decimal"
+                                readonly
+                                placeholder="待计算"
+                                aria-label="提前还款后的年利率"
+                            /><span>%</span>
+                        </div>
                     </div>
+                    <p class="rate-hint field-hint" aria-live="polite">
+                        根据贷款条件与本地 LPR 历史计算
+                    </p>
                 </div>
-            </div>
-            <div class="form-group row">
-                <label for="rate" class="col-sm col-form-label">初始贷款利率</label>
-                <div class="input-group mb-3 col-sm-10">
-                    <input type="text" class="form-control" id="rate" name="rate" placeholder="例如：4.2，即第一次发放贷款时年化利率4.2%" required>
-                    <div class="input-group-append">
-                        <span class="input-group-text">%</span>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="type" class="col-sm col-form-label">还款方式</label>
-                <div class="input-group mb-3 col-sm-10">
-                    <select class="form-control" id="type" name="type">
+                <div class="field">
+                    <label data-for="newType">之后的还款方式</label
+                    ><select name="newType">
                         <option value="1">等额本息</option>
                         <option value="2">等额本金</option>
                     </select>
                 </div>
-            </div>
-            <div class="form-group row">
-                <label for="firstPaymentDate" class="col-sm col-form-label">第一次还款日</label>
-                <div class="input-group mb-3 col-sm-10">
-                    <div class="mt40">
-                        <div class="c-datepicker-date-editor c-datepicker-single-editor J-datepicker-day mt10">
-                            <i class="c-datepicker-range__icon kxiconfont icon-clock"></i>
-                            <input type="text" autocomplete="off" id="firstPaymentDate" name="firstPaymentDate" placeholder="选择日期" class="c-datepicker-data-input only-date" value="">
-                        </div>
-                    </div>
+                <div class="field">
+                    <label data-for="repaymentType">希望如何调整？</label
+                    ><select name="repaymentType">
+                        <option value="1">缩短期限，月供基本不变</option>
+                        <option value="2">减少月供，期限不变</option>
+                    </select>
                 </div>
-            </div>
-            <fieldset class="form-group row">
-                <legend class="col-form-label col-sm float-sm-left pt-0">利率调整日</legend>
-                <div class="col-sm-10">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="rateAdjustmentDay" id="rateAdjustmentDay1" value="1" checked/>
-                        <label class="form-check-label" for="rateAdjustmentDay1">每年1月1日</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="rateAdjustmentDay" id="rateAdjustmentDay2" value="2"/>
-                        <label class="form-check-label" for="rateAdjustmentDay2">每年放贷日</label>
-                    </div>
-                </div>
-            </fieldset>
-            <fieldset class="form-group row">
-                <legend class="col-form-label col-sm float-sm-left pt-0">是否首套房</legend>
-                <div class="col-sm-10">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="firstHouse" id="firstHouse1" value="0">
-                        <label class="form-check-label" for="firstHouse1">否</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="firstHouse" id="firstHouse2" value="1" checked>
-                        <label class="form-check-label" for="firstHouse2">是</label>
-                    </div>
-                </div>
-            </fieldset>
-            <fieldset class="form-group row">
-                <legend class="col-form-label col-sm float-sm-left pt-0">提前还款</legend>
-                <div class="col-sm-10">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="prepayment" id="prepayment1" value="0" checked>
-                        <label class="form-check-label" for="prepayment1">否</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="prepayment" id="prepayment2" value="1">
-                        <label class="form-check-label" for="prepayment2">是</label>
-                    </div>
-                </div>
-            </fieldset>
-            <div id="prepayment-template" name="prepayment-template" class="alert alert-info alert-dismissible fade show" role="alert" style="display:none">
-<!--                <button type="button" class="close" data-dismiss="alert" aria-label="Close">-->
-<!--                    <span aria-hidden="true">&times;</span>-->
-<!--                </button>-->
-                <div class="card-body">
-                    <div class="form-group row">
-                        <label for="prepaymentDate" class="col-sm col-form-label">还款日期</label>
-                        <div class="input-group mb-3 col-sm-10">
-                            <div class="mt40">
-                                <div class="c-datepicker-date-editor c-datepicker-single-editor J-datepicker-day mt10">
-                                    <i class="c-datepicker-range__icon kxiconfont icon-clock"></i>
-                                    <input type="text" autocomplete="off" id="prepaymentDate" name="prepaymentDate" placeholder="选择日期" class="c-datepicker-data-input only-date" value="">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="repayment" class="col-sm col-form-label">还款金额</label>
-                        <div class="input-group mb-3 col-sm-10">
-                            <input type="text" class="form-control" id="repayment" name="repayment" placeholder="例如：10，即提前还款10万元">
-                            <div class="input-group-append">
-                                <span class="input-group-text">万元</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="repayment" class="col-sm col-form-label">新贷款利率</label>
-                        <div class="input-group mb-3 col-sm-10">
-                            <input type="text" class="form-control" id="newRate" name="newRate" placeholder="如：4.2，即年化利率4.2%">
-                            <div class="input-group-append">
-                                <span class="input-group-text">%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="newType" class="col-sm col-form-label">新还款方式</label>
-                        <div class="input-group mb-3 col-sm-10">
-                            <select class="form-control" id="newType" name="newType">
-                                <option value="1">等额本息</option>
-                                <option value="2">等额本金</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="repaymentType" class="col-sm col-form-label">还款方案</label>
-                        <div class="input-group mb-3 col-sm-10">
-                            <select class="form-control" id="repaymentType" name="repaymentType">
-                                <option value="1">缩短还款期限，月还款额基本不变</option>
-                                <option value="2">减少月还款额，还款期限不变</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<!--            <div class="empty-2"></div>-->
-            <button id="addPrepaymentBtn" type="button" class="btn btn-secondary btn-sm btn-block" style="display:none">新增提前还款计划</button>
-            <button id="submit-btn" type="button" class="btn btn-primary btn-block">计算</button>
-        </form>
-    </div>
-
-    <div id="container1"></div>
-    <div class="empty-5"></div>
-
-    <div id="container7"></div>
-    <div class="empty-5"></div>
-
-    <div id="container6"></div>
-    <div class="empty-5"></div>
-
-    <div id="container5"></div>
-    <div class="empty-5"></div>
-
-    <div id="container4"></div>
-    <div class="empty-5"></div>
-
-    <div id="container3"></div>
-    <div class="empty-5"></div>
-
-    <div id="container2"></div>
-    <div class="empty-5"></div>
-
-    <img src="../QR_code.png" class="rounded mx-auto d-block" style="width:30%">
-    <div class="empty-5"></div>
-</div>
-
-<script src="js/moment.min.js"></script>
-<script src="js/datepicker.all.min.js"></script>
-
-<script>
-    initDatePicker()
-
-    // 校验主表参数
-    validated();
-    validatedPrepayment();
-
-    // 控制是否显示提前还款计划
-    showPrepayment();
-    // 添加提前还款计划
-    addPrepayment();
-
-    // 提交按钮点击事件
-    sendRequest();
-
-</script>
-</body>
+            </article></template
+        >
+    </body>
+</html>

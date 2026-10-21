@@ -1,163 +1,111 @@
 package com.dijia478.visualization.service.impl;
 
-import com.dijia478.visualization.bean.LoanBO;
-import com.dijia478.visualization.bean.MonthLoan;
-import com.dijia478.visualization.bean.PrepaymentDTO;
-import com.dijia478.visualization.bean.TotalLoan;
+import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculator;
 import com.dijia478.visualization.service.LoanCalculatorAdapter;
-import com.dijia478.visualization.util.NumUtil;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
-/**
- * 提前还款计算器
- *
- * @author dijia478
- * @date 2023/8/17
- */
+/** 按月顺序应用利率调整与提前还款，复用两种还款策略。 */
 @Service("prepaymentCalculator")
 public class PrepaymentCalculator extends LoanCalculatorAdapter {
 
-    /** 等额本息计算器 */
     @Resource(name = "equalRepaymentCalculator")
     private LoanCalculator equalRepaymentCalculator;
 
-    /** 等额本金计算器 */
     @Resource(name = "equalPrincipalCalculator")
     private LoanCalculator equalPrincipalCalculator;
 
     @Override
     public TotalLoan compute(LoanBO data) {
-        TotalLoan totalLoan;
-        if (data.getType() == 1) {
-            totalLoan = equalRepaymentCalculator.compute(data);
-        } else {
-            totalLoan = equalPrincipalCalculator.compute(data);
+        List<PrepaymentDTO> events = data.getPrepaymentList() == null ? Collections.emptyList()
+                : new ArrayList<>(data.getPrepaymentList());
+        // 同期也逐笔重排计划，保留先缩期、后降月供等操作的真实顺序。
+        events.sort(Comparator.comparingInt(PrepaymentDTO::getPrepaymentMonth));
+        TotalLoan actual = apply(data, events, true);
+        // 比较场景保留相同利率/还款方式，排除LPR下降本身带来的“提前还款节省”。
+        TotalLoan baseline = events.stream().anyMatch(e -> e.getRepayment() > 0)
+                ? apply(data, events, false) : actual;
+        actual.setOriginalTotalInterest(baseline.getTotalInterest());
+        List<Integer> rateMonths = new ArrayList<>();
+        List<BigDecimal> rates = new ArrayList<>();
+        for (PrepaymentDTO event : events) {
+            if (Integer.valueOf(1).equals(event.getLprRate()) && event.getPrepaymentMonth() <= actual.getMonthLoanList().size()) {
+                rateMonths.add(event.getPrepaymentMonth());
+                rates.add(event.getNewRate());
+            }
         }
-        BigDecimal originalTotalInterest = totalLoan.getTotalInterest();
-        totalLoan.setOriginalTotalInterest(originalTotalInterest);
-        List<PrepaymentDTO> prepaymentList = data.getPrepaymentList();
-        if (CollectionUtils.isEmpty(prepaymentList)) {
-            return totalLoan;
-        }
+        actual.setLprMonth(rateMonths);
+        actual.setLprRate(rates);
+        actual.setLoanRate(data.getRate());
+        actual.setType(data.getType());
+        return actual;
+    }
 
-        List<Integer> lprMonth = new ArrayList<>();
-        List<BigDecimal> lprRate = new ArrayList<>();
-        prepaymentList = filterSameMonth(prepaymentList, lprMonth, lprRate);
-        for (int i = 0; i < prepaymentList.size(); i++) {
-            PrepaymentDTO prepaymentDTO = prepaymentList.get(i);
-            if (prepaymentDTO.getPrepaymentMonth() < 2) {
+    private LoanCalculator calculator(int type) {
+        return type == 1 ? equalRepaymentCalculator : equalPrincipalCalculator;
+    }
+
+    private TotalLoan apply(LoanBO data, List<PrepaymentDTO> events, boolean prepay) {
+        TotalLoan result = calculator(data.getType()).compute(data);
+        int lastAppliedMonth = 0;
+        for (PrepaymentDTO input : events) {
+            PrepaymentDTO event = copy(input);
+            if (!prepay) {
+                event.setRepayment(0);
+                event.setRepaymentType(2);
+                event.setInterestSegments(withoutPrepaymentOffsets(event.getInterestSegments()));
+            }
+            int paid = event.getPrepaymentMonth() - 1;
+            if (paid >= result.getMonthLoanList().size() && event.getRepayment() == 0) {
                 continue;
             }
-            List<MonthLoan> monthLoanList = totalLoan.getMonthLoanList();
-            if (prepaymentDTO.getNewType() == 1) {
-                totalLoan = equalRepaymentCalculator.computePrepayment(monthLoanList, prepaymentDTO);
-            } else {
-                totalLoan = equalPrincipalCalculator.computePrepayment(monthLoanList, prepaymentDTO);
+            // 对比方案移除纯提前还本事件；无利率/方式变化时重排月供会引入额外舍入漂移。
+            if (!prepay && !Integer.valueOf(1).equals(event.getLprRate())
+                    && event.getNewRate().compareTo(result.getLoanRate()) == 0
+                    && event.getNewType().equals(result.getType())) {
+                continue;
             }
-
-            int year = 0;
-            int monthInYear = 0;
-            int size = totalLoan.getMonthLoanList().size();
-            for (int j = 0; j < size; j++) {
-                MonthLoan monthLoan = totalLoan.getMonthLoanList().get(j);
-                monthLoan.setMonth(j + 1);
-                monthLoan.setYear(year + 1);
-                monthLoan.setMonthInYear(++monthInYear);
-                if ((j + 1) % 12 == 0) {
-                    year++;
-                    monthInYear = 0;
-                }
-            }
+            event.setReplannedInPeriod(lastAppliedMonth == event.getPrepaymentMonth());
+            result = calculator(event.getNewType()).computePrepayment(result.getMonthLoanList(), event);
+            lastAppliedMonth = event.getPrepaymentMonth();
         }
-
-        Map<Integer, BigDecimal> collect = prepaymentList.stream().collect(Collectors.toMap(p -> p.getPrepaymentMonth() - 1, p -> totalLoan(new BigDecimal(p.getRepayment().toString())), (a, b) -> a));
-        Set<Integer> keySet = collect.keySet();
-        BigDecimal totalRepayment = new BigDecimal("0");
-        BigDecimal totalPrincipal = new BigDecimal("0");
-        BigDecimal totalInterest = new BigDecimal("0");
-        int year = 0;
-        int monthInYear = 0;
-        int size = totalLoan.getMonthLoanList().size();
-        for (int i = 0; i < size; i++) {
-            MonthLoan monthLoan = totalLoan.getMonthLoanList().get(i);
-            monthLoan.setMonth(i + 1);
-            monthLoan.setYear(year + 1);
-            monthLoan.setMonthInYear(++monthInYear);
-            if ((i + 1) % 12 == 0) {
-                year++;
-                monthInYear = 0;
-            }
-
-            if (keySet.contains(i)) {
-                totalRepayment = NumUtil.add(totalRepayment, monthLoan.getRepayment(), collect.get(i));
-                totalPrincipal = NumUtil.add(totalPrincipal, monthLoan.getPrincipal(), collect.get(i));
-            } else {
-                totalRepayment = NumUtil.add(totalRepayment, monthLoan.getRepayment());
-                totalPrincipal = NumUtil.add(totalPrincipal, monthLoan.getPrincipal());
-            }
-            totalInterest = NumUtil.add(totalInterest, monthLoan.getInterest());
-            monthLoan.setTotalRepayment(totalRepayment);
-            monthLoan.setTotalPrincipal(totalPrincipal);
-            monthLoan.setTotalInterest(totalInterest);
-            monthLoan.setTotalRepaymentAndRemainPrincipal(NumUtil.add(totalRepayment, monthLoan.getRemainPrincipal()));
-        }
-        totalLoan.setLoanAmount(data.getAmount());
-        totalLoan.setLoanMonth(new BigDecimal(size));
-        totalLoan.setLoanRate(data.getRate());
-        totalLoan.setType(data.getType());
-        totalLoan.setTotalRepayment(totalLoan.getMonthLoanList().get(size - 1).getTotalRepayment());
-        totalLoan.setTotalInterest(totalLoan.getMonthLoanList().get(size - 1).getTotalInterest());
-        totalLoan.setOriginalTotalInterest(originalTotalInterest);
-        totalLoan.setLprMonth(lprMonth);
-        totalLoan.setLprRate(lprRate);
-        return totalLoan;
+        return result;
     }
 
-    /**
-     * 将相同还款期限的还款计划进行过滤融合
-     *  @param prepaymentList
-     * @param lprMonth
-     * @param lprRate
-     * @return
-     */
-    private List<PrepaymentDTO> filterSameMonth(List<PrepaymentDTO> prepaymentList, List<Integer> lprMonth, List<BigDecimal> lprRate) {
-        prepaymentList.sort(Comparator.comparingInt(PrepaymentDTO::getPrepaymentMonth));
-        List<PrepaymentDTO> newPrepaymentList = new ArrayList<>();
-        for (int i = 0; i < prepaymentList.size(); i++) {
-            PrepaymentDTO prepaymentDTO = prepaymentList.get(i);
-            if (Integer.valueOf(1).equals(prepaymentDTO.getLprRate())) {
-                lprMonth.add(prepaymentDTO.getPrepaymentMonth());
-                lprRate.add(prepaymentDTO.getNewRate());
-            }
-
-            if (i > 0) {
-                PrepaymentDTO beforePrepaymentDTO = prepaymentList.get(i - 1);
-                if (prepaymentDTO.getLprRate() != null) {
-                    prepaymentDTO.setNewType(beforePrepaymentDTO.getNewType());
-                }
-                if (beforePrepaymentDTO.getPrepaymentMonth().equals(prepaymentDTO.getPrepaymentMonth())) {
-                    beforePrepaymentDTO.setPrepaymentMonth(prepaymentDTO.getPrepaymentMonth());
-                    beforePrepaymentDTO.setRepayment(beforePrepaymentDTO.getRepayment() + prepaymentDTO.getRepayment());
-                    // 这里有点问题，如果前一个是Lpr调整的，就取后面那个？？不知道，银行应该是精确到了天
-                    if (Integer.valueOf(1).equals(beforePrepaymentDTO.getLprRate())) {
-                        beforePrepaymentDTO.setNewRate(prepaymentDTO.getNewRate());
-                        beforePrepaymentDTO.setNewType(prepaymentDTO.getNewType());
-                        beforePrepaymentDTO.setRepaymentType(prepaymentDTO.getRepaymentType());
-                        beforePrepaymentDTO.setLprRate(prepaymentDTO.getLprRate());
-                    }
-                    continue;
-                }
-            }
-            newPrepaymentList.add(prepaymentDTO);
-        }
-        return newPrepaymentList;
+    private PrepaymentDTO copy(PrepaymentDTO source) {
+        PrepaymentDTO copy = new PrepaymentDTO();
+        copy.setPrepaymentDate(source.getPrepaymentDate());
+        copy.setPrepaymentMonth(source.getPrepaymentMonth());
+        copy.setRepayment(source.getRepayment());
+        copy.setRepaymentType(source.getRepaymentType());
+        copy.setNewRate(source.getNewRate());
+        copy.setNewType(source.getNewType());
+        copy.setLprRate(source.getLprRate());
+        copy.setInterestSegments(source.getInterestSegments());
+        copy.setPaymentDeferred(source.isPaymentDeferred());
+        return copy;
     }
 
+    private List<InterestSegment> withoutPrepaymentOffsets(List<InterestSegment> source) {
+        if (source == null) {
+            return null;
+        }
+        List<InterestSegment> segments = new ArrayList<>();
+        for (InterestSegment input : source) {
+            InterestSegment previous = segments.isEmpty() ? null : segments.get(segments.size() - 1);
+            if (previous != null && previous.getAnnualRate().compareTo(input.getAnnualRate()) == 0) {
+                previous.setDays(previous.getDays() + input.getDays());
+            } else {
+                InterestSegment segment = new InterestSegment();
+                segment.setDays(input.getDays());
+                segment.setAnnualRate(input.getAnnualRate());
+                segments.add(segment);
+            }
+        }
+        return segments;
+    }
 }

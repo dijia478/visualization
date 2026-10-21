@@ -44,4 +44,14 @@ public class TotalLoan {
     /** lpr变更数值 */
     private List<BigDecimal> lprRate;
 
+    /** 保持用户输入顺序的已应用提前还款计划，金额单位为元 */
+    private List<AppliedPrepayment> appliedPrepayments;
+
+    /** 离线LPR数据核验日期 */
+    private String lprUpdatedAt;
+
+    private List<String> warnings;
+
+    private List<RateAdjustment> rateChanges;
+
 }

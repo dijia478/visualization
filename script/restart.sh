@@ -1,6 +1,7 @@
-#!/bin/bash 
+#!/bin/bash
+set -eu
 
-BASE_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+BASE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 bash "${BASE_DIR}"/stop.sh
 bash "${BASE_DIR}"/start.sh
