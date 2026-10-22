@@ -9,12 +9,14 @@
             rel="icon"
             href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23153f38'/%3E%3Cpath d='M16 31L32 17L48 31V48H16ZM27 48V34H37V48' fill='none' stroke='%23fff' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E"
         />
-        <link rel="stylesheet" href="css/index.css?v=20261021-savings-arrow-2" />
+        <link rel="stylesheet" href="css/index.css?v=20261022-chart-feedback-1" />
         <script defer src="js/g2plot/dist/g2plot.min.js"></script>
         <script defer src="js/s2/dist/index.min.js"></script>
-        <script defer src="js/charts.js?v=20261021-payoff-1"></script>
+        <script defer src="js/schedule.js?v=20261022-planning-1"></script>
+        <script defer src="js/charts.js?v=20261022-chart-feedback-1"></script>
         <script defer src="js/date-picker.js?v=20261021-defaults-1"></script>
-        <script defer src="js/index.js?v=20261021-defaults-1"></script>
+        <script defer src="js/planning.js?v=20261022-planning-1"></script>
+        <script defer src="js/index.js?v=20261022-planning-1"></script>
     </head>
     <body>
         <a class="skip-link" href="#form1">跳到贷款方案</a>
@@ -346,6 +348,17 @@
                                 导出 CSV <span aria-hidden="true">↓</span>
                             </button>
                         </div>
+                        <div class="view-switch" role="group" aria-label="还款明细视图">
+                            <button type="button" data-schedule-view="recent" aria-pressed="false">近期一年</button>
+                            <button type="button" data-schedule-view="annual" aria-pressed="false">按年汇总</button>
+                            <button type="button" data-schedule-view="events" aria-pressed="false">关键变动</button>
+                            <button type="button" data-schedule-view="all" aria-pressed="true">完整明细</button>
+                        </div>
+                        <div class="schedule-navigation">
+                            <p id="schedule-view-note" class="field-hint">按实际日期汇总还款计划</p>
+                            <button id="jump-current" type="button" class="text-button">回到本月 ↗</button>
+                        </div>
+                        <div id="schedule-summary" role="region" aria-label="还款明细汇总，上下滑动查看更多" tabindex="0"></div>
                         <div class="table-toolbar">
                             <span id="schedule-count">— 期还款计划</span
                             ><button
@@ -370,8 +383,70 @@
                             hidden
                         ></div>
                         <p class="chart-footnote">
-                            左右滑动可查看更多列，也可切换交互表格框选复制。提前还款与调息单独标记；期后提前还款计入该期累计金额与余额。
+                            历史金额按计划测算。完整明细支持左右滑动与框选复制，CSV 始终导出全部计划。
                         </p>
+                    </article>
+                    <article class="chart-card planning-card" aria-labelledby="planning-title">
+                        <div class="card-heading">
+                            <div>
+                                <span class="section-index">下一步，怎么还更合适</span>
+                                <h3 id="planning-title">提前还款方案对比</h3>
+                            </div>
+                        </div>
+                        <p id="planning-context" class="planning-context">先计算贷款方案，再比较未来的还款选择。</p>
+                        <form id="planning-form" novalidate>
+                            <div class="planning-fields">
+                                <div class="field">
+                                    <label for="planning-date">计划提前还款日</label>
+                                    <input id="planning-date" type="date" required />
+                                </div>
+                                <div class="field">
+                                    <label for="planning-amount">提前还款金额</label>
+                                    <div class="input-unit">
+                                        <input id="planning-amount" type="number" inputmode="decimal" min="0.000001" step="0.000001" value="10" required />
+                                        <span>万元</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="compare-btn" type="submit" class="primary-button" disabled>比较三种方案 <span aria-hidden="true">→</span></button>
+                            <details class="goal-planner">
+                                <summary>按目标计算，需要提前还多少？</summary>
+                                <div class="planning-fields">
+                                    <div class="field">
+                                        <label for="planning-goal">我想实现</label>
+                                        <select id="planning-goal">
+                                            <option value="PAYMENT">把首期月供降到目标金额</option>
+                                            <option value="PAYOFF">在指定日期前还清</option>
+                                        </select>
+                                    </div>
+                                    <div id="target-payment-field" class="field">
+                                        <label for="target-payment">提前还款后首期月供不超过</label>
+                                        <div class="input-unit">
+                                            <input id="target-payment" type="number" inputmode="decimal" min="0" step="0.01" required />
+                                            <span>元</span>
+                                        </div>
+                                    </div>
+                                    <div id="target-payoff-field" class="field" hidden>
+                                        <label for="target-payoff">希望最晚还清日期</label>
+                                        <input id="target-payoff" type="date" disabled required />
+                                    </div>
+                                </div>
+                                <p class="field-hint">使用上方计划提前还款日。等额本金也按提前还款后的首期月供作为目标。</p>
+                                <button id="solve-btn" type="button" class="secondary-button" disabled>计算所需提前还款额</button>
+                            </details>
+                        </form>
+                        <p id="planning-status" class="planning-status" role="status" aria-live="polite"></p>
+                        <div id="planning-error" class="planning-error" role="alert" tabindex="-1" hidden></div>
+                        <div id="goal-result" class="goal-result" hidden></div>
+                        <div id="scenario-results" class="scenario-grid" hidden></div>
+                        <div id="scenario-chart-section" hidden>
+                            <div class="view-switch" role="group" aria-label="方案对比图内容">
+                                <button type="button" data-comparison-trend="repayment" aria-pressed="true">后续月供</button>
+                                <button type="button" data-comparison-trend="principal" aria-pressed="false">剩余本金</button>
+                            </div>
+                            <div id="scenario-chart" class="chart-host" role="img" aria-label="三种方案的后续月供或剩余本金对比，金额见上方方案卡片"></div>
+                        </div>
+                        <p class="chart-footnote">保留已发生的提前还款及相同利率、还款方式变化，仅比较未来提前还本的选择。采用方案后将替换未来的提前还本计划。未来利率按本次计算条件测算。</p>
                     </article>
                     <article class="chart-card trend-card">
                         <div class="card-heading">
@@ -379,6 +454,11 @@
                                 <h3>还款走势</h3>
                             </div>
                             <span class="chart-unit">单位：元</span>
+                        </div>
+                        <div class="range-switch" role="group" aria-label="走势图时间范围">
+                            <button type="button" data-trend-range="year" aria-pressed="false">未来一年</button>
+                            <button type="button" data-trend-range="five" aria-pressed="false">未来五年</button>
+                            <button type="button" data-trend-range="all" aria-pressed="true">全部</button>
                         </div>
                         <div
                             class="chart-tabs"
@@ -422,10 +502,20 @@
                             role="tabpanel"
                             aria-labelledby="tab-monthly"
                         ></div>
+                        <p id="trend-marker-note" class="chart-footnote"></p>
+                        <div id="trend-event-controls" hidden>
+                            <div id="trend-event-list" class="trend-event-list" role="group" aria-label="选择调息或提前还款事件"></div>
+                            <div id="trend-event-detail" class="trend-event-detail" role="status" aria-live="polite" hidden></div>
+                        </div>
                         <p class="chart-footnote">
-                            点按图表查看金额，也可在下方明细中逐期核对。
+                            点按图表查看金额。今天以前为历史计划测算，以后为未来计划；执行利率变化日与月供变化日可能不同。
                         </p>
                     </article>
+                    <details class="chart-card timeline-card">
+                        <summary>利率与月供变化时间轴</summary>
+                        <p class="field-hint">查看调息、提前还款与月供变化的对应关系。</p>
+                        <div id="timeline-list"></div>
+                    </details>
                     <div class="chart-pair">
                         <article class="chart-card">
                             <div class="card-heading"><h3>本金与利息</h3></div>

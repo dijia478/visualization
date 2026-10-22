@@ -44,6 +44,8 @@ public enum ResultEnum {
 
     SHORTENING_UNAVAILABLE(706, "保持原月供无法缩短新还款方案的期限，请选择期限不变或增加提前还款金额"),
 
+    PLANNING_CONFIG_ERR(707, "请检查规划目标、金额精度和贷款条件"),
+
     LPR_HISTORY_UNAVAILABLE(705, "该放款日期早于离线LPR数据，请填写合同加点或选择固定利率"),
 
     DATE_FORMAT_ERR(801, "请检查日期格式及提前还款日期，提前还款需在首次还款日至贷款到期日之间");

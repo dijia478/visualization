@@ -9,6 +9,7 @@
         currentTrend = "monthly",
         previewRequest = null,
         calculationRequest = null,
+        planner = null,
         initialRateEdited = false,
         previewTimer;
     const money = (value) =>
@@ -185,6 +186,7 @@
     }
     function markChanged() {
         revision++;
+        if (planner) planner.invalidate();
         $("#download-btn").disabled = true;
         if (calculationRequest) {
             calculationRequest.abort();
@@ -472,6 +474,7 @@
         $("#download-btn").disabled = false;
         MortgageCharts.render(data, currentTrend);
         applyAutomaticRates(data.appliedPrepayments || []);
+        if (planner) planner.setLoan(submitted, data);
     }
     async function calculate(scrollToResult = false) {
         if (!validate()) return;
@@ -597,8 +600,51 @@
     }
     $("#table-mode").onclick = () =>
         setTableMode($("#accessible-table").hidden);
+    function selectSchedule(view) {
+        MortgageCharts.setView(view);
+        document.querySelectorAll("[data-schedule-view]").forEach((button) =>
+            button.setAttribute("aria-pressed", String(button.dataset.scheduleView === view)));
+    }
+    document.querySelectorAll("[data-schedule-view]").forEach((button) => {
+        button.onclick = () => selectSchedule(button.dataset.scheduleView);
+    });
+    $("#jump-current").onclick = () => {
+        selectSchedule("recent");
+        MortgageCharts.jumpToCurrent();
+    };
+    document.querySelectorAll("[data-trend-range]").forEach((button) => {
+        button.onclick = () => {
+            MortgageCharts.setRange(button.dataset.trendRange);
+            document.querySelectorAll("[data-trend-range]").forEach((item) =>
+                item.setAttribute("aria-pressed", String(item === button)));
+        };
+    });
     setTableMode(window.matchMedia("(max-width: 767px)").matches);
     toggleFloating();
+    function adoptPlanning(value) {
+        list.replaceChildren();
+        (value.prepaymentList || []).forEach((event) => {
+            const row = addPlan();
+            ["prepaymentDate", "repayment", "newType", "repaymentType"].forEach((name) => {
+                row.querySelector("[name=" + name + "]").value = event[name];
+            });
+            row.querySelector("[name=rateSource]").value = event.newRate == null ? "auto" : "manual";
+            row.querySelector("[name=newRate]").value = event.newRate == null ? "" : event.newRate;
+            setRateSource(row);
+            window.MortgageDatePicker.updateTrigger(row.querySelector("[name=prepaymentDate]"));
+        });
+        $("#prepayment-enabled").checked = list.children.length > 0;
+        togglePrepayment();
+        markChanged();
+        calculate(true);
+    }
+    if (window.MortgagePlanning) planner = window.MortgagePlanning.createPlanner({
+        document,
+        request,
+        today: () => window.MortgageDatePicker.today(),
+        updateDate: (input) => window.MortgageDatePicker.updateTrigger(input),
+        adopt: adoptPlanning,
+    });
     async function initializeDefaults() {
         $("#firstPaymentDate").value = window.MortgageDatePicker.today();
         window.MortgageDatePicker.updateTrigger($("#firstPaymentDate"));

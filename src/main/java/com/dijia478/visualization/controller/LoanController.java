@@ -2,6 +2,7 @@ package com.dijia478.visualization.controller;
 
 import com.dijia478.visualization.bean.*;
 import com.dijia478.visualization.service.LoanCalculator;
+import com.dijia478.visualization.service.LoanPlanningService;
 import com.dijia478.visualization.util.LoanUtil;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,9 @@ public class LoanController {
 
     @Resource(name = "prepaymentCalculator")
     private LoanCalculator prepaymentCalculator;
+
+    @Resource
+    private LoanPlanningService loanPlanningService;
 
     /** 默认利率与计算器共享随程序携带的最新已核验LPR，不依赖外部网络。 */
     @GetMapping("/calculator/defaults")
@@ -50,6 +54,16 @@ public class LoanController {
         totalLoan.setLprUpdatedAt(prepared.getPreview().getLprUpdatedAt());
         totalLoan.setWarnings(prepared.getPreview().getWarnings());
         return totalLoan;
+    }
+
+    @PostMapping("/calculator/planning/compare")
+    public LoanPlanningResult.Comparison compare(@RequestBody @Validated LoanPlanningRequest request) {
+        return loanPlanningService.compare(request, this::prepaymentCalculator);
+    }
+
+    @PostMapping("/calculator/planning/solve")
+    public LoanPlanningResult.Solution solve(@RequestBody @Validated LoanPlanningRequest request) {
+        return loanPlanningService.solve(request, this::prepaymentCalculator);
     }
 
     @PostMapping("/calculator/ratePreview")
