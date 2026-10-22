@@ -27,7 +27,7 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         events.sort(Comparator.comparingInt(PrepaymentDTO::getPrepaymentMonth));
         TotalLoan actual = apply(data, events, true);
         // 比较场景保留相同利率/还款方式，排除LPR下降本身带来的“提前还款节省”。
-        TotalLoan baseline = events.stream().anyMatch(e -> e.getRepayment() > 0)
+        TotalLoan baseline = events.stream().anyMatch(e -> e.getRepayment().signum() > 0)
                 ? apply(data, events, false) : actual;
         actual.setOriginalTotalInterest(baseline.getTotalInterest());
         List<Integer> rateMonths = new ArrayList<>();
@@ -56,22 +56,22 @@ public class PrepaymentCalculator extends LoanCalculatorAdapter {
         for (PrepaymentDTO input : events) {
             PrepaymentDTO event = copy(input);
             if (!prepay) {
-                event.setRepayment(0);
+                event.setRepayment(BigDecimal.ZERO);
                 event.setRepaymentType(2);
                 event.setInterestSegments(withoutPrepaymentOffsets(event.getInterestSegments()));
             }
             if (result.getPayoffDate() != null) {
-                if (event.getRepayment() > 0) {
+                if (event.getRepayment().signum() > 0) {
                     throw new LoanException(ResultEnum.PREPAYMENT_MONTH_TOO_BIG);
                 }
                 continue;
             }
             int paid = event.getPrepaymentMonth() - 1;
-            if (paid >= result.getMonthLoanList().size() && event.getRepayment() == 0) {
+            if (paid >= result.getMonthLoanList().size() && event.getRepayment().signum() == 0) {
                 continue;
             }
-            // 对比方案移除纯提前还本事件；无利率/方式变化时重排月供会引入额外舍入漂移。
-            if (!prepay && !Integer.valueOf(1).equals(event.getLprRate())
+            // 无本金、利率或方式变化时保留原计划，避免重排造成尾差或无效缩期错误。
+            if ((!prepay || event.getRepayment().signum() == 0) && !Integer.valueOf(1).equals(event.getLprRate())
                     && event.getNewRate().compareTo(result.getLoanRate()) == 0
                     && event.getNewType().equals(result.getType())) {
                 continue;

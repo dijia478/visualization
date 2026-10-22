@@ -647,6 +647,13 @@ select {
     font-variant-numeric: tabular-nums;
     text-align: right;
 }
+#payoff-remaining {
+    display: inline-block;
+    margin-left: 6px;
+    color: #d0dfd4;
+    font-size: 13px;
+    font-weight: 400;
+}
 .overview-secondary p {
     grid-column: 1/-1;
 }

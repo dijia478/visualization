@@ -22,6 +22,8 @@ public abstract class LoanCalculatorAdapter implements LoanCalculator {
         boolean shortened = fixedPayment != null || fixedPrincipal != null;
         BigDecimal payment = fixedPayment;
         BigDecimal principalPayment = fixedPrincipal;
+        BigDecimal firstRepayment = data.getFirstRepayment();
+        boolean separateFirstInterest = false;
         if (data.getType() == 1 && payment == null) {
             BigDecimal paymentBalance = balance;
             if (data.isAdjustPaymentForFirstInterest() && data.getFirstInterestSegments() != null) {
@@ -34,25 +36,46 @@ public abstract class LoanCalculatorAdapter implements LoanCalculator {
         } else if (data.getType() == 2 && principalPayment == null) {
             principalPayment = money(balance.divide(BigDecimal.valueOf(term), PRECISION));
         }
+        if (data.getType() == 1 && firstRepayment == null && data.isAdjustPaymentForFirstInterest()
+                && data.getFirstInterestSegments() != null) {
+            BigDecimal firstInterest = rawInterest(balance, data.getRate(), data.getFirstInterestSegments())
+                    .add(interestRemainder).setScale(2, RoundingMode.DOWN);
+            if (payment.compareTo(firstInterest) <= 0) {
+                // 大额预还前已发生的利息可能超过新月供；当期另计，后续仍按约定月供或期限摊还。
+                BigDecimal regularInterest = rawInterest(balance, data.getRate(), null)
+                        .add(interestRemainder).setScale(2, RoundingMode.DOWN);
+                BigDecimal regularPrincipal = (shortened ? payment : annuityPayment(balance, monthlyRate, term))
+                        .subtract(regularInterest);
+                if (regularPrincipal.signum() > 0) {
+                    firstRepayment = regularPrincipal.add(firstInterest);
+                    separateFirstInterest = true;
+                }
+            }
+        }
         // 缩期方案逐期偿还，避免double对数求期数后再次重算月供改变“月供不变”的约定。
         int limit = term;
         for (int i = 0; i < limit && balance.signum() > 0; i++) {
-            if (i == 1 && data.getFirstRepayment() != null && data.getType() == 1 && !shortened) {
+            if (i == 1 && firstRepayment != null && data.getType() == 1 && !shortened) {
                 payment = data.getSubsequentRepayment() == null ? annuityPayment(balance, monthlyRate, term - 1)
                         : data.getSubsequentRepayment();
+            }
+            if (i == 1 && separateFirstInterest) {
+                rows.get(0).setSubsequentRepayment(payment);
             }
             List<InterestSegment> segments = i == 0 ? data.getFirstInterestSegments() : null;
             BigDecimal accrued = rawInterest(balance, data.getRate(), segments).add(interestRemainder);
             BigDecimal interest = accrued.setScale(2, RoundingMode.DOWN);
             BigDecimal previousRemainder = interestRemainder;
             interestRemainder = accrued.subtract(interest);
-            BigDecimal currentPayment = i == 0 && data.getFirstRepayment() != null ? data.getFirstRepayment() : payment;
+            BigDecimal currentPayment = i == 0 && firstRepayment != null ? firstRepayment : payment;
             BigDecimal principal = data.getType() == 1 ? currentPayment.subtract(interest) : principalPayment;
-            if (principal.signum() <= 0) {
-                throw new LoanException(ResultEnum.PAYMENT_TOO_SMALL);
-            }
             if ((!shortened && i == term - 1) || principal.compareTo(balance) > 0) {
                 principal = balance;
+            }
+            // 按分摊还可能舍入为零；期限不变时将剩余本金留到末期，不能丢弃尾分。
+            boolean zeroPrincipalFromRounding = !shortened && (data.getType() == 2 || currentPayment.signum() == 0);
+            if (principal.signum() < 0 || (principal.signum() == 0 && !zeroPrincipalFromRounding)) {
+                throw new LoanException(ResultEnum.PAYMENT_TOO_SMALL);
             }
             balance = balance.subtract(principal);
             MonthLoan row = new MonthLoan();
@@ -97,7 +120,7 @@ public abstract class LoanCalculatorAdapter implements LoanCalculator {
             throw new LoanException(ResultEnum.PREPAYMENT_MONTH_TOO_BIG);
         }
         MonthLoan previous = monthLoanList.get(paid - 1);
-        BigDecimal extra = totalLoan(BigDecimal.valueOf(event.getRepayment()));
+        BigDecimal extra = totalLoan(event.getRepayment());
         BigDecimal remaining = previous.getRemainPrincipal().subtract(extra);
         if (remaining.signum() < 0) {
             throw new LoanException(ResultEnum.REPAYMENT_TOO_BIG);
@@ -122,8 +145,10 @@ public abstract class LoanCalculatorAdapter implements LoanCalculator {
                     .adjustPaymentForFirstInterest(extra.signum() > 0
                             || monthLoanList.get(paid).isAdjustPaymentForFirstInterest()).build();
             // 同期前一笔已改月供时，缩期沿用刚重建的计划，不能退回上个还款日的旧月供。
-            BigDecimal referencePayment = event.isReplannedInPeriod() || previous.getExtraRepayment().signum() > 0
-                    ? monthLoanList.get(paid).getRepayment() : previous.getRepayment();
+            MonthLoan reference = event.isReplannedInPeriod() || previous.getExtraRepayment().signum() > 0
+                    ? monthLoanList.get(paid) : previous;
+            BigDecimal referencePayment = reference.getSubsequentRepayment() == null
+                    ? reference.getRepayment() : reference.getSubsequentRepayment();
             BigDecimal payment = shorten && event.getNewType() == 1 ? referencePayment : null;
             BigDecimal principal = shorten && event.getNewType() == 2
                     ? referencePayment.subtract(rawInterest(remaining, event.getNewRate(), event.getInterestSegments())

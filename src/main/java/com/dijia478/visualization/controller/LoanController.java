@@ -95,7 +95,7 @@ public class LoanController {
             return;
         }
         for (PrepaymentDTO event : data.getPrepaymentList()) {
-            if (event.getRepayment() > data.getAmount()) {
+            if (event.getRepayment().compareTo(BigDecimal.valueOf(data.getAmount())) > 0) {
                 throw new LoanException(ResultEnum.REPAYMENT_TOO_BIG);
             }
         }

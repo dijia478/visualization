@@ -252,7 +252,7 @@ class MortgagePayoffTest {
     private PrepaymentDTO event(String date, int amount, String rate) {
         PrepaymentDTO event = new PrepaymentDTO();
         event.setPrepaymentDate(date);
-        event.setRepayment(amount);
+        event.setRepayment(BigDecimal.valueOf(amount));
         event.setNewRate(rate == null ? null : new BigDecimal(rate));
         event.setNewType(2);
         event.setRepaymentType(2);

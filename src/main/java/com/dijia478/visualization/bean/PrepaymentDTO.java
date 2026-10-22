@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Digits;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Collections;
@@ -26,10 +27,11 @@ public class PrepaymentDTO {
     /** 还款期数 */
     private Integer prepaymentMonth;
 
-    /** 还款金额 */
+    /** 还款金额，单位万元，六位小数对应一分 */
     @NotNull(message = "还款金额不能为空")
     @Min(value = 0, message = "还款金额不能小于0万元")
-    private Integer repayment;
+    @Digits(integer = 10, fraction = 6, message = "还款金额最多保留六位小数万元（精确到分）")
+    private BigDecimal repayment;
 
     /** 新执行年利率（百分数）；不传时按贷款重定价规则自动计算 */
     @Min(value = 0, message = "新贷款利率不能小于0")

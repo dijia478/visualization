@@ -255,7 +255,7 @@
                         <div class="overview-divider"></div>
                         <div class="overview-secondary">
                             <span>预计还清时间</span
-                            ><strong id="payoff-date">—</strong>
+                            ><strong><span id="payoff-date">—</span><small id="payoff-remaining"></small></strong>
                             <p id="duration-summary">按当前方案估算</p>
                         </div>
                         <svg
@@ -633,9 +633,9 @@
                             <input
                                 name="repayment"
                                 type="number"
-                                inputmode="numeric"
+                                inputmode="decimal"
                                 min="0"
-                                step="1"
+                                step="0.000001"
                                 required
                             /><span>万元</span>
                         </div>

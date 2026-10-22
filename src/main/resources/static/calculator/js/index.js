@@ -359,10 +359,10 @@
             currentDate = window.MortgageDatePicker.today(),
             currentMonth = currentDate.slice(0, 7),
             current = data.monthLoanList.find(
-                (row) => row.dateFormat.slice(0, 7) === currentMonth,
+                (row) => row.dateFormat.slice(0, 7) === currentMonth
+                    && !(row.dateFormat === data.payoffDate && Number(row.principal) === 0),
             );
-        $("#monthly-payment").textContent = money(current ? current.repayment : 0);
-        const payoffDate = (data.appliedPrepayments || [])
+        const payoffDate = data.payoffDate || (data.appliedPrepayments || [])
             .filter(
                 (event) =>
                     Number(event.effectiveMonth) ===
@@ -372,9 +372,17 @@
                 (date, event) =>
                     event.prepaymentDate > date ? event.prepaymentDate : date,
                 last.dateFormat,
-            );
+            ),
+            paidOff = payoffDate <= currentDate,
+            remainingMonths =
+                (Number(payoffDate.slice(0, 4)) - Number(currentDate.slice(0, 4))) * 12 +
+                Number(payoffDate.slice(5, 7)) - Number(currentDate.slice(5, 7));
+        $("#monthly-payment").textContent = money(!paidOff && current ? current.repayment : 0);
         $("#payoff-date").textContent =
             payoffDate.slice(0, 7).replace("-", " 年 ") + " 月";
+        $("#payoff-remaining").textContent = paidOff
+            ? "（已还清）"
+            : "（还剩" + Math.floor(remainingMonths / 12) + "年" + remainingMonths % 12 + "个月）";
         $("#duration-summary").textContent =
             "共 " +
             data.monthLoanList.length +
@@ -387,13 +395,13 @@
             " 年 / 初始年利率 " +
             submitted.rate +
             "%";
-        if (!current) {
+        if (paidOff) {
+            $("#loan-summary").textContent = "已还清 · 最后还款 " + payoffDate;
+        } else if (!current) {
             $("#loan-summary").textContent =
-                first.dateFormat.slice(0, 7) > currentMonth
+                first.dateFormat > currentDate
                     ? "尚未开始还款 · 首次还款 " + first.dateFormat
-                    : payoffDate.slice(0, 7) >= currentMonth
-                      ? "本月无月供 · 计划于 " + payoffDate + " 结清"
-                      : "已还清 · 最后还款 " + payoffDate;
+                    : "本月无月供 · 计划于 " + payoffDate + " 结清";
         }
         $("#total-payment").textContent =
             (Number(data.totalRepayment) / 10000).toFixed(2) + " 万";

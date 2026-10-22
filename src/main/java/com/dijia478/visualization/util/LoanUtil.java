@@ -195,7 +195,7 @@ public class LoanUtil {
                 AppliedPrepayment preview = new AppliedPrepayment();
                 preview.setPrepaymentDate(event.date.toString());
                 preview.setEffectiveMonth(effectiveMonth);
-                preview.setRepayment(BigDecimal.valueOf(event.input.getRepayment()).movePointRight(4));
+                preview.setRepayment(event.input.getRepayment().movePointRight(4));
                 preview.setNewRate(currentRate);
                 preview.setAutomatic(event.input.getNewRate() == null);
                 previews.set(event.index, preview);
@@ -214,7 +214,7 @@ public class LoanUtil {
             PrepaymentDTO resolved = new PrepaymentDTO();
             resolved.setPrepaymentDate(event.date.toString());
             resolved.setPrepaymentMonth(effectiveMonth);
-            resolved.setRepayment(event.kind == 2 ? event.input.getRepayment() : 0);
+            resolved.setRepayment(event.kind == 2 ? event.input.getRepayment() : BigDecimal.ZERO);
             resolved.setRepaymentType(event.kind == 2 ? event.input.getRepaymentType() : 2);
             resolved.setNewRate(currentRate);
             resolved.setNewType(currentType);
@@ -230,7 +230,7 @@ public class LoanUtil {
                 resolved.setInterestSegments(interestSegments(first, loanDate, effectiveMonth, originalRate,
                         rateChanges, appliedPrepayments, null));
             }
-            if (event.kind == 2 && event.input.getRepayment() > 0) {
+            if (event.kind == 2 && event.input.getRepayment().signum() > 0) {
                 // 建行住房借款合同第七条：提前还本按实际用款天数计息，不能补足到下一整期。
                 resolved.setSettlementInterestSegments(interestSegments(first, loanDate, effectiveMonth, originalRate,
                         rateChanges, appliedPrepayments, event.date));
@@ -289,7 +289,7 @@ public class LoanUtil {
         List<PrepaymentDTO> inPeriod = new ArrayList<>();
         for (PrepaymentDTO prepayment : prepayments) {
             LocalDate date = parseDate(prepayment.getPrepaymentDate());
-            if (prepayment.getRepayment() > 0 && date.isAfter(previousDue)
+            if (prepayment.getRepayment().signum() > 0 && date.isAfter(previousDue)
                     && (date.isBefore(due) || settlementDate != null && date.equals(due))) {
                 inPeriod.add(prepayment);
                 boundaries.add(date);
@@ -322,7 +322,7 @@ public class LoanUtil {
         BigDecimal offset = BigDecimal.ZERO;
         for (PrepaymentDTO prepayment : prepayments) {
             if (parseDate(prepayment.getPrepaymentDate()).isAfter(start)) {
-                offset = offset.add(BigDecimal.valueOf(prepayment.getRepayment()).movePointRight(4));
+                offset = offset.add(prepayment.getRepayment().movePointRight(4));
             }
         }
         return offset;

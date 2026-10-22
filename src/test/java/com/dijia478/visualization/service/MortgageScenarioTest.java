@@ -205,7 +205,7 @@ class MortgageScenarioTest {
     private PrepaymentDTO event(LocalDate date, int amount, int type, int strategy) {
         PrepaymentDTO event = new PrepaymentDTO();
         event.setPrepaymentDate(date.toString());
-        event.setRepayment(amount);
+        event.setRepayment(BigDecimal.valueOf(amount));
         event.setNewType(type);
         event.setRepaymentType(strategy);
         return event;

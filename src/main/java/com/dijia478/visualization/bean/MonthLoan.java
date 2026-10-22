@@ -77,4 +77,8 @@ public class MonthLoan {
     @JsonIgnore
     private boolean adjustPaymentForFirstInterest;
 
+    /** 不规则首期之后的正常月供，后续缩期不能沿用一次性的补息金额。 */
+    @JsonIgnore
+    private BigDecimal subsequentRepayment;
+
 }

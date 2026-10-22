@@ -214,7 +214,7 @@ class LoanRatePlanTest {
     private PrepaymentDTO event(String date, String rate) {
         PrepaymentDTO event = new PrepaymentDTO();
         event.setPrepaymentDate(date);
-        event.setRepayment(1);
+        event.setRepayment(BigDecimal.ONE);
         event.setNewRate(rate == null ? null : new BigDecimal(rate));
         event.setNewType(1);
         event.setRepaymentType(2);
